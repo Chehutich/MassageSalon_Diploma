@@ -1,0 +1,28 @@
+using Application.Common.Intefaces;
+using Application.Common.Intefaces.Repos;
+using Application.Common.Models;
+using CSharpFunctionalExtensions;
+using Domain.Errors;
+using MediatR;
+
+namespace Application.Features.Queries.GetMe;
+
+public record GetMeQuery : IRequest<Result<UserMeResponse, Error>>;
+
+public class GetMeHandler(
+    IUserRepository userRepository,
+    ICurrentUserContext userContext) : IRequestHandler<GetMeQuery, Result<UserMeResponse, Error>>
+{
+    public async Task<Result<UserMeResponse, Error>> Handle(GetMeQuery request, CancellationToken ct)
+    {
+        var userId = userContext.Id;
+        var user = await userRepository.GetByIdAsync(userId, ct);
+
+        if (user is null)
+        {
+            return Errors.User.NotFound(userId);
+        }
+
+        return new UserMeResponse(user.Id, user.FirstName, user.LastName, user.Email);
+    }
+}

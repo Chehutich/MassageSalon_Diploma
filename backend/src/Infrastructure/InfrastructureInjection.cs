@@ -24,9 +24,12 @@ public static class InfrastructureInjection
             options.UseNpgsql(connectionString);
         });
 
+        services.AddHttpContextAccessor();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IServiceRepository, ServiceRepository>();
+        services.AddScoped<ICurrentUserContext, CurrentUserContext>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();

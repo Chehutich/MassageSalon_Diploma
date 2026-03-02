@@ -91,7 +91,7 @@ public class User : IAuditableEntity
     public void InvalidateRefreshToken()
     {
         RefreshToken = null;
-        RefreshTokenExpiry = null;
+        RefreshTokenExpiry = DateTime.MinValue;
     }
 
     public void UpdatePassword(string newHash)

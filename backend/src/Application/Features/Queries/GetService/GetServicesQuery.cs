@@ -1,17 +1,10 @@
 using Application.Common.Intefaces;
+using Application.Common.Models;
 using CSharpFunctionalExtensions;
 using Domain.Errors;
 using MediatR;
 
 namespace Application.Features.Queries.GetService;
-
-public record ServiceResponse(
-    Guid Id,
-    string Title,
-    string? Description,
-    int Duration,
-    decimal Price,
-    string CategoryName);
 
 public record GetServicesQuery() : IRequest<Result<List<ServiceResponse>, Error>>;
 
