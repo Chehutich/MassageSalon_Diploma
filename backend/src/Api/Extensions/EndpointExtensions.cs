@@ -1,9 +1,12 @@
-using Application.Features.Commands.LogoutCommand;
-using Application.Features.Commands.RefreshTokenCommand;
-using Application.Features.Commands.RegisterCommand;
+using Application.Features.Commands.ChangeEmail;
+using Application.Features.Commands.ChangePassword;
+using Application.Features.Commands.ChangePhone;
+using Application.Features.Commands.Login;
+using Application.Features.Commands.Logout;
+using Application.Features.Commands.RefreshToken;
+using Application.Features.Commands.Register;
 using Application.Features.Queries.GetMe;
 using Application.Features.Queries.GetService;
-using Application.Features.Queries.Login;
 using MediatR;
 
 namespace Api.Extensions;
@@ -25,9 +28,9 @@ public static class EndpointExtensions
             })
             .WithName("RegisterUser");
 
-        group.MapPost("/login", async (LoginQuery query, ISender sender, HttpContext context) =>
+        group.MapPost("/login", async (LoginCommand command, ISender sender, HttpContext context) =>
         {
-            var result = await sender.Send(query);
+            var result = await sender.Send(command);
             if (result.IsFailure)
             {
                 return result.ToProblemDetails();
@@ -39,26 +42,26 @@ public static class EndpointExtensions
         });
 
         group.MapPost("/refresh", async (ISender sender, HttpContext context) =>
+        {
+            var accessToken = context.Request.Cookies["accessToken"];
+            var refreshToken = context.Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
             {
-                var accessToken = context.Request.Cookies["accessToken"];
-                var refreshToken = context.Request.Cookies["refreshToken"];
+                return Results.Unauthorized();
+            }
 
-                if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
-                {
-                    return Results.Unauthorized();
-                }
+            var result = await sender.Send(new RefreshTokenCommand(accessToken, refreshToken));
 
-                var result = await sender.Send(new RefreshTokenCommand(accessToken, refreshToken));
+            if (result.IsFailure)
+            {
+                return result.ToProblemDetails();
+            }
 
-                if (result.IsFailure)
-                {
-                    return result.ToProblemDetails();
-                }
+            AppendAuthCookies(context, result.Value.Token, result.Value.RefreshToken);
 
-                AppendAuthCookies(context, result.Value.Token, result.Value.RefreshToken);
-
-                return Results.Ok();
-            }).AllowAnonymous();
+            return Results.Ok();
+        }).AllowAnonymous();
 
         group.MapGet("/me", async (ISender sender) =>
             {
@@ -70,18 +73,44 @@ public static class EndpointExtensions
             .WithName("GetMe")
             .RequireAuthorization();
 
+        group.MapPut("/change-email", async (ChangeEmailCommand command, ISender sender) =>
+            {
+                var result = await sender.Send(command);
+                return result.IsSuccess
+                    ? Results.Ok()
+                    : result.ToProblemDetails();
+            })
+            .WithName("ChangeEmail")
+            .RequireAuthorization();
+
+        group.MapPut("/change-password", async (ChangePasswordCommand command, ISender sender) =>
+            {
+                var result = await sender.Send(command);
+                return result.IsSuccess
+                    ? Results.Ok()
+                    : result.ToProblemDetails();
+            })
+            .WithName("ChangePassword")
+            .RequireAuthorization();
+
+        group.MapPut("/change-phone", async (ChangePhoneCommand command, ISender sender) =>
+            {
+                var result = await sender.Send(command);
+                return result.IsSuccess ?
+                    Results.Ok()
+                    : result.ToProblemDetails();
+            })
+            .WithName("ChangePhone")
+            .RequireAuthorization();
+
         group.MapPost("/logout", async (HttpContext context, ISender sender) =>
             {
                 await sender.Send(new LogoutCommand());
 
-                var options = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
-                };
+                var options = new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict };
                 context.Response.Cookies.Delete("accessToken", options);
                 context.Response.Cookies.Delete("refreshToken", options);
+
                 return Results.Ok();
             })
             .WithName("Logout");

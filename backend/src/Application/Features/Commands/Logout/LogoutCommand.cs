@@ -4,7 +4,7 @@ using CSharpFunctionalExtensions;
 using Domain.Errors;
 using MediatR;
 
-namespace Application.Features.Commands.LogoutCommand;
+namespace Application.Features.Commands.Logout;
 
 public record LogoutCommand : IRequest<Result<Unit, Error>>;
 

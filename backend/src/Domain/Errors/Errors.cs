@@ -8,6 +8,10 @@ public static class Errors
             "User.InvalidCredentials",
             "User credentials are invalid.");
 
+        public static Error InvalidPassword => new(
+            "User.InvalidPassword",
+            "Password is invalid.");
+
         public static Error NotFound(Guid id)
         {
             return new Error(

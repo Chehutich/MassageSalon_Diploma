@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace Application.Features.Queries.Login;
+namespace Application.Features.Commands.Login;
 
-public class LoginQueryValidator : AbstractValidator<LoginQuery>
+public class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
-    public LoginQueryValidator()
+    public LoginCommandValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithErrorCode("User.Email.Required")

@@ -1,6 +1,6 @@
 using Application.Common.Intefaces;
 using Application.Common.Intefaces.Repos;
-using Application.Features.Commands.RegisterCommand;
+using Application.Features.Commands.Register;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;

@@ -1,28 +1,28 @@
 using Application.Common.Intefaces;
 using Application.Common.Intefaces.Repos;
-using Application.Features.Queries.Login;
+using Application.Features.Commands.Login;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
 
-namespace ApplicationTests.Features.Queries;
+namespace ApplicationTests.Features.Commands;
 
-public class LoginQueryHandlerTests
+public class LoginCommandHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly LoginQueryHandler _handler;
+    private readonly LoginCommandHandler _handler;
 
-    public LoginQueryHandlerTests()
+    public LoginCommandHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _jwtTokenGeneratorMock = new Mock<IJwtTokenGenerator>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        _handler = new LoginQueryHandler(_userRepositoryMock.Object, _passwordHasherMock.Object,
+        _handler = new LoginCommandHandler(_userRepositoryMock.Object, _passwordHasherMock.Object,
             _jwtTokenGeneratorMock.Object, _unitOfWorkMock.Object);
     }
 
@@ -30,7 +30,7 @@ public class LoginQueryHandlerTests
     public async Task Handle_Should_ReturnFailure_WhenUserDoesNotExist()
     {
         // Arrange
-        var query = new LoginQuery("notfound@test.com", "password123");
+        var query = new LoginCommand("notfound@test.com", "password123");
         _userRepositoryMock.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
@@ -46,7 +46,7 @@ public class LoginQueryHandlerTests
     public async Task Handle_Should_ReturnFailure_WhenPasswordIsIncorrect()
     {
         // Arrange
-        var query = new LoginQuery("user@test.com", "wrong_password");
+        var query = new LoginCommand("user@test.com", "wrong_password");
         var user = new User("Ivan", "Ivanov", query.Email, "correct_hash", "+380990000000");
 
         _userRepositoryMock.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
@@ -67,7 +67,7 @@ public class LoginQueryHandlerTests
     public async Task Handle_Should_ReturnSuccess_WhenCredentialsAreValid()
     {
         // Arrange
-        var query = new LoginQuery("user@test.com", "correct_password");
+        var query = new LoginCommand("user@test.com", "correct_password");
         var user = new User("Ivan", "Ivanov", query.Email, "correct_hash", "+380990000000");
 
         _userRepositoryMock.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))

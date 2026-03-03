@@ -13,10 +13,10 @@ public class GetMeHandler(
     IUserRepository userRepository,
     ICurrentUserContext userContext) : IRequestHandler<GetMeQuery, Result<UserMeResponse, Error>>
 {
-    public async Task<Result<UserMeResponse, Error>> Handle(GetMeQuery request, CancellationToken ct)
+    public async Task<Result<UserMeResponse, Error>> Handle(GetMeQuery request, CancellationToken cancellationToken)
     {
         var userId = userContext.Id;
-        var user = await userRepository.GetByIdAsync(userId, ct);
+        var user = await userRepository.GetByIdAsync(userId, cancellationToken);
 
         if (user is null)
         {

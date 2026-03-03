@@ -1,6 +1,6 @@
 using Application.Common.Intefaces;
 using Application.Common.Intefaces.Repos;
-using Application.Features.Commands.RefreshTokenCommand;
+using Application.Features.Commands.RefreshToken;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;

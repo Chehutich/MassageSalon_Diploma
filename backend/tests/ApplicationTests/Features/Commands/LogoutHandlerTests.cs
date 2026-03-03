@@ -1,6 +1,6 @@
 using Application.Common.Intefaces;
 using Application.Common.Intefaces.Repos;
-using Application.Features.Commands.LogoutCommand;
+using Application.Features.Commands.Logout;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -41,7 +41,7 @@ public class LogoutHandlerTests
         result.IsSuccess.Should().BeTrue();
 
         user.RefreshToken.Should().BeNull();
-        user.RefreshTokenExpiry.Should().Be(DateTime.MinValue);
+        user.RefreshTokenExpiry.Should().Be(null);
 
         _uowMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }

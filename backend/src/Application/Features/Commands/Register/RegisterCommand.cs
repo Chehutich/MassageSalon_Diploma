@@ -6,7 +6,7 @@ using Domain.Entities;
 using Domain.Errors;
 using MediatR;
 
-namespace Application.Features.Commands.RegisterCommand;
+namespace Application.Features.Commands.Register;
 
 public record RegisterCommand(
     string FirstName,

@@ -5,17 +5,17 @@ using CSharpFunctionalExtensions;
 using Domain.Errors;
 using MediatR;
 
-namespace Application.Features.Queries.Login;
+namespace Application.Features.Commands.Login;
 
-public record LoginQuery(string Email, string Password) : IRequest<Result<AuthResponse, Error>>;
+public record LoginCommand(string Email, string Password) : IRequest<Result<AuthResponse, Error>>;
 
-public class LoginQueryHandler(
+public class LoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     IJwtTokenGenerator jwtTokenGenerator,
-    IUnitOfWork unitOfWork) : IRequestHandler<LoginQuery, Result<AuthResponse, Error>>
+    IUnitOfWork unitOfWork) : IRequestHandler<LoginCommand, Result<AuthResponse, Error>>
 {
-    public async Task<Result<AuthResponse, Error>> Handle(LoginQuery request, CancellationToken ct)
+    public async Task<Result<AuthResponse, Error>> Handle(LoginCommand request, CancellationToken ct)
     {
         var user = await userRepository.GetByEmailAsync(request.Email, ct);
 

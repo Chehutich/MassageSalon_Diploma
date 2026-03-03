@@ -1,10 +1,17 @@
-﻿using Domain.Common;
+﻿using System.Text.RegularExpressions;
+using Domain.Common;
 using Domain.Enums;
 
 namespace Domain.Entities;
 
-public class User : IAuditableEntity
+public partial class User : IAuditableEntity
 {
+    [GeneratedRegex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")]
+    private static partial Regex EmailRegex();
+
+    [GeneratedRegex(@"^\+?[1-9]\d{1,14}$")]
+    private static partial Regex PhoneRegex();
+
     public Guid Id { get; private set; } = Guid.NewGuid();
 
     public string FirstName { get; private set; } = null!;
@@ -46,6 +53,11 @@ public class User : IAuditableEntity
             throw new ArgumentException("Email cannot be empty.");
         }
 
+        if (!EmailRegex().IsMatch(email))
+        {
+            throw new ArgumentException("Invalid email format.");
+        }
+
         if (string.IsNullOrWhiteSpace(passwordHash))
         {
             throw new ArgumentException("Password hash cannot be empty.");
@@ -54,6 +66,11 @@ public class User : IAuditableEntity
         if (string.IsNullOrWhiteSpace(phone))
         {
             throw new ArgumentException("Phone number cannot be empty.");
+        }
+
+        if (!PhoneRegex().IsMatch(phone))
+        {
+            throw new ArgumentException("Invalid phone number format. Use international format (e.g. +380...)");
         }
 
         FirstName = firstName;
@@ -91,7 +108,23 @@ public class User : IAuditableEntity
     public void InvalidateRefreshToken()
     {
         RefreshToken = null;
-        RefreshTokenExpiry = DateTime.MinValue;
+        RefreshTokenExpiry = null;
+    }
+
+    public void UpdateEmail(string newEmail)
+    {
+        if (string.IsNullOrWhiteSpace(newEmail))
+        {
+            throw new ArgumentException("New email cannot be empty.");
+        }
+
+        if (!EmailRegex().IsMatch(newEmail))
+        {
+            throw new ArgumentException("Invalid email format.");
+        }
+
+        Email = newEmail.ToLowerInvariant();
+        InvalidateRefreshToken();
     }
 
     public void UpdatePassword(string newHash)
@@ -102,5 +135,22 @@ public class User : IAuditableEntity
         }
 
         PasswordHash = newHash;
+        InvalidateRefreshToken();
+    }
+
+    public void UpdatePhone(string newPhone)
+    {
+        if (string.IsNullOrWhiteSpace(newPhone))
+        {
+            throw new ArgumentException("New phone number cannot be empty.");
+        }
+
+        if (!PhoneRegex().IsMatch(newPhone))
+        {
+            throw new ArgumentException("Invalid phone number format.");
+        }
+
+        Phone = newPhone;
+        InvalidateRefreshToken();
     }
 }
