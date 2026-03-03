@@ -2,7 +2,7 @@
 
 public class Master
 {
-    public Guid Id { get; private set; }
+    public Guid Id { get; private set; } = Guid.NewGuid();
 
     public Guid UserId { get; private set; }
 
@@ -10,7 +10,7 @@ public class Master
 
     public string? PhotoUrl { get; private set; }
 
-    public bool IsActive { get; private set; }
+    public bool IsActive { get; private set; } = true;
 
     public DateTime UpdatedAt { get; private set; }
 
@@ -23,4 +23,43 @@ public class Master
     public virtual User User { get; private set; } = null!;
 
     public virtual ICollection<Service> Services { get; private set; } = new List<Service>();
+
+    private Master() { }
+
+    public Master(Guid userId, string? bio, string? photoUrl)
+    {
+        UserId = userId;
+        Bio = bio;
+        PhotoUrl = photoUrl;
+    }
+
+    public void UpdateServices(IEnumerable<Service> services)
+    {
+        Services.Clear();
+        foreach (var service in services)
+        {
+            Services.Add(service);
+        }
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddService(Service service)
+    {
+        if (!Services.Any(s => s.Id == service.Id))
+        {
+            Services.Add(service);
+            UpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    public void RemoveService(Guid serviceId)
+    {
+        var service = Services.FirstOrDefault(s => s.Id == serviceId);
+        if (service != null)
+        {
+            Services.Remove(service);
+            UpdatedAt = DateTime.UtcNow;
+        }
+    }
 }

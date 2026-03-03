@@ -1,4 +1,4 @@
-using Application.Common.Intefaces.Repos;
+using Application.Common.Interfaces.Repos;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 

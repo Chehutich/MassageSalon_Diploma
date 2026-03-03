@@ -31,6 +31,22 @@ public class UserRepositoryTests : BaseRepositoryTest
     }
 
     [Fact]
+    public async Task GetByIdAsync_ShouldReturnUser_WhenUserExists()
+    {
+        // Arrange
+        var user = new User("Mykola", "1", "Mykola@test.com", "hash", "+3800000000");
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await _repository.GetByIdAsync(user.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Email.Should().Be(user.Email);
+    }
+
+    [Fact]
     public async Task GetByPhoneAsync_ShouldReturnUser_WhenPhoneExists()
     {
         // Arrange

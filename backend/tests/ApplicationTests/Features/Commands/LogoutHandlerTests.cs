@@ -1,5 +1,5 @@
-using Application.Common.Intefaces;
-using Application.Common.Intefaces.Repos;
+using Application.Common.Interfaces;
+using Application.Common.Interfaces.Repos;
 using Application.Features.Commands.Logout;
 using Domain.Entities;
 using FluentAssertions;
@@ -27,7 +27,7 @@ public class LogoutHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new User("Ivan", "Ivanov", "test@test.com", "hash", "+380...");
+        var user = new User("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
         user.SetRefreshToken("active_token", DateTime.UtcNow.AddDays(1));
 
         _userContextMock.Setup(x => x.Id).Returns(userId);

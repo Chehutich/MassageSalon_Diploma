@@ -1,4 +1,4 @@
-using Application.Common.Intefaces;
+using Application.Common.Interfaces;
 
 namespace Infrastructure.Persistence;
 

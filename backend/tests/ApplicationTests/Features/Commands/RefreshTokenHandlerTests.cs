@@ -1,5 +1,5 @@
-using Application.Common.Intefaces;
-using Application.Common.Intefaces.Repos;
+using Application.Common.Interfaces;
+using Application.Common.Interfaces.Repos;
 using Application.Features.Commands.RefreshToken;
 using Domain.Entities;
 using FluentAssertions;
@@ -27,7 +27,7 @@ public class RefreshTokenHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new User("Ivan", "Ivanov", "test@test.com", "hash", "+380...");
+        var user = new User("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
         var oldRefreshToken = "old_refresh_token";
         user.SetRefreshToken(oldRefreshToken, DateTime.UtcNow.AddDays(1));
 
@@ -76,7 +76,7 @@ public class RefreshTokenHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new User("Ivan", "Ivanov", "test@test.com", "hash", "+380...");
+        var user = new User("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
         user.SetRefreshToken("actual_refresh_in_db", DateTime.UtcNow.AddDays(1));
 
         var command = new RefreshTokenCommand("expired_access", "wrong_refresh_from_client");
@@ -97,7 +97,7 @@ public class RefreshTokenHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new User("Ivan", "Ivanov", "test@test.com", "hash", "+380...");
+        var user = new User("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
         var token = "token";
 
         typeof(User).GetProperty("RefreshTokenExpiry")?.SetValue(user, DateTime.UtcNow.AddDays(-1));

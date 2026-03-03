@@ -2,6 +2,16 @@ namespace Domain.Errors;
 
 public static class Errors
 {
+    public static class Service
+    {
+        public static Error NotFound(Guid id)
+        {
+            return new Error(
+                "Service.NotFound",
+                $"Service with ID {id} was not found.");
+        }
+    }
+
     public static class User
     {
         public static Error InvalidCredentials => new(

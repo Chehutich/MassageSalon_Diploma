@@ -1,5 +1,5 @@
-﻿using Application.Common.Intefaces;
-using Application.Common.Intefaces.Repos;
+﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces.Repos;
 using Infrastructure.Authentication;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repos;
@@ -30,6 +30,8 @@ public static class InfrastructureInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+        services.AddScoped<IMasterRepository, MasterRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();

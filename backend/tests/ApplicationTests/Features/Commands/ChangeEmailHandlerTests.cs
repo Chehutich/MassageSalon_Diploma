@@ -1,6 +1,6 @@
 using Application.Features.Commands.ChangeEmail;
-using Application.Common.Intefaces;
-using Application.Common.Intefaces.Repos;
+using Application.Common.Interfaces;
+using Application.Common.Interfaces.Repos;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;

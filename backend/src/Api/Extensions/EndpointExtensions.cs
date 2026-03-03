@@ -5,8 +5,10 @@ using Application.Features.Commands.Login;
 using Application.Features.Commands.Logout;
 using Application.Features.Commands.RefreshToken;
 using Application.Features.Commands.Register;
+using Application.Features.Queries.GetCategories;
 using Application.Features.Queries.GetMe;
-using Application.Features.Queries.GetService;
+using Application.Features.Queries.GetServiceById;
+using Application.Features.Queries.GetServices;
 using MediatR;
 
 namespace Api.Extensions;
@@ -130,14 +132,32 @@ public static class EndpointExtensions
             .WithTags("Services")
             .RequireAuthorization();
 
-        group.MapGet("/", async (ISender sender) =>
+        group.MapGet("/", async (Guid? categoryId, ISender sender) =>
         {
-            var result = await sender.Send(new GetServicesQuery());
+            var result = await sender.Send(new GetServicesQuery(categoryId));
 
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
         });
+
+        group.MapGet("/{id:guid}", async (Guid id, ISender sender) =>
+            {
+                var result = await sender.Send(new GetServiceByIdQuery(id));
+
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : result.ToProblemDetails();
+            })
+            .WithName("GetServiceById");
+
+        group.MapGet("/categories", async (ISender sender) =>
+            {
+                var result = await sender.Send(new GetCategoriesQuery());
+
+                return Results.Ok(result.Value);
+            })
+            .WithName("GetCategories");
 
         return app;
     }
