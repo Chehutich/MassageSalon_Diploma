@@ -132,9 +132,9 @@ public static class EndpointExtensions
             .WithTags("Services")
             .RequireAuthorization();
 
-        group.MapGet("/", async (Guid? categoryId, ISender sender) =>
+        group.MapGet("/", async (ISender sender) =>
         {
-            var result = await sender.Send(new GetServicesQuery(categoryId));
+            var result = await sender.Send(new GetServicesQuery());
 
             return result.IsSuccess
                 ? Results.Ok(result.Value)
