@@ -54,7 +54,8 @@ CREATE TABLE schedules (
     day_of_week SMALLINT NOT NULL,
     start_time  TIME     NOT NULL,
     end_time    TIME     NOT NULL,
-    CONSTRAINT chk_schedule_time CHECK (end_time > start_time)
+    CONSTRAINT chk_schedule_time CHECK (end_time > start_time),
+    CONSTRAINT chk_schedule_day CHECK (day_of_week >= 0 AND day_of_week <= 6)
 );
 
 CREATE TABLE time_offs (

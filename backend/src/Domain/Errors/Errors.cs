@@ -51,4 +51,11 @@ public static class Errors
             "Auth.InvalidToken",
             "Invalid token.");
     }
+
+    public static class Appointment
+    {
+        public static Error Conflict => new Error(
+            "Appointment.Conflict",
+            "Appointment time conflicts with another appointment.");
+    }
 }

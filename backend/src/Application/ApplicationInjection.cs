@@ -1,4 +1,6 @@
 ﻿using Application.Common.Behaviors;
+using Application.Common.Interfaces;
+using Application.Services;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +18,8 @@ public static class ApplicationInjection
         });
 
         services.AddValidatorsFromAssembly(typeof(ApplicationInjection).Assembly);
+        services.AddScoped<ISlotService, SlotService>();
+        services.AddSingleton(TimeProvider.System);
 
         return services;
     }

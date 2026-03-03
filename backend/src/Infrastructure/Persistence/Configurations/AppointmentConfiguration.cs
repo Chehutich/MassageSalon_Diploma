@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,22 +22,29 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
         builder.Property(e => e.Id)
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");
+
         builder.Property(e => e.ActualPrice)
             .HasPrecision(10, 2)
             .HasColumnName("actual_price");
+
         builder.Property(e => e.ClientId).HasColumnName("client_id");
         builder.Property(e => e.ClientNotes).HasColumnName("client_notes");
+
         builder.Property(e => e.CreatedAt)
             .HasDefaultValueSql("now()")
             .HasColumnName("created_at");
+
         builder.Property(e => e.EndTime).HasColumnName("end_time");
         builder.Property(e => e.MasterId).HasColumnName("master_id");
         builder.Property(e => e.ServiceId).HasColumnName("service_id");
         builder.Property(e => e.StartTime).HasColumnName("start_time");
+
         builder.Property(e => e.Status)
             .HasMaxLength(50)
-            .HasDefaultValueSql("'Pending'::character varying")
+            .HasConversion<string>()
+            .HasDefaultValue(AppointmentStatus.Confirmed)
             .HasColumnName("status");
+
         builder.Property(e => e.UpdatedAt)
             .HasDefaultValueSql("now()")
             .HasColumnName("updated_at");

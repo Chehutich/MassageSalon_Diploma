@@ -23,10 +23,21 @@ public static class ResultExtensions
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
+        var statusCode = result.Error.Code switch
+        {
+            var c when c.Contains("NotFound", StringComparison.Ordinal) => StatusCodes.Status404NotFound,
+            var c when c.StartsWith("Duplicate", StringComparison.Ordinal) => StatusCodes.Status409Conflict,
+            var c when c.StartsWith("Conflict", StringComparison.Ordinal) => StatusCodes.Status409Conflict,
+            var c when c.StartsWith("Auth.Invalid", StringComparison.Ordinal) => StatusCodes.Status401Unauthorized,
+            var c when c.StartsWith("Auth.", StringComparison.Ordinal) => StatusCodes.Status403Forbidden,
+            _ => StatusCodes.Status400BadRequest,
+        };
+
         var title = result.Error.Code switch
         {
-            var c when c.StartsWith("User.Duplicate", StringComparison.Ordinal) => "Conflict",
-            var c when c.StartsWith("User.InvalidCredentials",  StringComparison.Ordinal) => "Authentication Failed",
+            var c when c.StartsWith("Duplicate", StringComparison.Ordinal) => "Conflict",
+            var c when c.StartsWith("Conflict", StringComparison.Ordinal) => "Conflict",
+            var c when c.StartsWith("InvalidCredentials",  StringComparison.Ordinal) => "Authentication Failed",
             var c when c.Contains("NotFound",  StringComparison.Ordinal) => "Not Found",
             var c when c.StartsWith("Auth.",  StringComparison.Ordinal) => "Authorization Error",
             _ => "Bad Request",
@@ -39,6 +50,8 @@ public static class ResultExtensions
             var c when c.Contains("Email") => "Email",
             var c when c.Contains("Phone") => "Phone",
             var c when c.Contains("Password") => "Password",
+            var c when c.StartsWith("Appointment", StringComparison.Ordinal) => "TimeSlot",
+            var c when c.StartsWith("Service", StringComparison.Ordinal) => "Service",
             _ => "General",
         };
 
@@ -48,6 +61,6 @@ public static class ResultExtensions
             errors,
             title: title,
             detail: result.Error.Description,
-            statusCode: StatusCodes.Status400BadRequest);
+            statusCode: statusCode);
     }
 }

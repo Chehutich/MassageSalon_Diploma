@@ -31,6 +31,7 @@ public static class InfrastructureInjection
         services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<ICurrentUserContext, CurrentUserContext>();
         services.AddScoped<IMasterRepository, MasterRepository>();
+        services.AddScoped<IAppointmentRepository, AppointmentRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
