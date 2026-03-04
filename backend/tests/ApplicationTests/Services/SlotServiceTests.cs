@@ -223,7 +223,7 @@ public class SlotServiceTests
         var result = await slotService.GetAvailableSlotsAsync(masterId, serviceId, date, CancellationToken.None);
 
         // Assert
-        // Now 16:00. Buffer = 1 час. Minimal time to book = 17:00.
+        // Now 16:00. Buffer = 1 hour. Minimal time to book = 17:00.
         // Slots before 17:00 should be skipped.
 
         result.Should().NotBeEmpty();

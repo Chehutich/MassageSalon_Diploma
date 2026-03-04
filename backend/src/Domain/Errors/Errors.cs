@@ -43,19 +43,34 @@ public static class Errors
                 $"User with phone {phone} already exists.");
         }
 
-        public static Error InvalidRefreshToken => new Error(
+        public static Error InvalidRefreshToken => new(
             "Auth.InvalidRefreshToken",
             "Session has expired. Please login again.");
 
-        public static Error InvalidToken => new Error(
+        public static Error InvalidToken => new(
             "Auth.InvalidToken",
             "Invalid token.");
     }
 
     public static class Appointment
     {
-        public static Error Conflict => new Error(
+        public static Error Conflict => new(
             "Appointment.Conflict",
             "Appointment time conflicts with another appointment.");
+
+        public static readonly Error TooLateToReschedule = new(
+            "Appointment.TooLateToReschedule",
+            "Appointments can only be rescheduled at least 24 hours in advance.");
+
+        public static readonly Error TooLateToCancel = new(
+            "Appointment.TooLateToCancel",
+            "Appointments can only be canceled at least 1 hour in advance.");
+
+        public static Error NotFound(Guid id)
+        {
+            return new Error(
+                "Appointment.NotFound",
+                $"Appointment with ID {id} was not found.");
+        }
     }
 }

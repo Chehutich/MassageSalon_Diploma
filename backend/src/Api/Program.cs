@@ -40,6 +40,7 @@ app.UseAuthorization();
 app.MapAuthEndpoints();
 app.MapServiceEndpoints();
 app.MapAppointmentEndpoints();
+app.MapCategoryEndpoints();
 app.AddExceptionHandling();
 
 app.Run();

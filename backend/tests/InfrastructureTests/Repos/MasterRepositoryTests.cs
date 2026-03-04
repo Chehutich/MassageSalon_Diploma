@@ -74,7 +74,7 @@ public class MasterRepositoryTests : BaseRepositoryTest
         var end = start.AddMinutes(30);
 
         // Act
-        var result = await _repository.IsMasterAvailableAsync(master.Id, start, end, CancellationToken.None);
+        var result = await _repository.IsMasterAvailableAsync(master.Id, start, end, null, CancellationToken.None);
 
         // Assert
         result.Should().BeFalse();
@@ -94,7 +94,7 @@ public class MasterRepositoryTests : BaseRepositoryTest
         var end = start.AddHours(1);
 
         // Act
-        var result = await _repository.IsMasterAvailableAsync(master.Id, start, end, CancellationToken.None);
+        var result = await _repository.IsMasterAvailableAsync(master.Id, start, end, null, CancellationToken.None);
 
         // Assert
         result.Should().BeFalse();
@@ -120,11 +120,11 @@ public class MasterRepositoryTests : BaseRepositoryTest
         // Act
         // Test 1: New appointment overlaps existing one (12:30 - 13:30)
         var resultInternal = await _repository.IsMasterAvailableAsync(
-            master.Id, existingStart.AddMinutes(30), existingStart.AddMinutes(90), CancellationToken.None);
+            master.Id, existingStart.AddMinutes(30), existingStart.AddMinutes(90), null, CancellationToken.None);
 
         // Test 2: New appointment just before old one (11:00 - 12:00) -> Edge case
         var resultEdge = await _repository.IsMasterAvailableAsync(
-            master.Id, existingStart.AddHours(-1), existingStart, CancellationToken.None);
+            master.Id, existingStart.AddHours(-1), existingStart, null, CancellationToken.None);
 
         // Assert
         resultInternal.Should().BeFalse();
@@ -144,15 +144,15 @@ public class MasterRepositoryTests : BaseRepositoryTest
 
         // Act 1: Appointment just before opening (10:00 - 11:00)
         var startOpening = testDate.AddHours(10);
-        var resultOpening = await _repository.IsMasterAvailableAsync(master.Id, startOpening, startOpening.AddHours(1), CancellationToken.None);
+        var resultOpening = await _repository.IsMasterAvailableAsync(master.Id, startOpening, startOpening.AddHours(1), null, CancellationToken.None);
 
         // Act 2: Appointment just after closing (17:00 - 18:00)
         var startClosing = testDate.AddHours(17);
-        var resultClosing = await _repository.IsMasterAvailableAsync(master.Id, startClosing, startClosing.AddHours(1), CancellationToken.None);
+        var resultClosing = await _repository.IsMasterAvailableAsync(master.Id, startClosing, startClosing.AddHours(1), null, CancellationToken.None);
 
         // Act 3: Appointment exactly on the border (17:30 - 18:00)
         var startTooLate = testDate.AddHours(17).AddMinutes(30);
-        var resultTooLate = await _repository.IsMasterAvailableAsync(master.Id, startTooLate, startTooLate.AddHours(1), CancellationToken.None);
+        var resultTooLate = await _repository.IsMasterAvailableAsync(master.Id, startTooLate, startTooLate.AddHours(1), null, CancellationToken.None);
 
         // Assert
         resultOpening.Should().BeTrue();
@@ -181,22 +181,22 @@ public class MasterRepositoryTests : BaseRepositoryTest
 
         // Case 1: Total encapsulation (11:30 - 13:30) -> False
         var isEncapsulating = await _repository.IsMasterAvailableAsync(
-            master.Id, existingStart.AddMinutes(-30), existingEnd.AddMinutes(30), CancellationToken.None);
+            master.Id, existingStart.AddMinutes(-30), existingEnd.AddMinutes(30), null, CancellationToken.None);
         isEncapsulating.Should().BeFalse();
 
         // Case 2: Appointment in another one (12:15 - 12:45) -> False
         var isInside = await _repository.IsMasterAvailableAsync(
-            master.Id, existingStart.AddMinutes(15), existingEnd.AddMinutes(-15), CancellationToken.None);
+            master.Id, existingStart.AddMinutes(15), existingEnd.AddMinutes(-15), null, CancellationToken.None);
         isInside.Should().BeFalse();
 
         // Case 3: Border to border after (13:00 - 14:00) -> True
         var isAfter = await _repository.IsMasterAvailableAsync(
-            master.Id, existingEnd, existingEnd.AddHours(1), CancellationToken.None);
+            master.Id, existingEnd, existingEnd.AddHours(1), null, CancellationToken.None);
         isAfter.Should().BeTrue();
 
         // Case 4: Total match (12:00 - 13:00) -> False
         var isExactMatch = await _repository.IsMasterAvailableAsync(
-            master.Id, existingStart, existingEnd, CancellationToken.None);
+            master.Id, existingStart, existingEnd, null, CancellationToken.None);
         isExactMatch.Should().BeFalse();
     }
 }

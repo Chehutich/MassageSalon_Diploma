@@ -18,7 +18,16 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
                 cancellationToken);
     }
 
-    public async Task<List<Appointment>> GetByMasterAndDateAsync(Guid masterId, DateTime date, CancellationToken cancellationToken)
+    public async Task<Appointment?> GetByIdAsync(Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Appointments
+            .Include(a => a.Master)
+            .Include(a => a.Service)
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+    }
+
+    public async Task<List<Appointment>> GetByMasterAndDateAsync(Guid masterId, DateTime date, CancellationToken cancellationToken = default)
     {
         var startOfDay = date.Date.ToUniversalTime();
         var endOfDay = startOfDay.AddDays(1);
@@ -35,8 +44,8 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
             .ToListAsync(cancellationToken);
     }
 
-    public Task AddAsync(Appointment appointment, CancellationToken cancellationToken)
+    public async Task AddAsync(Appointment appointment, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await context.Appointments.AddAsync(appointment, cancellationToken);
     }
 }

@@ -9,7 +9,9 @@ public interface IAppointmentRepository
         DateTime endTime,
         CancellationToken cancellationToken);
 
-    Task<List<Appointment>> GetByMasterAndDateAsync(Guid masterId, DateTime date, CancellationToken cancellationToken);
+    Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task AddAsync(Appointment appointment, CancellationToken cancellationToken);
+    Task<List<Appointment>> GetByMasterAndDateAsync(Guid masterId, DateTime date, CancellationToken cancellationToken = default);
+
+    Task AddAsync(Appointment appointment, CancellationToken cancellationToken = default);
 }

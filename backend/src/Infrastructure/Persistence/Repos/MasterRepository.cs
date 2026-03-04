@@ -21,7 +21,9 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
         return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<Schedule?> GetScheduleForDayAsync(Guid masterId, int dayOfWeek, CancellationToken cancellationToken = default)
+    public async Task<Schedule?> GetScheduleForDayAsync(Guid masterId,
+        int dayOfWeek,
+        CancellationToken cancellationToken = default)
     {
         return await context.Schedules
             .AsNoTracking()
@@ -31,7 +33,9 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
                 cancellationToken);
     }
 
-    public async Task<bool> IsOnTimeOffAsync(Guid masterId, DateTime date, CancellationToken cancellationToken = default)
+    public async Task<bool> IsOnTimeOffAsync(Guid masterId,
+        DateTime date,
+        CancellationToken cancellationToken = default)
     {
         var dateOnly = DateOnly.FromDateTime(date);
 
@@ -43,11 +47,11 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
                 cancellationToken);
     }
 
-    public async Task<bool> IsMasterAvailableAsync(
-        Guid masterId,
+    public async Task<bool> IsMasterAvailableAsync(Guid masterId,
         DateTime start,
         DateTime end,
-        CancellationToken cancellationToken)
+        Guid? excludeAppointmentId = null,
+        CancellationToken cancellationToken = default)
     {
         // Check our working schedule
         var dbDayOfWeek = start.DayOfWeek;
@@ -78,6 +82,7 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
                     a.MasterId == masterId &&
                     a.Status != AppointmentStatus.Cancelled &&
                     a.Status != AppointmentStatus.NoShow &&
+                    (excludeAppointmentId == null || a.Id != excludeAppointmentId) &&
                     a.StartTime < end &&
                     start < a.EndTime,
                 cancellationToken);

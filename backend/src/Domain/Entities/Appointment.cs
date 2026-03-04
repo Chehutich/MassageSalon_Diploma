@@ -66,4 +66,18 @@ public class Appointment : IAuditableEntity
 
         Status = AppointmentStatus.Cancelled;
     }
+
+    public void Reschedule(DateTime newStartTime, DateTime newEndTime, DateTime utcNow)
+    {
+        var minRequiredNotice = utcNow.AddHours(24);
+
+        if (StartTime < minRequiredNotice)
+        {
+            throw new InvalidOperationException("Cannot reschedule an appointment before 24 hours notice.");
+        }
+
+        StartTime = newStartTime;
+        EndTime = newEndTime;
+        UpdatedAt = utcNow;
+    }
 }

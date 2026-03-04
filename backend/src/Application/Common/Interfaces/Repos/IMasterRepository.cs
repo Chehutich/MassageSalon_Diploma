@@ -15,5 +15,6 @@ public interface IMasterRepository
     Task<bool> IsMasterAvailableAsync(Guid masterId,
         DateTime start,
         DateTime end,
-        CancellationToken cancellationToken);
+        Guid? excludeAppointmentId = null,
+        CancellationToken cancellationToken = default);
 }

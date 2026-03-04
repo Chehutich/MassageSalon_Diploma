@@ -1,16 +1,18 @@
-using Application.Features.Commands.ChangeEmail;
-using Application.Features.Commands.ChangePassword;
-using Application.Features.Commands.ChangePhone;
-using Application.Features.Commands.CreateAppointment;
-using Application.Features.Commands.Login;
-using Application.Features.Commands.Logout;
-using Application.Features.Commands.RefreshToken;
-using Application.Features.Commands.Register;
-using Application.Features.Queries.GetAvailableSlots;
-using Application.Features.Queries.GetCategories;
-using Application.Features.Queries.GetMe;
-using Application.Features.Queries.GetServiceById;
-using Application.Features.Queries.GetServices;
+using Application.Features.Appointments.CancelAppointment;
+using Application.Features.Appointments.CreateAppointment;
+using Application.Features.Appointments.RescheduleAppointment;
+using Application.Features.Auth.Login;
+using Application.Features.Auth.Register;
+using Application.Features.Catalog.GetAvailableSlots;
+using Application.Features.Catalog.GetCategories;
+using Application.Features.Catalog.GetServiceById;
+using Application.Features.Catalog.GetServices;
+using Application.Features.User.ChangeEmail;
+using Application.Features.User.ChangePassword;
+using Application.Features.User.ChangePhone;
+using Application.Features.User.GetMe;
+using Application.Features.User.Logout;
+using Application.Features.User.RefreshToken;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -167,7 +169,20 @@ public static class EndpointExtensions
             .WithName("GetServiceById")
             .WithDescription("Retrieves detailed information about a specific service by its unique ID.");
 
-        group.MapGet("/categories", async (ISender sender, CancellationToken cancellationToken) =>
+        return app;
+    }
+
+    #endregion
+
+    #region Categories
+
+    public static IEndpointRouteBuilder MapCategoryEndpoints(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/api/categories")
+            .WithTags("Categories")
+            .RequireAuthorization();
+
+        group.MapGet("", async (ISender sender, CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(new GetCategoriesQuery(), cancellationToken);
 
@@ -203,18 +218,58 @@ public static class EndpointExtensions
             .WithName("GetAvailableSlots")
             .WithDescription("Retrieves a list of available time slots for a specific master and service on a given date.");
 
-        group.MapPost("", async ([FromBody] CreateAppointmentCommand command,
+        group.MapPost("", async (CreateAppointmentCommand command,
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(command, cancellationToken);
 
                 return result.IsSuccess
-                    ? Results.Ok(result.Value)
+                    ? Results.Created($"/api/appointments/{result.Value}", new { id = result.Value })
                     : result.ToProblemDetails();
             })
             .WithName("CreateAppointment")
             .WithDescription("Books a new appointment for a specific service and master.");
+
+        group.MapPost("/{id:guid}/reschedule", async (
+                Guid id,
+                RescheduleAppointmentCommand command,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                if (id != command.AppointmentId)
+                {
+                    return Results.Problem(
+                        statusCode: StatusCodes.Status400BadRequest,
+                        title: "Bad Request",
+                        detail: "The ID in the URL does not match the Appointment ID in the request body."
+                    );
+                }
+
+                var result = await sender.Send(command, cancellationToken);
+
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : result.ToProblemDetails();
+            })
+            .WithName("RescheduleAppointment")
+            .WithDescription("Reschedules an existing appointment to a new time. Must be done at least 24 hours in advance.");
+
+        group.MapPost("/{id:guid}/cancel", async (
+                Guid id,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                var command = new CancelAppointmentCommand(id);
+                var result = await sender.Send(command, cancellationToken);
+
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : result.ToProblemDetails();
+            })
+            .WithName("CancelAppointment")
+            .WithSummary("Cancel")
+            .WithDescription("Cancels an existing appointment. Must be done at least 1 hour in advance.");
 
         return app;
     }
