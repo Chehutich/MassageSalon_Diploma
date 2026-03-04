@@ -4,11 +4,6 @@ namespace Application.Common.Interfaces.Repos;
 
 public interface IAppointmentRepository
 {
-    Task<bool> HasOverlapAsync(Guid masterId,
-        DateTime startTime,
-        DateTime endTime,
-        CancellationToken cancellationToken);
-
     Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<List<Appointment>> GetByMasterAndDateAsync(Guid masterId, DateTime date, CancellationToken cancellationToken = default);

@@ -59,6 +59,29 @@ public class UserRepositoryTests : BaseRepositoryTest
     }
 
     [Fact]
+    public async Task GetByRefreshTokenAsync_ShouldReturnUser_WhenPhoneExists()
+    {
+        // Arrange
+        var email = "oleg@test.com";
+        var refreshToken = "some-very-secret-token-123";
+        var expiry = DateTime.UtcNow.AddDays(7);
+        
+        var user = await CreateUserAsync(email, "+380991112233");
+
+        user.SetRefreshToken(refreshToken, expiry);
+
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await _repository.GetByRefreshTokenAsync(refreshToken);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Email.Should().Be(email);
+        result.RefreshToken.Should().Be(refreshToken);
+    }
+
+    [Fact]
     public async Task AddAsync_ShouldAddUserToDatabase()
     {
         // Arrange

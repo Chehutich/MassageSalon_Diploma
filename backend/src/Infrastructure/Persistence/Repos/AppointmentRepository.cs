@@ -7,17 +7,6 @@ namespace Infrastructure.Persistence.Repos;
 
 public class AppointmentRepository(ApplicationDbContext context) : IAppointmentRepository
 {
-    public async Task<bool> HasOverlapAsync(Guid masterId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
-    {
-        return await context.Appointments
-            .AnyAsync(a =>
-                    a.MasterId == masterId &&
-                    a.Status == AppointmentStatus.Confirmed &&
-                    a.StartTime < endTime &&
-                    startTime < a.EndTime,
-                cancellationToken);
-    }
-
     public async Task<Appointment?> GetByIdAsync(Guid id,
         CancellationToken cancellationToken = default)
     {

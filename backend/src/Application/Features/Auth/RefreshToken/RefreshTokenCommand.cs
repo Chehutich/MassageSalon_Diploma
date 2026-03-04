@@ -5,7 +5,7 @@ using CSharpFunctionalExtensions;
 using Domain.Errors;
 using MediatR;
 
-namespace Application.Features.User.RefreshToken;
+namespace Application.Features.Auth.RefreshToken;
 
 public record RefreshTokenCommand(string AccessToken, string RefreshToken)
     : IRequest<Result<AuthResponse, Error>>;
@@ -17,21 +17,24 @@ public class RefreshTokenHandler(
 {
     public async Task<Result<AuthResponse, Error>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var userId = jwtTokenGenerator.GetUserIdFromExpiredToken(request.AccessToken);
-        if (userId is null)
-        {
-            return Errors.User.InvalidToken;
-        }
-
-        var user = await userRepository.GetByIdAsync(userId.Value, cancellationToken);
+        var user = await userRepository.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
         if (user is null)
         {
-            return Errors.User.NotFound(userId.Value);
+            return Errors.User.InvalidAccessToken;
         }
 
-        if (user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiry <= DateTime.UtcNow)
+        if (user.RefreshTokenExpiry <= DateTime.UtcNow)
         {
             return Errors.User.InvalidRefreshToken;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.AccessToken))
+        {
+            var userIdFromToken = jwtTokenGenerator.GetUserIdFromExpiredToken(request.AccessToken);
+            if (userIdFromToken != null && userIdFromToken != user.Id)
+            {
+                return Errors.User.InvalidAccessToken;
+            }
         }
 
         var newAccessToken = jwtTokenGenerator.GenerateToken(user);

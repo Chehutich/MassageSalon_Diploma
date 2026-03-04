@@ -49,7 +49,7 @@ public static class ValidationErrors
 
     public static class Token
     {
-        public const string InvalidToken = "Token.InvalidToken";
+        public const string InvalidToken = "Token.InvalidAccessToken";
         public const string AccessTokenRequired = "Token.AccessToken.Required";
         public const string RefreshTokenRequired = "Token.RefreshToken.Required";
     }

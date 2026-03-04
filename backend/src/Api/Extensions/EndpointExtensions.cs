@@ -2,6 +2,7 @@ using Application.Features.Appointments.CancelAppointment;
 using Application.Features.Appointments.CreateAppointment;
 using Application.Features.Appointments.RescheduleAppointment;
 using Application.Features.Auth.Login;
+using Application.Features.Auth.RefreshToken;
 using Application.Features.Auth.Register;
 using Application.Features.Catalog.GetAvailableSlots;
 using Application.Features.Catalog.GetCategories;
@@ -12,7 +13,6 @@ using Application.Features.User.ChangePassword;
 using Application.Features.User.ChangePhone;
 using Application.Features.User.GetMe;
 using Application.Features.User.Logout;
-using Application.Features.User.RefreshToken;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,10 +54,10 @@ public static class EndpointExtensions
 
         group.MapPost("/refresh", async (ISender sender, HttpContext context, CancellationToken cancellationToken) =>
             {
-                var accessToken = context.Request.Cookies["accessToken"];
+                var accessToken = context.Request.Cookies["accessToken"] ?? string.Empty;;
                 var refreshToken = context.Request.Cookies["refreshToken"];
 
-                if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
+                if (string.IsNullOrEmpty(refreshToken))
                 {
                     return Results.Unauthorized();
                 }
@@ -268,7 +268,6 @@ public static class EndpointExtensions
                     : result.ToProblemDetails();
             })
             .WithName("CancelAppointment")
-            .WithSummary("Cancel")
             .WithDescription("Cancels an existing appointment. Must be done at least 1 hour in advance.");
 
         return app;

@@ -47,8 +47,8 @@ public static class Errors
             "Auth.InvalidRefreshToken",
             "Session has expired. Please login again.");
 
-        public static Error InvalidToken => new(
-            "Auth.InvalidToken",
+        public static Error InvalidAccessToken => new(
+            "Auth.InvalidAccessToken",
             "Invalid token.");
     }
 
