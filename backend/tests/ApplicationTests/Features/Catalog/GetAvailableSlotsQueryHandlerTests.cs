@@ -1,7 +1,6 @@
 using Application.Common.Interfaces;
 using Application.Features.Catalog.GetAvailableSlots;
 using CSharpFunctionalExtensions;
-using Domain.ValueObjects;
 using FluentAssertions;
 using Moq;
 

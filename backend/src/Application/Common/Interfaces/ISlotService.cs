@@ -1,12 +1,12 @@
-using Domain.ValueObjects;
+using Application.Features.Catalog.GetAvailableSlots;
 
 namespace Application.Common.Interfaces;
 
 public interface ISlotService
 {
     Task<List<Slot>> GetAvailableSlotsAsync(
-        Guid masterId,
+        Guid? masterId,
         Guid serviceId,
         DateTime date,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 }

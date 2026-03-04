@@ -21,16 +21,33 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
         return await query.ToListAsync(cancellationToken);
     }
 
+    public async Task<Master?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await context.Masters
+            .Where(m => m.Id == id)
+            .Include(m => m.User)
+            .Include(m => m.Services)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<Schedule?> GetScheduleForDayAsync(Guid masterId,
         int dayOfWeek,
         CancellationToken cancellationToken = default)
     {
         return await context.Schedules
-            .AsNoTracking()
             .FirstOrDefaultAsync(s =>
                     s.MasterId == masterId &&
                     s.DayOfWeek == dayOfWeek,
                 cancellationToken);
+    }
+
+    public async Task<List<Master>> GetMastersByServiceAsync(Guid serviceId, CancellationToken cancellationToken = default)
+    {
+        return await context.Masters
+            .Include(m => m.Services)
+            .Include(m => m.User)
+            .Where(m => m.Services.Any(s => s.Id == serviceId)) // If master has this service
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<bool> IsOnTimeOffAsync(Guid masterId,

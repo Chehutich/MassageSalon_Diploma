@@ -6,10 +6,6 @@ public class GetAvailableSlotsQueryValidator : AbstractValidator<GetAvailableSlo
 {
     public GetAvailableSlotsQueryValidator(TimeProvider timeProvider)
     {
-        RuleFor(x => x.MasterId)
-            .NotEmpty()
-            .WithErrorCode("GetAvailableSlots.MasterId.Required");
-
         RuleFor(x => x.ServiceId)
             .NotEmpty()
             .WithErrorCode("GetAvailableSlots.ServiceId.Required");

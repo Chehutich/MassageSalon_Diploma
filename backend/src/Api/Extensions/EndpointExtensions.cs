@@ -204,9 +204,10 @@ public static class EndpointExtensions
             .WithTags("Appointments")
             .RequireAuthorization();
 
-        group.MapGet("/available-slots", async (Guid masterId,
+        group.MapGet("/available-slots", async (
                 Guid serviceId,
                 DateTime date,
+                Guid? masterId,
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
