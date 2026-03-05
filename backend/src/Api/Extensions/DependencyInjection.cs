@@ -17,8 +17,6 @@ public static class DependencyInjection
         builder.Host.UseSerilog((context, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration));
 
-        builder.Services.AddOpenApi();
-
         builder.Services.Configure<JsonOptions>(options =>
         {
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -44,6 +42,8 @@ public static class DependencyInjection
         {
             throw new InvalidOperationException("JWT Key must be at least 32 characters long for security reasons.");
         }
+
+        builder.Services.AddCors();
 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -94,7 +94,7 @@ public static class DependencyInjection
                 document.Security = [
                     new OpenApiSecurityRequirement
                     {
-                        [new OpenApiSecuritySchemeReference("Bearer")] = [],
+                        [new OpenApiSecuritySchemeReference("jwt")] = [],
                     },
                 ];
 

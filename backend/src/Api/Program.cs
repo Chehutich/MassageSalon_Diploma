@@ -11,12 +11,14 @@ builder.AddPresentation();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
-
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
 var app = builder.Build();
+
+app.UseCors(policy => policy
+        .WithOrigins("http://localhost:8081") // Expo
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+);
 
 app.UseSerilogRequestLogging();
 
@@ -45,4 +47,4 @@ app.MapCategoryEndpoints();
 app.MapMasterEndpoints();
 app.AddExceptionHandling();
 
-app.Run();
+app.Run("http://0.0.0.0:5260");
