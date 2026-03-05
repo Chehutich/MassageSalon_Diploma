@@ -1,4 +1,5 @@
 using Api.Extensions;
+using Api.Extensions.Endpoints;
 using Application;
 using Infrastructure;
 using Scalar.AspNetCore;

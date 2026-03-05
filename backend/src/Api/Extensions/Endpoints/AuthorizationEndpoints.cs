@@ -1,27 +1,17 @@
-using Application.Features.Appointments.CancelAppointment;
-using Application.Features.Appointments.CreateAppointment;
-using Application.Features.Appointments.RescheduleAppointment;
 using Application.Features.Auth.Login;
 using Application.Features.Auth.RefreshToken;
 using Application.Features.Auth.Register;
-using Application.Features.Catalog.GetAvailableSlots;
-using Application.Features.Catalog.GetCategories;
-using Application.Features.Catalog.GetServiceById;
-using Application.Features.Catalog.GetServices;
 using Application.Features.User.ChangeEmail;
 using Application.Features.User.ChangePassword;
 using Application.Features.User.ChangePhone;
 using Application.Features.User.GetMe;
 using Application.Features.User.Logout;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Extensions;
+namespace Api.Extensions.Endpoints;
 
-public static class EndpointExtensions
+public static class AuthorizationEndpoints
 {
-    #region Authorization
-
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/auth")
@@ -137,147 +127,6 @@ public static class EndpointExtensions
         return app;
     }
 
-    #endregion
-
-    #region Services
-
-    public static IEndpointRouteBuilder MapServiceEndpoints(this IEndpointRouteBuilder app)
-    {
-        var group = app.MapGroup("/api/services")
-            .WithTags("Services")
-            .RequireAuthorization();
-
-        group.MapGet("/", async (ISender sender, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(new GetServicesQuery(), cancellationToken);
-
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : result.ToProblemDetails();
-            })
-            .WithName("GetServices")
-            .WithDescription("Retrieves a list of all available services.");
-
-        group.MapGet("/{id:guid}", async (Guid id, ISender sender, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(new GetServiceByIdQuery(id), cancellationToken);
-
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : result.ToProblemDetails();
-            })
-            .WithName("GetServiceById")
-            .WithDescription("Retrieves detailed information about a specific service by its unique ID.");
-
-        return app;
-    }
-
-    #endregion
-
-    #region Categories
-
-    public static IEndpointRouteBuilder MapCategoryEndpoints(this IEndpointRouteBuilder app)
-    {
-        var group = app.MapGroup("/api/categories")
-            .WithTags("Categories")
-            .RequireAuthorization();
-
-        group.MapGet("", async (ISender sender, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(new GetCategoriesQuery(), cancellationToken);
-
-                return Results.Ok(result.Value);
-            })
-            .WithName("GetCategories")
-            .WithDescription("Retrieves a list of all service categories.");
-
-        return app;
-    }
-
-    #endregion
-
-    #region Appointments
-
-    public static IEndpointRouteBuilder MapAppointmentEndpoints(this IEndpointRouteBuilder app)
-    {
-        var group = app.MapGroup("/api/appointments")
-            .WithTags("Appointments")
-            .RequireAuthorization();
-
-        group.MapGet("/available-slots", async (
-                Guid serviceId,
-                DateTime date,
-                Guid? masterId,
-                ISender sender,
-                CancellationToken cancellationToken) =>
-            {
-                var query = new GetAvailableSlotsQuery(masterId, serviceId, date);
-                var result = await sender.Send(query, cancellationToken);
-
-                return Results.Ok(result.Value);
-            })
-            .WithName("GetAvailableSlots")
-            .WithDescription("Retrieves a list of available time slots for a specific master and service on a given date.");
-
-        group.MapPost("", async (CreateAppointmentCommand command,
-                ISender sender,
-                CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(command, cancellationToken);
-
-                return result.IsSuccess
-                    ? Results.Created($"/api/appointments/{result.Value}", new { id = result.Value })
-                    : result.ToProblemDetails();
-            })
-            .WithName("CreateAppointment")
-            .WithDescription("Books a new appointment for a specific service and master.");
-
-        group.MapPost("/{id:guid}/reschedule", async (
-                Guid id,
-                RescheduleAppointmentCommand command,
-                ISender sender,
-                CancellationToken cancellationToken) =>
-            {
-                if (id != command.AppointmentId)
-                {
-                    return Results.Problem(
-                        statusCode: StatusCodes.Status400BadRequest,
-                        title: "Bad Request",
-                        detail: "The ID in the URL does not match the Appointment ID in the request body."
-                    );
-                }
-
-                var result = await sender.Send(command, cancellationToken);
-
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : result.ToProblemDetails();
-            })
-            .WithName("RescheduleAppointment")
-            .WithDescription("Reschedules an existing appointment to a new time. Must be done at least 24 hours in advance.");
-
-        group.MapPost("/{id:guid}/cancel", async (
-                Guid id,
-                ISender sender,
-                CancellationToken cancellationToken) =>
-            {
-                var command = new CancelAppointmentCommand(id);
-                var result = await sender.Send(command, cancellationToken);
-
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : result.ToProblemDetails();
-            })
-            .WithName("CancelAppointment")
-            .WithDescription("Cancels an existing appointment. Must be done at least 1 hour in advance.");
-
-        return app;
-    }
-
-    #endregion
-
-    #region Helpers
-
     private static void AppendAuthCookies(HttpContext context, string token, string refreshToken)
     {
         var baseOptions = new CookieOptions
@@ -296,6 +145,4 @@ public static class EndpointExtensions
 
         context.Response.Cookies.Append("refreshToken", refreshToken, baseOptions);
     }
-
-    #endregion
 }
