@@ -11,6 +11,7 @@ public record CancelAppointmentCommand(Guid AppointmentId) : IRequest<Result<Gui
 public class CancelAppointmentCommandHandler(
     IAppointmentRepository appointmentRepository,
     IUnitOfWork unitOfWork,
+    ICurrentUserContext userContext,
     TimeProvider timeProvider) : IRequestHandler<CancelAppointmentCommand, Result<Guid, Error>>
 {
     public async Task<Result<Guid, Error>> Handle(CancelAppointmentCommand request, CancellationToken cancellationToken)
@@ -19,6 +20,11 @@ public class CancelAppointmentCommandHandler(
         if (appointment == null)
         {
             return Errors.Appointment.NotFound(request.AppointmentId);
+        }
+
+        if (appointment.ClientId != userContext.Id)
+        {
+            return Errors.Appointment.NotFound(appointment.Id);
         }
 
         var now = timeProvider.GetUtcNow().UtcDateTime;

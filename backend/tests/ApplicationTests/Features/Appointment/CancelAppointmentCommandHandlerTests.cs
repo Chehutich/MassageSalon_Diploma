@@ -12,6 +12,7 @@ namespace ApplicationTests.Features.Appointment;
 public class CancelAppointmentCommandHandlerTests
 {
     private readonly Mock<IAppointmentRepository> _appointmentRepoMock;
+    private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<TimeProvider> _timeProviderMock;
     private readonly CancelAppointmentCommandHandler _handler;
@@ -21,10 +22,12 @@ public class CancelAppointmentCommandHandlerTests
         _appointmentRepoMock = new Mock<IAppointmentRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _timeProviderMock = new Mock<TimeProvider>();
+        _currentUserContextMock = new Mock<ICurrentUserContext>();
 
         _handler = new CancelAppointmentCommandHandler(
             _appointmentRepoMock.Object,
             _unitOfWorkMock.Object,
+            _currentUserContextMock.Object,
             _timeProviderMock.Object);
     }
 
@@ -85,7 +88,7 @@ public class CancelAppointmentCommandHandlerTests
 
         var now = DateTime.UtcNow;
 
-       var startTime = now.AddHours(2);
+        var startTime = now.AddHours(2);
 
         var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
         typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Id))?.SetValue(appointment, appointmentId);

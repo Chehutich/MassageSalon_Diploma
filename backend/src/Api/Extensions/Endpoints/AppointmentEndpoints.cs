@@ -1,5 +1,7 @@
 using Application.Features.Appointments.CancelAppointment;
 using Application.Features.Appointments.CreateAppointment;
+using Application.Features.Appointments.GetAppointmentDetails;
+using Application.Features.Appointments.GetMyAppointments;
 using Application.Features.Appointments.RescheduleAppointment;
 using Application.Features.Catalog.GetAvailableSlots;
 using MediatR;
@@ -13,6 +15,33 @@ public static class AppointmentEndpoints
         var group = app.MapGroup("/api/appointments")
             .WithTags("Appointments")
             .RequireAuthorization();
+
+        group.MapGet("/my", async (
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                var query = new GetMyAppointmentsQuery();
+                var result = await sender.Send(query, cancellationToken);
+
+                return Results.Ok(result.Value);
+            })
+            .WithName("GetMyAppointments")
+            .WithDescription("Retrieves all appointments for the current user.");
+
+        group.MapGet("/{id:guid}", async (
+                Guid id,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                var query = new GetAppointmentDetailsQuery(id);
+                var result = await sender.Send(query, cancellationToken);
+
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : result.ToProblemDetails();
+            })
+            .WithName("GetAppointmentDetails")
+            .WithDescription("Retrieves full details for a specific appointment.");
 
         group.MapGet("/available-slots", async (
                 Guid serviceId,
@@ -35,9 +64,13 @@ public static class AppointmentEndpoints
             {
                 var result = await sender.Send(command, cancellationToken);
 
-                return result.IsSuccess
-                    ? Results.Created($"/api/appointments/{result.Value}", new { id = result.Value })
-                    : result.ToProblemDetails();
+                var detailsQuery = new GetAppointmentDetailsQuery(result.Value);
+                var detailsResult = await sender.Send(detailsQuery, cancellationToken);
+
+                return Results.Created(
+                    $"/api/appointments/{result.Value}",
+                    detailsResult.Value
+                );
             })
             .WithName("CreateAppointment")
             .WithDescription("Books a new appointment for a specific service and master.");

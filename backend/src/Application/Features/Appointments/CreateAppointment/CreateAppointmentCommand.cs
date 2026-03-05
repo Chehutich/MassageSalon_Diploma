@@ -9,7 +9,7 @@ namespace Application.Features.Appointments.CreateAppointment;
 
 public record CreateAppointmentCommand(
     Guid ServiceId,
-    Guid MasterId,
+    Guid? MasterId,
     DateTime StartTime,
     string? Notes = null) : IRequest<Result<Guid, Error>>;
 
@@ -30,22 +30,46 @@ public class CreateAppointmentHandler(
         }
 
         var endTime = request.StartTime.AddMinutes(service.Duration);
+        Guid finalMasterId;
 
-        var isAvailable = await masterRepository.IsMasterAvailableAsync(
-            request.MasterId,
-            request.StartTime,
-            endTime,
-            null,
-            cancellationToken);
-
-        if (!isAvailable)
+        if (request.MasterId.HasValue)
         {
-            return Errors.Appointment.Conflict;
+            var isAvailable = await masterRepository.IsMasterAvailableAsync(
+                request.MasterId.Value, request.StartTime, endTime, null, cancellationToken);
+
+            if (!isAvailable)
+            {
+                return Errors.Appointment.Conflict;
+            }
+
+            finalMasterId = request.MasterId.Value;
+        }
+
+        else
+        {
+            var masters = await masterRepository.GetMastersByServiceAsync(request.ServiceId, cancellationToken);
+
+            Master? availableMaster = null;
+            foreach (var m in masters)
+            {
+                if (await masterRepository.IsMasterAvailableAsync(m.Id, request.StartTime, endTime, null, cancellationToken))
+                {
+                    availableMaster = m;
+                    break;
+                }
+            }
+
+            if (availableMaster == null)
+            {
+                return Errors.Appointment.Conflict;
+            }
+
+            finalMasterId = availableMaster.Id;
         }
 
         var appointment = new Appointment(
             userContext.Id,
-            request.MasterId,
+            finalMasterId,
             service,
             request.StartTime,
             request.Notes

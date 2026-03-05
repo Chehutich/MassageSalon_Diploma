@@ -88,8 +88,10 @@ public class SlotService(
         var minAllowedBookingTime = now.AddHours(1);
 
         var slots = new List<Slot>();
-        var currentStart = date.Date.Add(schedule.StartTime.ToTimeSpan());
-        var dayEnd = date.Date.Add(schedule.EndTime.ToTimeSpan());
+
+        var dayDateUtc = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+        var currentStart = dayDateUtc.Add(schedule.StartTime.ToTimeSpan());
+        var dayEnd = dayDateUtc.Add(schedule.EndTime.ToTimeSpan());
 
         while (currentStart.AddMinutes(durationMinutes) <= dayEnd)
         {

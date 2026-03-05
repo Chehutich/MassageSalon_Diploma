@@ -12,6 +12,7 @@ public record RescheduleAppointmentCommand(
 
 public class RescheduleAppointmentCommandHandler(
     IAppointmentRepository appointmentRepository,
+    ICurrentUserContext userContext,
     IMasterRepository masterRepository,
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : IRequestHandler<RescheduleAppointmentCommand, Result<Guid, Error>>
@@ -23,6 +24,11 @@ public class RescheduleAppointmentCommandHandler(
         if (appointment == null)
         {
             return Errors.Appointment.NotFound(request.AppointmentId);
+        }
+
+        if (appointment.ClientId != userContext.Id)
+        {
+            return Errors.Appointment.NotFound(appointment.Id);
         }
 
         var newEndTime = request.NewStartTime.AddMinutes(appointment.Service.Duration);

@@ -70,6 +70,11 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
         Guid? excludeAppointmentId = null,
         CancellationToken cancellationToken = default)
     {
+        if (start.Minute % 30 != 0)
+        {
+            return false;
+        }
+
         // Check our working schedule
         var dbDayOfWeek = start.DayOfWeek;
         var startTime = TimeOnly.FromDateTime(start);
