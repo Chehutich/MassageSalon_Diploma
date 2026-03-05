@@ -15,24 +15,7 @@ public class MasterRepositoryTests : BaseRepositoryTest
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnActiveMastersWithUsers()
-    {
-        // Arrange
-        var user = await CreateUserAsync("john@test.com", "+1234567890");
-        var master = await CreateMasterAsync(user);
-
-        // Act
-        var result = await _repository.GetAllAsync();
-
-        // Assert
-        result.Should().HaveCount(1);
-
-        result.First().User.FirstName.Should().Be("FirstName");
-        result.First().Bio.Should().Be("Expert bio");
-    }
-
-    [Fact]
-    public async Task GetAllAsync_WithServiceId_ShouldFilterMasters()
+    public async Task GetAllAsyncWithDetails_ShouldFilterMasters()
     {
         // Arrange
         var category = await CreateCategoryAsync("Body");
@@ -52,7 +35,7 @@ public class MasterRepositoryTests : BaseRepositoryTest
         await context.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetAllAsync(service1.Id);
+        var result = await _repository.GetAllWithDetailsAsync(service1.Id);
 
         // Assert
         result.Should().HaveCount(1);

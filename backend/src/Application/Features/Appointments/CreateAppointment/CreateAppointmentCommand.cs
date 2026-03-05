@@ -47,7 +47,7 @@ public class CreateAppointmentHandler(
 
         else
         {
-            var masters = await masterRepository.GetMastersByServiceAsync(request.ServiceId, cancellationToken);
+            var masters = await masterRepository.GetAllWithDetailsAsync(request.ServiceId, cancellationToken);
 
             Master? availableMaster = null;
             foreach (var m in masters)

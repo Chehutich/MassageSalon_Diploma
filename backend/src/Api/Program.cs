@@ -42,6 +42,7 @@ app.MapAuthEndpoints();
 app.MapServiceEndpoints();
 app.MapAppointmentEndpoints();
 app.MapCategoryEndpoints();
+app.MapMasterEndpoints();
 app.AddExceptionHandling();
 
 app.Run();

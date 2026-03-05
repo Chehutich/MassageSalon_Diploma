@@ -73,4 +73,14 @@ public static class Errors
                 $"Appointment with ID {id} was not found.");
         }
     }
+
+    public static class Master
+    {
+        public static Error NotFound(Guid id)
+        {
+            return new Error(
+                "Master.NotFound",
+                $"Master with ID {id} was not found.");
+        }
+    }
 }

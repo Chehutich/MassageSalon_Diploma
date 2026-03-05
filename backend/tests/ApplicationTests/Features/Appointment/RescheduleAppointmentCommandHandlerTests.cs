@@ -97,7 +97,7 @@ public class RescheduleAppointmentCommandHandlerTests
 
         var service = new Service(userId, "Haircut", "Desc", 60, 100m);
 
-        var appointment = new Domain.Entities.Appointment(Guid.NewGuid(), Guid.NewGuid(), service, oldStartTime, null);
+        var appointment = new Domain.Entities.Appointment(userId, Guid.NewGuid(), service, oldStartTime, null);
         typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Service))?.SetValue(appointment, service);
 
         _appointmentRepoMock.Setup(x => x.GetByIdAsync(appointmentId, It.IsAny<CancellationToken>())).ReturnsAsync(appointment);

@@ -1,19 +1,20 @@
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Repos;
+using Application.Common.Models;
 using CSharpFunctionalExtensions;
 using Domain.Errors;
 using MediatR;
 
 namespace Application.Features.Appointments.GetAppointmentDetails;
 
-public record GetAppointmentDetailsQuery(Guid AppointmentId) : IRequest<Result<AppointmentDetailsDto, Error>>;
+public record GetAppointmentDetailsQuery(Guid AppointmentId) : IRequest<Result<AppointmentDetailsResponse, Error>>;
 
 public class GetAppointmentDetailsHandler(
     IAppointmentRepository appointmentRepository,
     ICurrentUserContext userContext)
-    : IRequestHandler<GetAppointmentDetailsQuery, Result<AppointmentDetailsDto, Error>>
+    : IRequestHandler<GetAppointmentDetailsQuery, Result<AppointmentDetailsResponse, Error>>
 {
-    public async Task<Result<AppointmentDetailsDto, Error>> Handle(GetAppointmentDetailsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<AppointmentDetailsResponse, Error>> Handle(GetAppointmentDetailsQuery request, CancellationToken cancellationToken)
     {
 
         var appointment = await appointmentRepository.GetByIdWithDetailsAsync(request.AppointmentId, cancellationToken);
@@ -28,7 +29,7 @@ public class GetAppointmentDetailsHandler(
             return Errors.Appointment.NotFound(appointment.Id);
         }
 
-        var dto = new AppointmentDetailsDto(
+        var dto = new AppointmentDetailsResponse(
             appointment.Id,
             appointment.StartTime,
             appointment.EndTime,

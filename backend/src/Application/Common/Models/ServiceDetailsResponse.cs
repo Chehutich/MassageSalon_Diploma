@@ -1,6 +1,6 @@
 namespace Application.Common.Models;
 
-public record ServiceDetailResponse(
+public record ServiceDetailsResponse(
     Guid Id,
     string Title,
     string? Description,

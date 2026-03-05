@@ -44,13 +44,10 @@ public static class AppointmentEndpoints
             .WithDescription("Retrieves full details for a specific appointment.");
 
         group.MapGet("/available-slots", async (
-                Guid serviceId,
-                DateTime date,
-                Guid? masterId,
+                [AsParameters] GetAvailableSlotsQuery query,
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                var query = new GetAvailableSlotsQuery(masterId, serviceId, date);
                 var result = await sender.Send(query, cancellationToken);
 
                 return Results.Ok(result.Value);
@@ -63,6 +60,11 @@ public static class AppointmentEndpoints
                 CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(command, cancellationToken);
+
+                if (result.IsFailure)
+                {
+                    return result.ToProblemDetails();
+                }
 
                 var detailsQuery = new GetAppointmentDetailsQuery(result.Value);
                 var detailsResult = await sender.Send(detailsQuery, cancellationToken);

@@ -36,7 +36,7 @@ public class GetServiceByIdHandlerTests
 
         _serviceRepoMock.Setup(x => x.GetByIdAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(service);
-        _masterRepoMock.Setup(x => x.GetAllAsync(serviceId, It.IsAny<CancellationToken>()))
+        _masterRepoMock.Setup(x => x.GetAllWithDetailsAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Master> { master });
 
         // Act
@@ -65,7 +65,7 @@ public class GetServiceByIdHandlerTests
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Service.NotFound");
 
-        _masterRepoMock.Verify(x => x.GetAllAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _masterRepoMock.Verify(x => x.GetAllWithDetailsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public class GetServiceByIdHandlerTests
         _serviceRepoMock.Setup(x => x.GetByIdAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(service);
 
-        _masterRepoMock.Setup(x => x.GetAllAsync(serviceId, It.IsAny<CancellationToken>()))
+        _masterRepoMock.Setup(x => x.GetAllWithDetailsAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Master>());
 
         // Act

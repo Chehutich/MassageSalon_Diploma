@@ -105,7 +105,7 @@ public class SlotServiceTests
         var service = BuildService(serviceId, 60);
 
         _serviceRepoMock.Setup(x => x.GetByIdAsync(serviceId, It.IsAny<CancellationToken>())).ReturnsAsync(service);
-        _masterRepoMock.Setup(x => x.GetMastersByServiceAsync(serviceId, It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        _masterRepoMock.Setup(x => x.GetAllWithDetailsAsync(serviceId, It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
         var result = await _slotService.GetAvailableSlotsAsync(null, serviceId, DateTime.UtcNow.AddDays(1));
 
@@ -212,7 +212,7 @@ public class SlotServiceTests
         var master2 = BuildMaster(Guid.NewGuid());
 
         _serviceRepoMock.Setup(x => x.GetByIdAsync(serviceId, It.IsAny<CancellationToken>())).ReturnsAsync(service);
-        _masterRepoMock.Setup(x => x.GetMastersByServiceAsync(serviceId, It.IsAny<CancellationToken>()))
+        _masterRepoMock.Setup(x => x.GetAllWithDetailsAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync([master1, master2]);
 
         SetupMasterSchedule(master1.Id, date, new TimeOnly(10, 0), new TimeOnly(11, 0));

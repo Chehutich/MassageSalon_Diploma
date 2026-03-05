@@ -7,10 +7,21 @@ namespace Infrastructure.Persistence.Repos;
 
 public class MasterRepository(ApplicationDbContext context) : IMasterRepository
 {
-    public async Task<List<Master>> GetAllAsync(Guid? serviceId = null, CancellationToken cancellationToken = default)
+    public async Task<Master?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await context.Masters
+            .Include(m => m.User)
+            .Include(m => m.Services)
+            .ThenInclude(s => s.Category)
+            .FirstOrDefaultAsync(m => m.Id == id && m.IsActive, cancellationToken);
+    }
+
+    public async Task<List<Master>> GetAllWithDetailsAsync(Guid? serviceId = null, CancellationToken cancellationToken = default)
     {
         var query = context.Masters
             .Include(m => m.User)
+            .Include(m => m.Services)
+            .ThenInclude(s => s.Category)
             .Where(m => m.IsActive);
 
         if (serviceId.HasValue)
@@ -41,15 +52,6 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
                 cancellationToken);
     }
 
-    public async Task<List<Master>> GetMastersByServiceAsync(Guid serviceId, CancellationToken cancellationToken = default)
-    {
-        return await context.Masters
-            .Include(m => m.Services)
-            .Include(m => m.User)
-            .Where(m => m.Services.Any(s => s.Id == serviceId)) // If master has this service
-            .ToListAsync(cancellationToken);
-    }
-
     public async Task<bool> IsOnTimeOffAsync(Guid masterId,
         DateTime date,
         CancellationToken cancellationToken = default)
@@ -70,11 +72,6 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
         Guid? excludeAppointmentId = null,
         CancellationToken cancellationToken = default)
     {
-        if (start.Minute % 30 != 0)
-        {
-            return false;
-        }
-
         // Check our working schedule
         var dbDayOfWeek = start.DayOfWeek;
         var startTime = TimeOnly.FromDateTime(start);

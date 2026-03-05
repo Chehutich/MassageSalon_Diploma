@@ -1,6 +1,7 @@
 using Application.Common.Constants;
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Repos;
+using Application.Common.Models;
 using Application.Features.Catalog.GetAvailableSlots;
 using Domain.Entities;
 
@@ -14,7 +15,7 @@ public class SlotService(
 {
     private const int TimeStepMinutes = 30;
 
-    public async Task<List<Slot>> GetAvailableSlotsAsync(Guid? masterId, Guid serviceId, DateTime date, CancellationToken cancellationToken = default)
+    public async Task<List<SlotResponse>> GetAvailableSlotsAsync(Guid? masterId, Guid serviceId, DateTime date, CancellationToken cancellationToken = default)
     {
         var service = await serviceRepository.GetByIdAsync(serviceId, cancellationToken);
         if (service == null)
@@ -22,27 +23,27 @@ public class SlotService(
             return new();
         }
 
-        List<Master> masters;
+        var masters = await masterRepository.GetAllWithDetailsAsync(serviceId, cancellationToken);
+
         if (masterId.HasValue)
         {
-            var master = await masterRepository.GetByIdAsync(masterId.Value, cancellationToken);
-            masters = master != null ? [master] : [];
-        }
-        else
-        {
-            masters = await masterRepository.GetMastersByServiceAsync(serviceId, cancellationToken);
+            masters = masters.Where(m => m.Id == masterId.Value).ToList();
+
+            if (masters.Count == 0)
+            {
+                return new();
+            }
         }
 
-        var tempResults = new List<(MasterSlotDto Master, Slot RawSlot)>();
+        var tempResults = new List<(MasterShortResponse Master, SlotResponse RawSlot)>();
 
         foreach (var master in masters)
         {
-            var masterDto = new MasterSlotDto(
+            var masterDto = new MasterShortResponse(
                 master.Id,
                 master.User.FirstName,
                 master.User.LastName,
-                master.PhotoUrl,
-                master.Bio);
+                master.PhotoUrl);
 
             var masterSlots = await GetSlotsForMasterAsync(master.Id, service.Duration, date, cancellationToken);
 
@@ -54,7 +55,7 @@ public class SlotService(
 
         return tempResults
             .GroupBy(x => x.RawSlot.Start)
-            .Select(g => new Slot(
+            .Select(g => new SlotResponse(
                 g.Key,
                 g.First().RawSlot.End,
                 g.Select(x => x.Master).ToList()
@@ -63,7 +64,7 @@ public class SlotService(
             .ToList();
     }
 
-    private async Task<List<Slot>> GetSlotsForMasterAsync(
+    private async Task<List<SlotResponse>> GetSlotsForMasterAsync(
         Guid masterId,
         int durationMinutes,
         DateTime date,
@@ -87,7 +88,7 @@ public class SlotService(
         // Minimum booking time: 1 hour
         var minAllowedBookingTime = now.AddHours(1);
 
-        var slots = new List<Slot>();
+        var slots = new List<SlotResponse>();
 
         var dayDateUtc = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
         var currentStart = dayDateUtc.Add(schedule.StartTime.ToTimeSpan());
@@ -102,7 +103,7 @@ public class SlotService(
 
             if (!isOverlapping && currentStart >= minAllowedBookingTime)
             {
-                slots.Add(new Slot(currentStart, currentEnd));
+                slots.Add(new SlotResponse(currentStart, currentEnd));
             }
 
             currentStart = currentStart.AddMinutes(TimeStepMinutes);

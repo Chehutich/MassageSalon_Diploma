@@ -1,10 +1,11 @@
+using Application.Common.Models;
 using Application.Features.Catalog.GetAvailableSlots;
 
 namespace Application.Common.Interfaces;
 
 public interface ISlotService
 {
-    Task<List<Slot>> GetAvailableSlotsAsync(
+    Task<List<SlotResponse>> GetAvailableSlotsAsync(
         Guid? masterId,
         Guid serviceId,
         DateTime date,

@@ -146,7 +146,7 @@ public class CreateAppointmentHandlerTests
         _userContextMock.Setup(x => x.Id).Returns(clientId);
         _serviceRepoMock.Setup(x => x.GetByIdAsync(serviceId, It.IsAny<CancellationToken>())).ReturnsAsync(service);
 
-        _masterRepoMock.Setup(x => x.GetMastersByServiceAsync(serviceId, It.IsAny<CancellationToken>()))
+        _masterRepoMock.Setup(x => x.GetAllWithDetailsAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(masters);
 
         _masterRepoMock.Setup(x =>
@@ -179,7 +179,7 @@ public class CreateAppointmentHandlerTests
         var masters = new List<Master> { BuildMaster(Guid.NewGuid()) };
 
         _serviceRepoMock.Setup(x => x.GetByIdAsync(serviceId, It.IsAny<CancellationToken>())).ReturnsAsync(service);
-        _masterRepoMock.Setup(x => x.GetMastersByServiceAsync(serviceId, It.IsAny<CancellationToken>()))
+        _masterRepoMock.Setup(x => x.GetAllWithDetailsAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(masters);
 
         _masterRepoMock.Setup(x => x.IsMasterAvailableAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(),

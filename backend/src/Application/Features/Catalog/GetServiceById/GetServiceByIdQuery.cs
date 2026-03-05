@@ -6,14 +6,14 @@ using MediatR;
 
 namespace Application.Features.Catalog.GetServiceById;
 
-public record GetServiceByIdQuery(Guid Id) : IRequest<Result<ServiceDetailResponse, Error>>;
+public record GetServiceByIdQuery(Guid Id) : IRequest<Result<ServiceDetailsResponse, Error>>;
 
 public class GetServiceByIdHandler(
     IServiceRepository serviceRepository,
     IMasterRepository masterRepository)
-    : IRequestHandler<GetServiceByIdQuery, Result<ServiceDetailResponse, Error>>
+    : IRequestHandler<GetServiceByIdQuery, Result<ServiceDetailsResponse, Error>>
 {
-    public async Task<Result<ServiceDetailResponse, Error>> Handle(GetServiceByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ServiceDetailsResponse, Error>> Handle(GetServiceByIdQuery request, CancellationToken cancellationToken)
     {
         var service = await serviceRepository.GetByIdAsync(request.Id, cancellationToken);
 
@@ -22,9 +22,9 @@ public class GetServiceByIdHandler(
             return Errors.Service.NotFound(request.Id);
         }
 
-        var mastersForService = await masterRepository.GetAllAsync(service.Id, cancellationToken);
+        var mastersForService = await masterRepository.GetAllWithDetailsAsync(service.Id, cancellationToken);
 
-        var response = new ServiceDetailResponse(
+        var response = new ServiceDetailsResponse(
             service.Id,
             service.Title,
             service.Description,

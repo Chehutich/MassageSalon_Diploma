@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Application.Common.Models;
 using Application.Features.Catalog.GetAvailableSlots;
 using CSharpFunctionalExtensions;
 using FluentAssertions;
@@ -23,7 +24,7 @@ public class GetAvailableSlotsQueryHandlerTests
         // Arrange
         var query = new GetAvailableSlotsQuery(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.Date);
 
-        var expectedSlots = new List<Slot>();
+        var expectedSlots = new List<SlotResponse>();
 
         _slotServiceMock
             .Setup(x => x.GetAvailableSlotsAsync(
