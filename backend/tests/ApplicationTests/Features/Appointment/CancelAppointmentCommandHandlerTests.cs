@@ -5,6 +5,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Errors;
 using FluentAssertions;
+using MediatR;
 using Moq;
 
 namespace ApplicationTests.Features.Appointment;
@@ -103,7 +104,7 @@ public class CancelAppointmentCommandHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().Be(appointmentId);
+        result.Value.Should().Be(Unit.Value);
 
         appointment.Status.Should().Be(AppointmentStatus.Cancelled);
 

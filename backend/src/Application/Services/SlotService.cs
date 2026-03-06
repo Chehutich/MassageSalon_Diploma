@@ -23,7 +23,7 @@ public class SlotService(
             return new();
         }
 
-        var masters = await masterRepository.GetAllWithDetailsAsync(serviceId, cancellationToken);
+        var masters = await masterRepository.GetAllWithDetailsAsync(serviceId, cancellationToken) ?? new List<Master>();
 
         if (masterId.HasValue)
         {
