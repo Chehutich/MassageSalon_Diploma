@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Features.Catalog.GetCategories;
 using MediatR;
 
@@ -9,6 +10,7 @@ public static class CategoryEndpoints
     {
         var group = app.MapGroup("/api/categories")
             .WithTags("Categories")
+            .ProducesProblem(401)
             .RequireAuthorization();
 
         group.MapGet("", async (ISender sender, CancellationToken cancellationToken) =>
@@ -17,6 +19,7 @@ public static class CategoryEndpoints
 
                 return Results.Ok(result.Value);
             })
+            .Produces<List<CategoryResponse>>()
             .WithName("GetCategories")
             .WithDescription("Retrieves a list of all service categories.");
 

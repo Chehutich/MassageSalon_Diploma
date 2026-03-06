@@ -6,15 +6,15 @@ using MediatR;
 
 namespace Application.Features.Appointments.CancelAppointment;
 
-public record CancelAppointmentCommand(Guid AppointmentId) : IRequest<Result<Guid, Error>>;
+public record CancelAppointmentCommand(Guid AppointmentId) : IRequest<Result<Unit, Error>>;
 
 public class CancelAppointmentCommandHandler(
     IAppointmentRepository appointmentRepository,
     IUnitOfWork unitOfWork,
     ICurrentUserContext userContext,
-    TimeProvider timeProvider) : IRequestHandler<CancelAppointmentCommand, Result<Guid, Error>>
+    TimeProvider timeProvider) : IRequestHandler<CancelAppointmentCommand, Result<Unit, Error>>
 {
-    public async Task<Result<Guid, Error>> Handle(CancelAppointmentCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Unit, Error>> Handle(CancelAppointmentCommand request, CancellationToken cancellationToken)
     {
         var appointment = await appointmentRepository.GetByIdAsync(request.AppointmentId, cancellationToken);
         if (appointment == null)
@@ -36,6 +36,6 @@ public class CancelAppointmentCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return appointment.Id;
+        return Unit.Value;
     }
 }

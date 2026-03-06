@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Features.Masters.GetMasterDetails;
 using Application.Features.Masters.GetMasters;
 using MediatR;
@@ -10,6 +11,7 @@ public static class MastersEndpoints
     {
         var group = app.MapGroup("/api/masters")
             .WithTags("Masters")
+            .ProducesProblem(401)
             .RequireAuthorization();
 
         group.MapGet("", async (
@@ -21,6 +23,7 @@ public static class MastersEndpoints
 
                 return Results.Ok(result.Value);
             })
+            .Produces<List<MasterResponse>>()
             .WithName("Get Masters")
             .WithDescription("Retrieves a list of masters.");
 
@@ -36,6 +39,8 @@ public static class MastersEndpoints
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             })
+            .Produces<MasterDetailsResponse>()
+            .ProducesProblem(404)
             .WithName("Get Master Details")
             .WithDescription("Retrieves detailed information about a specific master by its unique ID.");
 

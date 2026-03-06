@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Features.Appointments.CancelAppointment;
 using Application.Features.Appointments.CreateAppointment;
 using Application.Features.Appointments.GetAppointmentDetails;
@@ -14,6 +15,8 @@ public static class AppointmentEndpoints
     {
         var group = app.MapGroup("/api/appointments")
             .WithTags("Appointments")
+            .ProducesProblem(401)
+            .ProducesProblem(400)
             .RequireAuthorization();
 
         group.MapGet("/my", async (
@@ -25,6 +28,7 @@ public static class AppointmentEndpoints
 
                 return Results.Ok(result.Value);
             })
+            .Produces<List<MyAppointmentResponse>>()
             .WithName("GetMyAppointments")
             .WithDescription("Retrieves all appointments for the current user.");
 
@@ -40,6 +44,8 @@ public static class AppointmentEndpoints
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             })
+            .Produces<AppointmentDetailsResponse>()
+            .ProducesProblem(404)
             .WithName("GetAppointmentDetails")
             .WithDescription("Retrieves full details for a specific appointment.");
 
@@ -52,6 +58,7 @@ public static class AppointmentEndpoints
 
                 return Results.Ok(result.Value);
             })
+            .Produces<List<SlotResponse>>()
             .WithName("GetAvailableSlots")
             .WithDescription("Retrieves a list of available time slots for a specific master and service on a given date.");
 
@@ -74,6 +81,9 @@ public static class AppointmentEndpoints
                     detailsResult.Value
                 );
             })
+            .Produces<AppointmentDetailsResponse>()
+            .ProducesProblem(404)
+            .ProducesProblem(409)
             .WithName("CreateAppointment")
             .WithDescription("Books a new appointment for a specific service and master.");
 
@@ -94,10 +104,21 @@ public static class AppointmentEndpoints
 
                 var result = await sender.Send(command, cancellationToken);
 
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : result.ToProblemDetails();
+                if (result.IsFailure)
+                {
+                    return result.ToProblemDetails();
+                }
+
+                var details = await sender.Send(
+                    new GetAppointmentDetailsQuery(result.Value), cancellationToken);
+
+                return details.IsSuccess
+                    ? Results.Ok(details.Value)
+                    : details.ToProblemDetails();
             })
+            .Produces<AppointmentDetailsResponse>()
+            .ProducesProblem(404)
+            .ProducesProblem(409)
             .WithName("RescheduleAppointment")
             .WithDescription("Reschedules an existing appointment to a new time. Must be done at least 24 hours in advance.");
 
@@ -110,9 +131,11 @@ public static class AppointmentEndpoints
                 var result = await sender.Send(command, cancellationToken);
 
                 return result.IsSuccess
-                    ? Results.Ok(result.Value)
+                    ? Results.NoContent()
                     : result.ToProblemDetails();
             })
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(404)
             .WithName("CancelAppointment")
             .WithDescription("Cancels an existing appointment. Must be done at least 1 hour in advance.");
 

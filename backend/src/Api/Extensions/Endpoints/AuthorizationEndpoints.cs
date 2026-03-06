@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Features.Auth.Login;
 using Application.Features.Auth.RefreshToken;
 using Application.Features.Auth.Register;
@@ -15,36 +16,49 @@ public static class AuthorizationEndpoints
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/auth")
+            .ProducesProblem(400)
             .WithTags("Auth");
 
-        group.MapPost("/register", async (RegisterCommand command, ISender sender, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(command, cancellationToken);
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : result.ToProblemDetails();
-            })
+        group.MapPost("/register",
+                async (RegisterCommand command, ISender sender, CancellationToken cancellationToken) =>
+                {
+                    var result = await sender.Send(command, cancellationToken);
+                    return result.IsSuccess
+                        ? Results.Ok(result.Value)
+                        : result.ToProblemDetails();
+                })
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(409)
+            .AllowAnonymous()
             .WithName("RegisterUser")
             .WithDescription("Registers a new user.");
 
-        group.MapPost("/login", async (LoginCommand command, ISender sender, HttpContext context, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(command, cancellationToken);
-                if (result.IsFailure)
+        group.MapPost("/login",
+                async (LoginCommand command,
+                    ISender sender,
+                    HttpContext context,
+                    CancellationToken cancellationToken) =>
                 {
-                    return result.ToProblemDetails();
-                }
+                    var result = await sender.Send(command, cancellationToken);
+                    if (result.IsFailure)
+                    {
+                        return result.ToProblemDetails();
+                    }
 
-                AppendAuthCookies(context, result.Value.Token, result.Value.RefreshToken);
+                    AppendAuthCookies(context, result.Value.Token, result.Value.RefreshToken);
 
-                return Results.Ok(new { result.Value.Id, result.Value.FirstName, result.Value.Email });
-            })
+                    return Results.Ok(new AuthResponse(result.Value.Id, result.Value.FirstName, result.Value.Email,
+                        result.Value.Token, result.Value.RefreshToken));
+                })
+            .Produces<AuthResponse>()
+            .ProducesProblem(401)
+            .AllowAnonymous()
             .WithName("LoginUser")
             .WithDescription("Authenticates a user and issues JWT tokens via HTTP-only cookies.");
 
         group.MapPost("/refresh", async (ISender sender, HttpContext context, CancellationToken cancellationToken) =>
             {
-                var accessToken = context.Request.Cookies["accessToken"] ?? string.Empty;;
+                var accessToken = context.Request.Cookies["accessToken"] ?? string.Empty;
                 var refreshToken = context.Request.Cookies["refreshToken"];
 
                 if (string.IsNullOrEmpty(refreshToken))
@@ -63,9 +77,35 @@ public static class AuthorizationEndpoints
 
                 return Results.Ok();
             })
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(401)
             .AllowAnonymous()
             .WithName("RefreshToken")
             .WithDescription("Refreshes the authentication tokens using the refresh token from cookies.");
+
+        group.MapPost("/refresh-mobile",
+            async (RefreshTokenCommand command, ISender sender, CancellationToken cancellationToken) =>
+            {
+                if (string.IsNullOrEmpty(command.RefreshToken))
+                {
+                    return Results.Unauthorized();
+                }
+
+                var result = await sender.Send(new RefreshTokenCommand(command.AccessToken, command.RefreshToken), cancellationToken);
+
+                if (result.IsFailure)
+                {
+                    return result.ToProblemDetails();
+                }
+
+                return Results.Ok(result.Value);
+            })
+            .Produces<AuthResponse>()
+            .ProducesProblem(401)
+            .AllowAnonymous()
+            .WithName("RefreshTokenForMobile")
+            .WithDescription("Refreshes the authentication tokens using the refresh token from body.");
+
 
         group.MapGet("/me", async (ISender sender, CancellationToken cancellationToken) =>
             {
@@ -74,39 +114,57 @@ public static class AuthorizationEndpoints
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             })
+            .Produces<UserMeResponse>()
+            .ProducesProblem(404)
+            .ProducesProblem(401)
             .WithName("GetMe")
             .WithDescription("Retrieves the profile information of the currently authenticated user.")
             .RequireAuthorization();
 
-        group.MapPut("/change-email", async (ChangeEmailCommand command, ISender sender, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(command, cancellationToken);
-                return result.IsSuccess
-                    ? Results.Ok()
-                    : result.ToProblemDetails();
-            })
+        group.MapPut("/change-email",
+                async (ChangeEmailCommand command, ISender sender, CancellationToken cancellationToken) =>
+                {
+                    var result = await sender.Send(command, cancellationToken);
+                    return result.IsSuccess
+                        ? Results.Ok()
+                        : result.ToProblemDetails();
+                })
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(409)
+            .ProducesProblem(401)
+            .ProducesProblem(404)
             .WithName("ChangeEmail")
             .WithDescription("Updates the email address of the currently authenticated user.")
             .RequireAuthorization();
 
-        group.MapPut("/change-password", async (ChangePasswordCommand command, ISender sender, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(command, cancellationToken);
-                return result.IsSuccess
-                    ? Results.Ok()
-                    : result.ToProblemDetails();
-            })
+        group.MapPut("/change-password",
+                async (ChangePasswordCommand command, ISender sender, CancellationToken cancellationToken) =>
+                {
+                    var result = await sender.Send(command, cancellationToken);
+                    return result.IsSuccess
+                        ? Results.Ok()
+                        : result.ToProblemDetails();
+                })
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(400)
+            .ProducesProblem(401)
+            .ProducesProblem(404)
             .WithName("ChangePassword")
             .WithDescription("Updates the password of the currently authenticated user.")
             .RequireAuthorization();
 
-        group.MapPut("/change-phone", async (ChangePhoneCommand command, ISender sender, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(command, cancellationToken);
-                return result.IsSuccess
-                    ? Results.Ok()
-                    : result.ToProblemDetails();
-            })
+        group.MapPut("/change-phone",
+                async (ChangePhoneCommand command, ISender sender, CancellationToken cancellationToken) =>
+                {
+                    var result = await sender.Send(command, cancellationToken);
+                    return result.IsSuccess
+                        ? Results.Ok()
+                        : result.ToProblemDetails();
+                })
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(400)
+            .ProducesProblem(401)
+            .ProducesProblem(404)
             .WithName("ChangePhone")
             .WithDescription("Updates the phone number of the currently authenticated user.")
             .RequireAuthorization();
@@ -121,6 +179,7 @@ public static class AuthorizationEndpoints
 
                 return Results.Ok();
             })
+            .Produces(StatusCodes.Status200OK)
             .WithName("Logout")
             .WithDescription("Logs out the current user and clears authentication cookies.");
 

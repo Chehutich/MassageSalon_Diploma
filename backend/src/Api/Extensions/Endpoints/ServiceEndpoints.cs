@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Features.Catalog.GetServiceById;
 using Application.Features.Catalog.GetServices;
 using MediatR;
@@ -10,6 +11,7 @@ public static class ServiceEndpoints
     {
         var group = app.MapGroup("/api/services")
             .WithTags("Services")
+            .ProducesProblem(401)
             .RequireAuthorization();
 
         group.MapGet("/", async (ISender sender, CancellationToken cancellationToken) =>
@@ -20,6 +22,7 @@ public static class ServiceEndpoints
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             })
+            .Produces<List<ServiceResponse>>()
             .WithName("GetServices")
             .WithDescription("Retrieves a list of all available services.");
 
@@ -31,6 +34,8 @@ public static class ServiceEndpoints
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             })
+            .Produces<ServiceResponse>()
+            .ProducesProblem(404)
             .WithName("GetServiceById")
             .WithDescription("Retrieves detailed information about a specific service by its unique ID.");
 

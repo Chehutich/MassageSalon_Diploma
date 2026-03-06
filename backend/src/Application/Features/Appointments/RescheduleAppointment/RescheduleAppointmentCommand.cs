@@ -8,7 +8,7 @@ namespace Application.Features.Appointments.RescheduleAppointment;
 
 public record RescheduleAppointmentCommand(
     Guid AppointmentId,
-    DateTime NewStartTime) : IRequest<Result<Guid, Error>>;
+    DateTime NewStartTime) : IRequest<Result<Guid, Error>>; // TODO: change to Result<AppointmentDetails, Error>
 
 public class RescheduleAppointmentCommandHandler(
     IAppointmentRepository appointmentRepository,

@@ -1,6 +1,6 @@
-namespace Application.Features.Appointments.GetMyAppointments;
+namespace Application.Common.Models;
 
-public record MyAppointmentDto(
+public record MyAppointmentResponse(
     Guid Id,
     DateTime StartTime,
     DateTime EndTime,
