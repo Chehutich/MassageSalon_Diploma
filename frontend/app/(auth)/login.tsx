@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react-native";
+import * as SecureStore from "expo-secure-store";
 import { FontAwesome } from "@expo/vector-icons";
 import { Palette } from "../../src/theme/tokens";
 import { AmbientBackground } from "../../src/components/AmbientBackground";
@@ -29,8 +30,10 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     const newErrors: Record<string, string> = {};
+
     if (!email.trim()) newErrors.email = "Введіть email";
     else if (!EMAIL_REGEX.test(email)) newErrors.email = "Некоректний email";
+
     if (!password) newErrors.password = "Введіть пароль";
     else if (password.length < 8) newErrors.password = "Мінімум 8 символів";
     else if (!HAS_LETTER.test(password))
@@ -45,8 +48,10 @@ export default function LoginScreen() {
     login(
       { data: { email, password } },
       {
-        onSuccess: () => {
-          console.log("success");
+        onSuccess: async (data) => {
+          console.log("tokens to save:", data.token, data.refreshToken);
+          await SecureStore.setItemAsync("accessToken", data.token);
+          await SecureStore.setItemAsync("refreshToken", data.refreshToken);
           router.replace("/(home)");
         },
         onError: (e: any) => {

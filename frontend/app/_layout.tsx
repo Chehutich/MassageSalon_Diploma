@@ -6,6 +6,7 @@ import {
   DMSans_400Regular,
   DMSans_500Medium,
 } from "@expo-google-fonts/dm-sans";
+import { FontAwesome } from "@expo/vector-icons";
 import {
   CormorantGaramond_400Regular,
   CormorantGaramond_600SemiBold,
@@ -31,6 +32,7 @@ export default function RootLayout() {
     DMSans_500Medium,
     CormorantGaramond_400Regular,
     CormorantGaramond_600SemiBold,
+    ...FontAwesome.font,
   });
   const [ready, setReady] = useState(false);
 

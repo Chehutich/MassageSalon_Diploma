@@ -105,7 +105,6 @@ export const InputField = ({
 
   return (
     <View style={styles.outerContainer}>
-      {/* Обертка для тряски */}
       <Animated.View
         style={{ transform: [{ translateX: shakeAnim }], width: "100%" }}
       >
@@ -131,7 +130,7 @@ export const InputField = ({
             style={[
               styles.input,
               isFocused && styles.inputFocused,
-              isInvalid && styles.inputError, // Красная (розовая) рамка
+              isInvalid && styles.inputError,
               icon && { paddingLeft: 48 },
               rightElement && { paddingRight: 48 },
             ]}
@@ -152,7 +151,7 @@ export const InputField = ({
         </View>
       </Animated.View>
 
-      {/* Текст ошибки */}
+      {/* Error */}
       {isInvalid && errorText ? (
         <Text style={styles.errorText}>{errorText}</Text>
       ) : null}
