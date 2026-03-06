@@ -49,9 +49,9 @@ export default function HomeLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: "Home",
+          title: "Головна",
           tabBarIcon: ({ color, focused }) => (
             <Home size={20} strokeWidth={focused ? 2 : 1.6} color={color} />
           ),
@@ -60,7 +60,7 @@ export default function HomeLayout() {
       <Tabs.Screen
         name="appointments"
         options={{
-          title: "Sessions",
+          title: "Записи",
           tabBarIcon: ({ color, focused }) => (
             <Calendar size={20} strokeWidth={focused ? 2 : 1.6} color={color} />
           ),

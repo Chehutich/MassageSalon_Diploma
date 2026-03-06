@@ -1,9 +1,7 @@
 import React from "react";
-import { View, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Palette } from "../theme/tokens";
 import Svg, { Circle } from "react-native-svg";
-
-const { width } = Dimensions.get("window");
 
 export const AmbientBackground = () => (
   <View style={StyleSheet.absoluteFill}>

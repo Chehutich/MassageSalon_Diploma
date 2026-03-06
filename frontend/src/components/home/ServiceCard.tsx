@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Clock, Heart, Hand } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";

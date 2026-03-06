@@ -38,6 +38,7 @@ import { ServiceCard } from "@/src/components/home/ServiceCard";
 import { MasterCard } from "@/src/components/home/MasterCard";
 import { useGetMasters } from "@/src/api/generated/masters/masters";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { PLURAL, pluralize } from "@/src/utils/pluralize";
 
 export default function HomeScreen() {
   const [search, setSearch] = useState("");
@@ -241,30 +242,6 @@ export default function HomeScreen() {
             </View>
           )}
 
-          {!search && masters && masters.length > 0 && (
-            <View style={{ marginBottom: 22 }}>
-              <View style={[styles.sectionLabel, { paddingHorizontal: 24 }]}>
-                <Text style={styles.sectionTitle}>Наші майстри</Text>
-                <Pressable>
-                  <Text style={styles.sectionCount}>Всі →</Text>
-                </Pressable>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  paddingHorizontal: 24,
-                  gap: 12,
-                  marginTop: 12,
-                }}
-              >
-                {masters.map((master: MasterResponse) => (
-                  <MasterCard key={master.id} master={master} />
-                ))}
-              </ScrollView>
-            </View>
-          )}
-
           {/* ── Section label ── */}
           <View style={styles.sectionLabel}>
             <Text style={styles.sectionTitle}>
@@ -272,7 +249,7 @@ export default function HomeScreen() {
             </Text>
             {!search && (
               <Text style={styles.sectionCount}>
-                {grouped.length} категорій
+                {pluralize(grouped.length, PLURAL.category)}
               </Text>
             )}
           </View>
@@ -299,6 +276,30 @@ export default function HomeScreen() {
               ))
             )}
           </View>
+
+          {!search && masters && masters.length > 0 && (
+            <View style={{ marginTop: 22 }}>
+              <View style={[styles.sectionLabel, { paddingHorizontal: 24 }]}>
+                <Text style={styles.sectionTitle}>Наші майстри</Text>
+                <Pressable>
+                  <Text style={styles.sectionCount}>Всі →</Text>
+                </Pressable>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingHorizontal: 24,
+                  gap: 12,
+                  marginTop: 12,
+                }}
+              >
+                {masters.map((master: MasterResponse) => (
+                  <MasterCard key={master.id} master={master} />
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </ScrollView>
       </SafeAreaView>
     </View>

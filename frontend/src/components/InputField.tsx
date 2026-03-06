@@ -1,12 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Animated,
-  Easing,
-} from "react-native";
+import { View, Text, TextInput, StyleSheet, Animated } from "react-native";
 import { Palette } from "../theme/tokens";
 
 export const InputField = ({

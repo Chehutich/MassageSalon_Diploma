@@ -52,10 +52,13 @@ export default function LoginScreen() {
           console.log("tokens to save:", data.token, data.refreshToken);
           await SecureStore.setItemAsync("accessToken", data.token);
           await SecureStore.setItemAsync("refreshToken", data.refreshToken);
-          router.replace("/(home)");
+          router.replace("/(home)/home");
         },
         onError: (e: any) => {
           const status = e.response?.status;
+          console.log("status:", e.response?.status);
+          console.log("data:", JSON.stringify(e.response?.data));
+          console.log("message:", e.message);
 
           if (status === 400 || status === 401) {
             setErrors({ password: "Невірний email або пароль" });

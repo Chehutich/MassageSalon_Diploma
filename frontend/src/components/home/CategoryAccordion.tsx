@@ -9,6 +9,7 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { ServiceCard } from "./ServiceCard";
+import { PLURAL, pluralize } from "@/src/utils/pluralize";
 
 export function CategoryAccordion({
   cat,
@@ -47,7 +48,9 @@ export function CategoryAccordion({
         </View>
         <View style={styles.labelBox}>
           <Text style={styles.label}>{cat.label}</Text>
-          <Text style={styles.sub}>{cat.count} послуг доступно</Text>
+          <Text style={styles.sub}>
+            {pluralize(cat.count, PLURAL.service)} доступно
+          </Text>
         </View>
         <View
           style={[
