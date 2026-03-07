@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
 import { Palette } from "../../theme/tokens";
 import { LeafLogo } from "../LeafLogo";
 
@@ -8,27 +8,29 @@ type Props = {
   subtitle: string;
 };
 
-export const AuthHeader = ({ title, subtitle }: Props) => (
-  <View style={styles.header}>
-    <View style={styles.logoRow}>
-      <LeafLogo />
-      <View>
-        <Text style={styles.brandName}>SERENITY</Text>
-        <Text style={styles.brandTagline}>Massage & Wellness</Text>
+export const AuthHeader = ({ title, subtitle }: Props) => {
+  const { height } = useWindowDimensions();
+
+  return (
+    <View>
+      <View style={[styles.logoRow, { marginBottom: height * 0.08 }]}>
+        <LeafLogo />
+        <View>
+          <Text style={styles.brandName}>SERENITY</Text>
+          <Text style={styles.brandTagline}>Massage & Wellness</Text>
+        </View>
       </View>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
-    <Text style={styles.title}>{title}</Text>
-    <Text style={styles.subtitle}>{subtitle}</Text>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
-  header: { marginBottom: 28 },
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    marginBottom: 28,
   },
   brandName: {
     fontSize: 11,

@@ -63,10 +63,8 @@ export default function RootLayout() {
               animation: "fade_from_bottom",
             }}
           >
-            <Stack.Screen name="(auth)/forgot" />
-            <Stack.Screen name="(auth)/login" />
-            <Stack.Screen name="(auth)/register" />
-            <Stack.Screen name="(home)/index" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(home)" />
           </Stack>
         </KeyboardProvider>
       </SafeAreaProvider>

@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Palette } from "../theme/tokens";
+import { Palette } from "../../theme/tokens";
 
 export const OrDivider = () => (
   <View style={styles.dividerContainer}>

@@ -1,15 +1,24 @@
-import React from "react";
-import { Pressable, Text, StyleSheet, Animated } from "react-native";
+import React, { useRef } from "react";
+import {
+  Pressable,
+  Text,
+  StyleSheet,
+  Animated,
+  ActivityIndicator,
+  View,
+} from "react-native";
 import { Palette, Shadows } from "../theme/tokens";
 
-export const PressButton = ({ title, onPress, loading }: any) => {
-  const scale = new Animated.Value(1);
+export const PressButton = ({ title, onPress, loading, disabled }: any) => {
+  const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
-    Animated.spring(scale, { toValue: 0.98, useNativeDriver: true }).start();
+    if (loading || disabled) return;
+    Animated.spring(scale, { toValue: 0.96, useNativeDriver: true }).start();
   };
 
   const handlePressOut = () => {
+    if (loading || disabled) return;
     Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
   };
 
@@ -19,13 +28,18 @@ export const PressButton = ({ title, onPress, loading }: any) => {
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={onPress}
+        disabled={loading || disabled}
         style={({ pressed }) => [
           styles.button,
-          { opacity: pressed ? 0.9 : 1 },
+          { opacity: pressed || loading || disabled ? 0.8 : 1 },
           Shadows.button,
         ]}
       >
-        <Text style={styles.text}>{loading ? "Connecting..." : title}</Text>
+        {loading ? (
+          <ActivityIndicator color={Palette.espresso} size="small" />
+        ) : (
+          <Text style={styles.text}>{title}</Text>
+        )}
       </Pressable>
     </Animated.View>
   );
@@ -38,11 +52,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
+    flexDirection: "row",
   },
   text: {
     color: Palette.espresso,
     fontSize: 16,
-    fontWeight: "600",
     fontFamily: "DMSans_500Medium",
   },
 });

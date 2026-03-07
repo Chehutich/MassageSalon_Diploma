@@ -7,12 +7,11 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react-native";
 import * as SecureStore from "expo-secure-store";
 import { FontAwesome } from "@expo/vector-icons";
 import { Palette } from "../../src/theme/tokens";
-import { AmbientBackground } from "../../src/components/AmbientBackground";
 import { PressButton } from "../../src/components/PressButton";
 import { InputField } from "../../src/components/InputField";
 import { AuthHeader } from "../../src/components/auth/AuthHeader";
 import { AuthFooter } from "../../src/components/auth/AuthFooter";
-import { SocialBtn, OrDivider } from "../../src/components/SocialAuth";
+import { SocialBtn, OrDivider } from "../../src/components/auth/SocialAuth";
 import {
   EMAIL_REGEX,
   HAS_LETTER,
@@ -71,17 +70,16 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Palette.ivory }}>
-      <AmbientBackground />
-      <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-        <KeyboardAwareScrollView
-          bottomOffset={24}
-          bounces={false}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <View style={styles.inner}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+      <KeyboardAwareScrollView
+        bottomOffset={24}
+        bounces={false}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <View style={styles.inner}>
+          <View style={styles.top}>
             <AuthHeader
               title={"Ласкаво\nпросимо."}
               subtitle="Увійдіть, щоб керувати своїми записами"
@@ -139,7 +137,9 @@ export default function LoginScreen() {
                 }
               />
 
-              <TouchableOpacity onPress={() => router.push("/(auth)/forgot")}>
+              <TouchableOpacity
+                onPress={() => router.replace("/(auth)/forgot")}
+              >
                 <Text style={styles.forgotPassword}>Забули пароль?</Text>
               </TouchableOpacity>
 
@@ -173,9 +173,9 @@ export default function LoginScreen() {
               />
             </View>
           </View>
-        </KeyboardAwareScrollView>
-      </SafeAreaView>
-    </View>
+        </View>
+      </KeyboardAwareScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -183,8 +183,12 @@ const styles = StyleSheet.create({
   inner: {
     flex: 1,
     paddingHorizontal: 28,
-    paddingTop: 10,
+    paddingTop: 24,
     paddingBottom: 36,
+    justifyContent: "space-between",
+  },
+  top: {
+    gap: 18,
   },
   form: { gap: 18 },
   forgotPassword: {
@@ -193,5 +197,5 @@ const styles = StyleSheet.create({
     color: Palette.taupe,
     fontFamily: "DMSans_500Medium",
   },
-  socialRow: { flexDirection: "row", gap: 12, marginTop: 8 },
+  socialRow: { flexDirection: "row", gap: 12 },
 });

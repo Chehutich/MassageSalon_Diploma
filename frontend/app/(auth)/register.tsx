@@ -96,65 +96,62 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Palette.ivory }}>
-      <AmbientBackground />
-      <KeyboardAwareScrollView
-        bottomOffset={24}
-        bounces={false}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        <View style={styles.inner}>
-          {step < 3 && (
-            <>
-              <AuthHeader
-                title={STEP_CONFIG[step as 1 | 2].title}
-                subtitle={STEP_CONFIG[step as 1 | 2].subtitle}
-              />
-              <View style={styles.stepRow}>
-                <StepDot num={1} active={step === 1} done={step > 1} />
-                <StepLine done={step > 1} />
-                <StepDot num={2} active={step === 2} done={step > 2} />
-                <Text style={styles.stepLabel}>Крок {step} з 2</Text>
-              </View>
-            </>
-          )}
+    <KeyboardAwareScrollView
+      bottomOffset={24}
+      bounces={false}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
+      <View style={styles.inner}>
+        {step < 3 && (
+          <>
+            <AuthHeader
+              title={STEP_CONFIG[step as 1 | 2].title}
+              subtitle={STEP_CONFIG[step as 1 | 2].subtitle}
+            />
+            <View style={styles.stepRow}>
+              <StepDot num={1} active={step === 1} done={step > 1} />
+              <StepLine done={step > 1} />
+              <StepDot num={2} active={step === 2} done={step > 2} />
+              <Text style={styles.stepLabel}>Крок {step} з 2</Text>
+            </View>
+          </>
+        )}
 
-          <View style={{ flex: 1, marginTop: 20 }}>
-            {step === 1 && (
-              <Step1Form
-                data={personal}
-                errors={step1Errors}
-                onChange={handlePersonalChange}
-                onNext={handleNext1}
-              />
-            )}
-            {step === 2 && !loading && (
-              <Step2Form
-                data={security}
-                errors={step2Errors}
-                onChange={handleSecurityChange}
-                onNext={handleNext2}
-                onBack={handleBack}
-              />
-            )}
-            {step === 2 && loading && (
-              <LoadingSpinner label="Створюємо ваш акаунт…" />
-            )}
-            {step === 3 && <StepSuccess name={personal.first} />}
-          </View>
-
-          {step < 3 && (
-            <AuthFooter
-              text="Вже є акаунт? "
-              linkText="Увійти"
-              onPress={() => router.replace("/(auth)/login")}
+        <View style={{ flex: 1, marginTop: 20 }}>
+          {step === 1 && (
+            <Step1Form
+              data={personal}
+              errors={step1Errors}
+              onChange={handlePersonalChange}
+              onNext={handleNext1}
             />
           )}
+          {step === 2 && !loading && (
+            <Step2Form
+              data={security}
+              errors={step2Errors}
+              onChange={handleSecurityChange}
+              onNext={handleNext2}
+              onBack={handleBack}
+            />
+          )}
+          {step === 2 && loading && (
+            <LoadingSpinner label="Створюємо ваш акаунт…" />
+          )}
+          {step === 3 && <StepSuccess name={personal.first} />}
         </View>
-      </KeyboardAwareScrollView>
-    </View>
+
+        {step < 3 && (
+          <AuthFooter
+            text="Вже є акаунт? "
+            linkText="Увійти"
+            onPress={() => router.replace("/(auth)/login")}
+          />
+        )}
+      </View>
+    </KeyboardAwareScrollView>
   );
 }
 
