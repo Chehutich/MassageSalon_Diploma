@@ -32,7 +32,8 @@ public class GetMasterDetailsHandler(IMasterRepository masterRepository)
                 s.Description,
                 s.Duration,
                 s.Price,
-                s.Category.Title
+                s.Badge?.ToString(),
+                s.Category.Slug
             )).ToList()
         );
     }

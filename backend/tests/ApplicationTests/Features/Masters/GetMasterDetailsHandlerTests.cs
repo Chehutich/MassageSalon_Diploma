@@ -24,7 +24,7 @@ public class GetMasterDetailsHandlerTests
     {
         // Arrange
         var masterId = Guid.NewGuid();
-        var category = new Category("Massage");
+        var category = new Category("Massage", "massage");
         var service = new Service(Guid.NewGuid(), "Classic", "Description", 60, 1000m);
 
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service, category);
@@ -47,7 +47,7 @@ public class GetMasterDetailsHandlerTests
         result.Value.Id.Should().Be(masterId);
         result.Value.FirstName.Should().Be("Hanna");
         result.Value.Services.Should().HaveCount(1);
-        result.Value.Services.First().CategoryName.Should().Be("Massage");
+        result.Value.Services.First().CategorySlug.Should().Be("massage");
         result.Value.Services.First().Title.Should().Be("Classic");
     }
 

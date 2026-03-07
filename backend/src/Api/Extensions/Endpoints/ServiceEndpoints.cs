@@ -34,7 +34,7 @@ public static class ServiceEndpoints
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             })
-            .Produces<ServiceResponse>()
+            .Produces<ServiceDetailsResponse>()
             .ProducesProblem(404)
             .WithName("GetServiceById")
             .WithDescription("Retrieves detailed information about a specific service by its unique ID.");

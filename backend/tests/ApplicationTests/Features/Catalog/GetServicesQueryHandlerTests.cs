@@ -22,7 +22,7 @@ public class GetServicesQueryHandlerTests
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = new Category("Massage");
+        var category = new Category("Massage", "massage");
 
         var service = new Service(
             categoryId,
@@ -51,7 +51,7 @@ public class GetServicesQueryHandlerTests
 
         var response = result.Value.First();
         response.Title.Should().Be("Classical Massage");
-        response.CategoryName.Should().Be("Massage");
+        response.CategorySlug.Should().Be("massage");
         response.Price.Should().Be(1500m);
     }
 

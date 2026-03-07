@@ -27,6 +27,7 @@ CREATE TABLE masters (
 -- Catalog
 CREATE TABLE categories (
     id        UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug      VARCHAR(150) NOT NULL UNIQUE,
     title     VARCHAR(150) NOT NULL UNIQUE,
     is_active BOOLEAN      NOT NULL DEFAULT TRUE
 );
@@ -38,7 +39,9 @@ CREATE TABLE services (
     description TEXT,
     duration    INT            NOT NULL,
     price       DECIMAL(10,2)  NOT NULL,
-    is_active   BOOLEAN        NOT NULL DEFAULT TRUE
+    is_active   BOOLEAN        NOT NULL DEFAULT TRUE,
+    badge       VARCHAR(50)    DEFAULT NULL,
+    benefits    TEXT[]         NOT NULL DEFAULT '{}'
 );
 
 CREATE TABLE master_services (

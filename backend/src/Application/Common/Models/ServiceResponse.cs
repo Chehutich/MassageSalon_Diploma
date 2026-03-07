@@ -6,4 +6,5 @@ public record ServiceResponse(
     string? Description,
     int Duration,
     decimal Price,
-    string CategoryName);
+    string? Badge,
+    string CategorySlug);

@@ -32,6 +32,15 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .HasMaxLength(200)
             .HasColumnName("title");
 
+        builder.Property(e => e.Badge)
+            .HasMaxLength(50)
+            .HasConversion<string>()
+            .HasColumnName("badge");
+
+        builder.Property(e => e.Benefits)
+            .HasDefaultValueSql("'{}'::text[]")
+            .HasColumnName("benefits");
+
         builder.HasOne(d => d.Category).WithMany(p => p.Services)
             .HasForeignKey(d => d.CategoryId)
             .OnDelete(DeleteBehavior.Restrict)

@@ -14,12 +14,21 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.HasIndex(e => e.Title, "categories_title_key").IsUnique();
 
+        builder.HasIndex(e => e.Slug).IsUnique();
+
         builder.Property(e => e.Id)
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");
+
+        builder.Property(e => e.Slug)
+            .HasMaxLength(50)
+            .IsRequired()
+            .HasColumnName("slug");
+
         builder.Property(e => e.IsActive)
             .HasDefaultValue(true)
             .HasColumnName("is_active");
+
         builder.Property(e => e.Title)
             .HasMaxLength(150)
             .HasColumnName("title");

@@ -6,6 +6,8 @@ public record ServiceDetailsResponse(
     string? Description,
     int Duration,
     decimal Price,
-    string CategoryName,
+    string CategorySlug,
+    string? Badge,
+    List<string> Benefits,
     List<MasterShortResponse> Masters);
 

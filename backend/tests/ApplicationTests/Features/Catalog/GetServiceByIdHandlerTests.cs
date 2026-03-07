@@ -20,12 +20,12 @@ public class GetServiceByIdHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ReturnServiceWithMasters_WhenExists()
+    public async Task Handle_Should_ReturnServiceWithMastersAndBenefits_WhenExists()
     {
         // Arrange
         var serviceId = Guid.NewGuid();
-        var category = new Category("Body");
-        var service = new Service(Guid.NewGuid(), "Oil Massage", "Deep relax", 60, 2000m);
+        var category = new Category("Body", "massage");
+        var service = new Service(Guid.NewGuid(), "Oil Massage", "Deep relax", 60, 2000m, new List<string> { "Deep relax", "Relax" });
 
         typeof(Service).GetProperty(nameof(Service.Id))?.SetValue(service, serviceId);
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service, category);
@@ -45,6 +45,7 @@ public class GetServiceByIdHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Title.Should().Be("Oil Massage");
+        result.Value.Benefits.Should().HaveCount(2);
         result.Value.Masters.Should().HaveCount(1);
         result.Value.Masters.First().FirstName.Should().Be("John");
     }
@@ -73,7 +74,7 @@ public class GetServiceByIdHandlerTests
     {
         // Arrange
         var serviceId = Guid.NewGuid();
-        var category = new Category("Body");
+        var category = new Category("Body", "massage");
         var service = new Service(Guid.NewGuid(), "Zen Massage", "Relax", 60, 3000m);
 
         typeof(Service).GetProperty(nameof(Service.Id))?.SetValue(service, serviceId);

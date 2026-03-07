@@ -15,7 +15,7 @@ public class GetCategoriesQueryHandler(
     {
         var categories = await categoryRepository.GetAllActiveAsync(cancellationToken);
 
-        return categories.Select(c => new CategoryResponse(c.Id, c.Title))
+        return categories.Select(c => new CategoryResponse(c.Id, c.Slug))
             .ToList();
     }
 }

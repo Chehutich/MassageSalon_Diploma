@@ -21,7 +21,8 @@ public class GetServicesQueryHandler(IServiceRepository serviceRepository)
             s.Description,
             s.Duration,
             s.Price,
-            s.Category.Title)).ToList();
+            s.Badge?.ToString(),
+            s.Category.Slug)).ToList();
 
         return response;
     }

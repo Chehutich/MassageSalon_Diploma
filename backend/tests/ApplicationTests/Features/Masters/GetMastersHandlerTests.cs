@@ -22,7 +22,7 @@ public class GetMastersHandlerTests
     public async Task Handle_Should_ReturnMastersWithDistinctCategories_WhenMastersExist()
     {
         // Arrange
-        var category = new Category("Massage");
+        var category = new Category("Massage", "massage");
         var service1 = new Service(Guid.NewGuid(), "Tai", "...", 60, 1000m);
         var service2 = new Service(Guid.NewGuid(), "Health", "...", 60, 1200m);
 

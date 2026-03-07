@@ -45,9 +45,9 @@ public abstract class BaseRepositoryTest : IDisposable
         return master;
     }
 
-    protected async Task<Category> CreateCategoryAsync(string title = "General SPA", bool isActive = true)
+    protected async Task<Category> CreateCategoryAsync(string title = "General SPA", string slug = "spa", bool isActive = true)
     {
-        var category = new Category(title);
+        var category = new Category(title, slug);
         if (!isActive)
         {
             category.Deactivate();

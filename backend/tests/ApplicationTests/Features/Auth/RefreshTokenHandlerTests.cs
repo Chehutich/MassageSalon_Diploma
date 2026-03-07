@@ -89,6 +89,6 @@ public class RefreshTokenHandlerTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("Auth.InvalidAccessToken");
+        result.Error.Code.Should().Be("Auth.InvalidRefreshToken");
     }
 }

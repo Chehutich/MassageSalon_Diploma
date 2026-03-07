@@ -23,8 +23,8 @@ public class GetCategoriesQueryHandlerTests
         // Arrange
         var categories = new List<Category>
         {
-            new Category("Massage"),
-            new Category("Spa Procedures")
+            new Category("Massage", "Massage-"),
+            new Category("Spa Procedures", "sPA")
         };
 
         _categoryRepositoryMock
@@ -39,8 +39,8 @@ public class GetCategoriesQueryHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(2);
-        result.Value.Should().Contain(c => c.Title == "Massage");
-        result.Value.Should().Contain(c => c.Title == "Spa Procedures");
+        result.Value.Should().Contain(c => c.Slug == "massage");
+        result.Value.Should().Contain(c => c.Slug == "spa");
     }
 
     [Fact]

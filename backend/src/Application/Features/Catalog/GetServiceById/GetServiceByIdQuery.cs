@@ -30,7 +30,9 @@ public class GetServiceByIdHandler(
             service.Description,
             service.Duration,
             service.Price,
-            service.Category.Title,
+            service.Category.Slug,
+            service.Badge?.ToString(),
+            service.Benefits,
             mastersForService.Select(m => new MasterShortResponse(m.Id, m.User.FirstName, m.User.LastName, m.PhotoUrl)).ToList()
         );
 
