@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet, Image } from "react-native";
 import { Palette } from "@/src/theme/tokens";
 import type { MasterResponse } from "@/src/api/generated/apiV1.schemas";
+import { MasterAvatar } from "@/src/components/MasterAvatar";
 
 type Props = {
   master: MasterResponse;
@@ -15,15 +16,13 @@ export function MasterCard({ master, onPress }: Props) {
   return (
     <Pressable style={styles.card} onPress={onPress}>
       {/* Photo */}
-      {master.photoUrl ? (
-        <Image source={{ uri: master.photoUrl }} style={styles.avatar} />
-      ) : (
-        <View
-          style={[styles.avatarFallback, { backgroundColor: color + "22" }]}
-        >
-          <Text style={[styles.initials, { color }]}>{initials}</Text>
-        </View>
-      )}
+      <MasterAvatar
+        firstName={master.firstName}
+        lastName={master.lastName}
+        photoUrl={master.photoUrl}
+        size={56}
+        accent={color}
+      />
 
       {/* Name */}
       <Text style={styles.name} numberOfLines={1}>
@@ -36,7 +35,7 @@ export function MasterCard({ master, onPress }: Props) {
       {/* Specialty */}
       {master.serviceCategories?.length > 0 && (
         <Text style={styles.specialty} numberOfLines={1}>
-          {master.serviceCategories[0].title}
+          {master.serviceCategories[0].slug}
         </Text>
       )}
     </Pressable>

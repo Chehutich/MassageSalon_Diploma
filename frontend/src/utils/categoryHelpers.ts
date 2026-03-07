@@ -10,19 +10,35 @@ const COLORS: Record<string, string> = {
   energy: "#B8A9C9",
   relax: Palette.taupe,
   wellness: "#A8C5B5",
+  spa: "#A8C5B5",
 };
 
 const ICONS: Record<string, LucideIcon> = {
   massage: Leaf,
-  facial: Sparkles,
+  spa: Sparkles,
   body: Wind,
   energy: Zap,
   relax: Heart,
   wellness: Star,
 };
 
-export const categoryColor = (title: string) =>
-  COLORS[title.toLowerCase().split(" ")[0]] ?? Palette.taupe;
+export function categoryLabel(slug: string): string {
+  const map: Record<string, string> = {
+    massage: "Масаж",
+    facial: "Догляд за обличчям",
+    body: "Догляд за тілом",
+    nails: "Нігті",
+    hair: "Волосся",
+    spa: "Спа",
+  };
+  return map[slug] ?? slug;
+}
 
-export const categoryIcon = (title: string) =>
-  ICONS[title.toLowerCase().split(" ")[0]] ?? Leaf;
+export const categoryColor = (slug: string) =>
+  COLORS[slug.toLowerCase().split(" ")[0]] ?? Palette.taupe;
+
+export const categoryIcon = (slug: string): LucideIcon => {
+  console.log("slug:", slug); // ← подивись що приходить
+  const key = Object.keys(ICONS).find((k) => slug.toLowerCase().includes(k));
+  return key ? ICONS[key] : Leaf;
+};

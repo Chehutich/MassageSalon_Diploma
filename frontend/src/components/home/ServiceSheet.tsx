@@ -9,14 +9,18 @@ import {
   Modal,
   TouchableWithoutFeedback,
   PanResponder,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Clock, ChevronRight } from "lucide-react-native";
+import { Clock, ChevronRight, Sparkle } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
-import type { ServiceResponse } from "@/src/api/generated/apiV1.schemas";
+import { useGetServiceById } from "@/src/api/generated/services/services";
+import { MasterShortResponse } from "@/src/api/generated/apiV1.schemas";
+import { MasterAvatar } from "@/src/components/MasterAvatar";
+import { getBadgeConfig } from "@/src/utils/badgeHelpers";
 
 type Props = {
-  item: ServiceResponse | null;
+  itemId: string | null;
   accent: string;
   Icon?: React.ComponentType<{
     size: number;
@@ -29,10 +33,16 @@ type Props = {
 
 const SHEET_HEIGHT = 600;
 
-export function ServiceSheet({ item, accent, Icon, onClose, onBook }: Props) {
+export function ServiceSheet({ itemId, accent, Icon, onClose, onBook }: Props) {
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+
+  const { data: item, isLoading } = useGetServiceById(itemId ?? "", {
+    query: { enabled: !!itemId },
+  });
+
+  const badge = item ? getBadgeConfig(item.badge) : null;
 
   const slideIn = () => {
     Animated.parallel([
@@ -67,16 +77,15 @@ export function ServiceSheet({ item, accent, Icon, onClose, onBook }: Props) {
   };
 
   useEffect(() => {
-    if (item) {
+    if (itemId) {
       translateY.setValue(SHEET_HEIGHT);
       opacity.setValue(0);
       slideIn();
     }
-  }, [item]);
+  }, [itemId]);
 
   const handleClose = () => slideOut(onClose);
 
-  // Swipe down to dismiss
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -99,12 +108,12 @@ export function ServiceSheet({ item, accent, Icon, onClose, onBook }: Props) {
     }),
   ).current;
 
-  if (!item) return null;
+  if (!itemId) return null;
 
   return (
     <Modal
       transparent
-      visible={!!item}
+      visible={!!itemId}
       onRequestClose={handleClose}
       statusBarTranslucent
     >
@@ -123,52 +132,138 @@ export function ServiceSheet({ item, accent, Icon, onClose, onBook }: Props) {
           <View style={styles.handle} />
         </View>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.content}
-          scrollEventThrottle={16}
-        >
-          {/* Icon + Title */}
-          <View style={styles.topRow}>
-            <View style={[styles.iconBox, { backgroundColor: accent + "18" }]}>
-              {Icon && <Icon size={26} strokeWidth={1.4} color={accent} />}
-            </View>
-            <Text style={styles.name}>{item.title}</Text>
-          </View>
-
-          {/* Pills */}
-          <View style={styles.pills}>
-            <View style={styles.pill}>
-              <Clock size={13} strokeWidth={1.8} color={Palette.taupe} />
-              <Text style={styles.pillText}>{item.duration} хв</Text>
-            </View>
-            <View style={styles.pill}>
-              <Text style={styles.pillPrice}>{item.price} ₴</Text>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          {item.description && (
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Про процедуру</Text>
-              <Text style={styles.description}>{item.description}</Text>
-            </View>
-          )}
-
-          <View style={styles.divider} />
-
-          <Pressable
-            onPress={() => {
-              onBook?.();
-              handleClose();
-            }}
-            style={[styles.bookBtn, { backgroundColor: Palette.rose }]}
+        {isLoading || !item ? (
+          <ActivityIndicator
+            color={Palette.taupe}
+            style={{ marginVertical: 60 }}
+          />
+        ) : (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.content}
+            scrollEventThrottle={16}
           >
-            <Text style={styles.bookText}>Забронювати · {item.price} ₴</Text>
-            <ChevronRight size={18} strokeWidth={2} color={Palette.espresso} />
-          </Pressable>
-        </ScrollView>
+            {/* Icon + Title */}
+            <View style={styles.topRow}>
+              <View
+                style={[styles.iconBox, { backgroundColor: accent + "18" }]}
+              >
+                {Icon && <Icon size={26} strokeWidth={1.4} color={accent} />}
+              </View>
+              <Text style={styles.name}>{item.title}</Text>
+            </View>
+
+            {/* Pills */}
+            <View style={styles.pills}>
+              <View style={styles.pill}>
+                <Clock size={13} strokeWidth={1.8} color={Palette.taupe} />
+                <Text style={styles.pillText}>{item.duration} хв</Text>
+              </View>
+              <View style={styles.pill}>
+                <Text style={styles.pillPrice}>{item.price} ₴</Text>
+              </View>
+              {badge && (
+                <View
+                  style={[
+                    styles.pill,
+                    {
+                      backgroundColor: badge.bg,
+                      borderColor: badge.borderColor,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.pillText, { color: badge.color }]}>
+                    {badge.label}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.divider} />
+
+            {/* Description */}
+            {item.description && (
+              <View style={styles.section}>
+                <Text style={styles.sectionLabel}>Про процедуру</Text>
+                <Text style={styles.description}>{item.description}</Text>
+              </View>
+            )}
+
+            {/* Benefits */}
+            {item.benefits && item.benefits.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionLabel}>Переваги</Text>
+                <View style={{ gap: 8 }}>
+                  {item.benefits.map((b, i) => (
+                    <View key={i} style={styles.benefitRow}>
+                      <View
+                        style={[
+                          styles.benefitDot,
+                          { backgroundColor: accent + "18" },
+                        ]}
+                      >
+                        <Text style={[styles.benefitCheck, { color: accent }]}>
+                          <Sparkle size={11} strokeWidth={1.5} color={accent} />
+                        </Text>
+                      </View>
+                      <Text style={styles.benefitText}>{b}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Masters */}
+            {item.masters && item.masters.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionLabel}>Майстри</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{ marginHorizontal: -4 }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 10,
+                      paddingHorizontal: 4,
+                    }}
+                  >
+                    {item.masters.map((m: MasterShortResponse) => (
+                      <View key={m.id} style={styles.masterChip}>
+                        <MasterAvatar
+                          firstName={m.firstName}
+                          lastName={m.lastName}
+                          photoUrl={m.photoUrl}
+                          size={48}
+                          accent={accent}
+                        />
+                        <Text style={styles.masterName}>{m.firstName}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+            )}
+
+            <View style={styles.divider} />
+
+            {/* CTA */}
+            <Pressable
+              onPress={() => {
+                onBook?.();
+                handleClose();
+              }}
+              style={[styles.bookBtn, { backgroundColor: Palette.rose }]}
+            >
+              <Text style={styles.bookText}>Забронювати · {item.price} ₴</Text>
+              <ChevronRight
+                size={18}
+                strokeWidth={2}
+                color={Palette.espresso}
+              />
+            </Pressable>
+          </ScrollView>
+        )}
       </Animated.View>
     </Modal>
   );
@@ -262,6 +357,37 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     opacity: 0.88,
   },
+  benefitRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  benefitDot: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  benefitCheck: { fontSize: 11, fontFamily: "DMSans_500Medium" },
+  benefitText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: "DMSans_400Regular",
+    color: Palette.espresso,
+    opacity: 0.85,
+  },
+  masterChip: { alignItems: "center", gap: 6 },
+  masterAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  masterInitials: { fontSize: 15, fontFamily: "DMSans_500Medium" },
+  masterName: {
+    fontSize: 11.5,
+    fontFamily: "DMSans_400Regular",
+    color: Palette.taupe,
+  },
   bookBtn: {
     height: 58,
     borderRadius: 16,
@@ -269,11 +395,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    shadowColor: Palette.rose,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 6,
   },
   bookText: {
     fontSize: 16,

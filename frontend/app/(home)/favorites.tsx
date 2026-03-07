@@ -30,11 +30,11 @@ export default function FavoritesScreen() {
     if (!categories || !services) return [];
     return categories.map((cat: CategoryResponse) => ({
       id: cat.id,
-      label: cat.title,
-      color: categoryColor(cat.title),
-      icon: categoryIcon(cat.title),
+      label: cat.slug,
+      color: categoryColor(cat.slug),
+      icon: categoryIcon(cat.slug),
       items: services.filter(
-        (s: ServiceResponse) => s.categoryName === cat.title,
+        (s: ServiceResponse) => s.categorySlug === cat.slug,
       ),
     }));
   }, [categories, services]);

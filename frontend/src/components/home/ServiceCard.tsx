@@ -4,6 +4,7 @@ import { Clock, Heart, Hand } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { ServiceSheet } from "./ServiceSheet";
 import type { ServiceResponse } from "@/src/api/generated/apiV1.schemas";
+import { getBadgeConfig } from "@/src/utils/badgeHelpers";
 
 type Props = {
   item: ServiceResponse;
@@ -29,6 +30,7 @@ export function ServiceCard({
   const [booked, setBooked] = useState(false);
   const likeScale = useRef(new Animated.Value(1)).current;
   const [sheetOpen, setSheetOpen] = useState(false);
+  const badge = getBadgeConfig(item.badge);
 
   const handleLike = () => {
     Animated.sequence([
@@ -49,7 +51,12 @@ export function ServiceCard({
   };
 
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        badge && { borderColor: badge.borderColor, borderWidth: 1.5 },
+      ]}
+    >
       {/* ── Top: icon + name + like ── */}
       <Pressable style={styles.topRow} onPress={() => setSheetOpen(true)}>
         <View style={[styles.iconBox, { backgroundColor: accent + "18" }]}>
@@ -57,23 +64,9 @@ export function ServiceCard({
         </View>
 
         <View style={styles.info}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name} numberOfLines={1}>
-              {item.title}
-            </Text>
-            {/*{item.popular && (
-              <View
-                style={[
-                  styles.popularBadge,
-                  { backgroundColor: accent + "20" },
-                ]}
-              >
-                <Text style={[styles.popularText, { color: accent }]}>
-                  Popular
-                </Text>
-              </View>
-            )}*/}
-          </View>
+          <Text style={styles.name} numberOfLines={1}>
+            {item.title}
+          </Text>
           <View style={styles.meta}>
             <Clock
               size={11}
@@ -82,6 +75,25 @@ export function ServiceCard({
               style={{ opacity: 0.65 }}
             />
             <Text style={styles.metaText}>{item.duration} хв</Text>
+            {badge && (
+              <>
+                <Text style={styles.metaDot}>·</Text>
+                <View
+                  style={[
+                    styles.badge,
+                    {
+                      backgroundColor: badge.bg,
+                      borderWidth: 1,
+                      borderColor: badge.borderColor,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.badgeText, { color: badge.color }]}>
+                    {badge.label}
+                  </Text>
+                </View>
+              </>
+            )}
           </View>
         </View>
 
@@ -131,7 +143,7 @@ export function ServiceCard({
       </Pressable>
 
       <ServiceSheet
-        item={sheetOpen ? item : null}
+        itemId={sheetOpen ? item.id : null}
         accent={accent}
         Icon={Icon}
         onClose={() => setSheetOpen(false)}
@@ -169,24 +181,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   info: { flex: 1, minWidth: 0 },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    flexWrap: "wrap",
-  },
   name: {
     fontSize: 14,
     fontFamily: "DMSans_500Medium",
     color: Palette.espresso,
     lineHeight: 20,
   },
-  popularBadge: {
+  metaDot: {
+    fontSize: 11,
+    color: Palette.taupe,
+    opacity: 0.4,
+  },
+  badge: {
     borderRadius: 20,
     paddingHorizontal: 7,
-    paddingVertical: 1,
+    paddingVertical: 2,
   },
-  popularText: {
+  badgeText: {
     fontSize: 9.5,
     fontFamily: "DMSans_500Medium",
     letterSpacing: 0.5,
@@ -212,7 +223,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   price: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "DMSans_500Medium",
     color: Palette.espresso,
   },

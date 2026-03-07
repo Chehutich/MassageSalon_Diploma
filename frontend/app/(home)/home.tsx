@@ -48,14 +48,15 @@ export default function HomeScreen() {
     return categories
       .map((cat: CategoryResponse) => ({
         id: cat.id,
-        label: cat.title,
-        color: categoryHelpers.categoryColor(cat.title),
-        icon: categoryHelpers.categoryIcon(cat.title),
+        label: categoryHelpers.categoryLabel(cat.slug),
+        slug: cat.slug,
+        color: categoryHelpers.categoryColor(cat.slug),
+        icon: categoryHelpers.categoryIcon(cat.slug),
         items: services.filter(
-          (s: ServiceResponse) => s.categoryName === cat.title,
+          (s: ServiceResponse) => s.categorySlug === cat.slug,
         ),
         count: services.filter(
-          (s: ServiceResponse) => s.categoryName === cat.title,
+          (s: ServiceResponse) => s.categorySlug === cat.slug,
         ).length,
       }))
       .filter((c) => c.items.length > 0);
@@ -66,7 +67,7 @@ export default function HomeScreen() {
 
     if (activeChip !== "All") {
       result = result.filter((c) =>
-        c.label.toLowerCase().includes(activeChip.toLowerCase()),
+        c.slug.toLowerCase().includes(activeChip.toLowerCase()),
       );
     }
 
@@ -86,7 +87,7 @@ export default function HomeScreen() {
 
   const chips = useMemo(() => {
     if (!categories) return ["All"];
-    return ["All", ...categories.map((c: CategoryResponse) => c.title)];
+    return ["All", ...categories.map((c: CategoryResponse) => c.slug)];
   }, [categories]);
 
   const initials = me
@@ -181,7 +182,9 @@ export default function HomeScreen() {
                       activeChip === chip && styles.chipTextActive,
                     ]}
                   >
-                    {chip}
+                    {chip === "All"
+                      ? "Всі"
+                      : categoryHelpers.categoryLabel(chip)}
                   </Text>
                 </Pressable>
               ))}
