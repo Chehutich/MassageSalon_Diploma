@@ -12,4 +12,5 @@ public record MyAppointmentResponse(
     string MasterFirstName,
     string MasterLastName,
     string Status,
-    string? ClientNotes);
+    string? ClientNotes,
+    decimal ActualPrice);

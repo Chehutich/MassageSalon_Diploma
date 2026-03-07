@@ -18,12 +18,7 @@ public class RefreshTokenHandler(
     public async Task<Result<AuthResponse, Error>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
-        if (user is null)
-        {
-            return Errors.User.InvalidAccessToken;
-        }
-
-        if (user.RefreshTokenExpiry <= DateTime.UtcNow)
+        if (user is null || user.RefreshTokenExpiry <= DateTime.UtcNow)
         {
             return Errors.User.InvalidRefreshToken;
         }

@@ -31,7 +31,8 @@ public class GetMyAppointmentsQueryHandler(
             a.Master.User.FirstName,
             a.Master.User.LastName,
             a.Status.ToString(),
-            a.ClientNotes
+            a.ClientNotes,
+            a.ActualPrice
         )).ToList();
 
         return dtos;
