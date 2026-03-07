@@ -7,7 +7,6 @@ export const LoadingSpinner = ({ label }: { label?: string }) => {
   const rotation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // На всякий случай сбрасываем значение при маунте
     rotation.setValue(0);
 
     Animated.loop(
@@ -15,10 +14,10 @@ export const LoadingSpinner = ({ label }: { label?: string }) => {
         toValue: 1,
         duration: 800,
         easing: Easing.linear,
-        useNativeDriver: false, // <--- СТАВИМ FALSE
+        useNativeDriver: false,
       }),
     ).start();
-  }, []); // Пустой массив зависимостей здесь ок, так как rotation — это ref
+  }, []);
 
   const rotate = rotation.interpolate({
     inputRange: [0, 1],
@@ -42,7 +41,7 @@ export const LoadingSpinner = ({ label }: { label?: string }) => {
           borderWidth: 2,
           borderColor: Palette.sandDark ?? "#D9C4AB",
           borderTopColor: Palette.rose,
-          transform: [{ rotate }], // вращение будет работать идеально
+          transform: [{ rotate }],
         }}
       />
       {label && (

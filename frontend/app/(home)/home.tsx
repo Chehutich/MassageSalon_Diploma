@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -9,16 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  Search,
-  Bell,
-  Leaf,
-  Sparkles,
-  Wind,
-  Zap,
-  Heart,
-  Star,
-} from "lucide-react-native";
+import { Search, Bell } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { AmbientBackground } from "@/src/components/AmbientBackground";
 import { AvatarBadge } from "@/src/components/home/AvatarBadge";
@@ -26,7 +17,7 @@ import { PromoBanner } from "@/src/components/home/PromoBanner";
 import { CategoryAccordion } from "@/src/components/home/CategoryAccordion";
 import { LeafLogo } from "@/src/components/LeafLogo";
 import { useGetMe } from "@/src/api/generated/auth/auth";
-import type { LucideIcon } from "lucide-react-native";
+import * as categoryHelpers from "@/src/utils/categoryHelpers";
 import { useGetCategories } from "@/src/api/generated/categories/categories";
 import { useGetServices } from "@/src/api/generated/services/services";
 import type {
@@ -34,23 +25,16 @@ import type {
   ServiceResponse,
   MasterResponse,
 } from "@/src/api/generated/apiV1.schemas";
-import { ServiceCard } from "@/src/components/home/ServiceCard";
 import { MasterCard } from "@/src/components/home/MasterCard";
 import { useGetMasters } from "@/src/api/generated/masters/masters";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PLURAL, pluralize } from "@/src/utils/pluralize";
+import { useLikes } from "@/src/context/LikesContext";
 
 export default function HomeScreen() {
   const [search, setSearch] = useState("");
   const [focused, setFocused] = useState(false);
   const [activeChip, setActiveChip] = useState<string>("All");
-  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    AsyncStorage.getItem("likedIds").then((val) => {
-      if (val) setLikedIds(new Set(JSON.parse(val)));
-    });
-  }, []);
+  const { likedIds, toggleLike } = useLikes();
 
   const { data: me } = useGetMe();
   const { data: categories, isLoading: catsLoading } = useGetCategories();
@@ -65,8 +49,8 @@ export default function HomeScreen() {
       .map((cat: CategoryResponse) => ({
         id: cat.id,
         label: cat.title,
-        color: categoryColor(cat.title),
-        icon: categoryIcon(cat.title),
+        color: categoryHelpers.categoryColor(cat.title),
+        icon: categoryHelpers.categoryIcon(cat.title),
         items: services.filter(
           (s: ServiceResponse) => s.categoryName === cat.title,
         ),
@@ -110,20 +94,6 @@ export default function HomeScreen() {
     : "??";
 
   const greeting = getGreeting();
-
-  const toggleLike = (id: string) => {
-    setLikedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      AsyncStorage.setItem("likedIds", JSON.stringify([...next]));
-      return next;
-    });
-  };
-
-  const likedServices = useMemo(() => {
-    if (!services) return [];
-    return services.filter((s: ServiceResponse) => likedIds.has(s.id));
-  }, [services, likedIds]);
 
   return (
     <View style={styles.root}>
@@ -218,30 +188,6 @@ export default function HomeScreen() {
             </ScrollView>
           )}
 
-          {/* ── Favorites ── */}
-          {likedServices.length > 0 && !search && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Улюблені</Text>
-              <View style={{ gap: 10, marginTop: 12 }}>
-                {likedServices.map((item: ServiceResponse) => {
-                  const cat = grouped.find((c) =>
-                    c.items.some((i: ServiceResponse) => i.id === item.id),
-                  );
-                  return (
-                    <ServiceCard
-                      key={item.id}
-                      item={item}
-                      accent={cat?.color ?? Palette.taupe}
-                      Icon={cat?.icon}
-                      liked={likedIds.has(item.id)}
-                      onToggleLike={() => toggleLike(item.id)}
-                    />
-                  );
-                })}
-              </View>
-            </View>
-          )}
-
           {/* ── Section label ── */}
           <View style={styles.sectionLabel}>
             <Text style={styles.sectionTitle}>
@@ -306,41 +252,11 @@ export default function HomeScreen() {
   );
 }
 
-// ── Helpers ──────────────────────────────────────────────────────
-
 function getGreeting(): string {
   const h = new Date().getHours();
   if (h < 12) return "Доброго ранку";
   if (h < 17) return "Доброго дня";
   return "Доброго вечора";
-}
-
-const CATEGORY_COLORS: Record<string, string> = {
-  massage: Palette.rose,
-  facial: Palette.sage,
-  body: "#C4A882",
-  energy: "#B8A9C9",
-  relax: Palette.taupe,
-  wellness: "#A8C5B5",
-};
-
-function categoryColor(title: string): string {
-  const key = title.toLowerCase().split(" ")[0];
-  return CATEGORY_COLORS[key] ?? Palette.taupe;
-}
-
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  massage: Leaf,
-  facial: Sparkles,
-  body: Wind,
-  energy: Zap,
-  relax: Heart,
-  wellness: Star,
-};
-
-function categoryIcon(title: string): LucideIcon {
-  const key = title.toLowerCase().split(" ")[0];
-  return CATEGORY_ICONS[key] ?? Leaf;
 }
 
 // ── Styles ───────────────────────────────────────────────────────

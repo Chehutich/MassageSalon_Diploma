@@ -21,7 +21,13 @@ import { PLURAL, pluralize } from "@/src/utils/pluralize";
 export default function AppointmentsScreen() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
-  const { data: appointments, isLoading, refetch } = useGetMyAppointments();
+  const {
+    data: appointments,
+    isLoading,
+    refetch,
+  } = useGetMyAppointments({
+    query: { staleTime: 0 },
+  });
 
   useFocusEffect(
     useCallback(() => {

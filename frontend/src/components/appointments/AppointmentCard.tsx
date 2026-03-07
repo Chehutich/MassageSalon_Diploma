@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import { Calendar, Clock } from "lucide-react-native";
+import { Banknote, Calendar, Clock } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { STATUS_CONFIG } from "./appointmentHelpers";
 import type { MyAppointmentResponse } from "@/src/api/generated/apiV1.schemas";
@@ -47,7 +47,7 @@ export function AppointmentCard({ item }: { item: MyAppointmentResponse }) {
       {/* ── Divider ── */}
       <View style={styles.divider} />
 
-      {/* ── Meta: master + date + time ── */}
+      {/* ── Meta: master + date + time + price ── */}
       <View style={styles.metaBlock}>
         <View style={styles.masterRow}>
           <Text style={styles.masterName}>
@@ -72,6 +72,15 @@ export function AppointmentCard({ item }: { item: MyAppointmentResponse }) {
               style={{ opacity: 0.7 }}
             />
             <Text style={styles.metaText}>{timeStr}</Text>
+          </View>
+          <View style={styles.price}>
+            <Banknote
+              size={12}
+              strokeWidth={1.8}
+              color={Palette.taupe}
+              style={{ opacity: 0.7 }}
+            />
+            <Text style={styles.metaText}>{item.actualPrice} ₴</Text>
           </View>
         </View>
       </View>
@@ -180,6 +189,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "DMSans_400Regular",
     color: Palette.taupe,
+  },
+  price: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    fontSize: 12,
+    fontFamily: "DMSans_500Medium",
+    color: Palette.espresso,
   },
   actions: { flexDirection: "row", gap: 10 },
   btnSecondary: {
