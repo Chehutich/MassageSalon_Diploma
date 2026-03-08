@@ -7,15 +7,21 @@ type Props = {
   title: string;
   accent: string;
   items: MyAppointmentResponse[];
+  onBookAgain?: (serviceId: string, masterId: string | null) => void;
 };
 
-export function AppointmentSection({ title, accent, items }: Props) {
+export function AppointmentSection({
+  title,
+  accent,
+  items,
+  onBookAgain,
+}: Props) {
   if (items.length === 0) return null;
   return (
     <View style={styles.section}>
       <View style={{ gap: 10 }}>
         {items.map((a) => (
-          <AppointmentCard key={a.id} item={a} />
+          <AppointmentCard key={a.id} item={a} onBookAgain={onBookAgain} />
         ))}
       </View>
     </View>

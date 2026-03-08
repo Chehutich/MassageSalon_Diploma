@@ -29,11 +29,15 @@ import { MasterCard } from "@/src/components/home/MasterCard";
 import { useGetMasters } from "@/src/api/generated/masters/masters";
 import { PLURAL, pluralize } from "@/src/utils/pluralize";
 import { useLikes } from "@/src/context/LikesContext";
+import { BookingSheet } from "@/src/components/booking/BookingSheet";
 
 export default function HomeScreen() {
   const [search, setSearch] = useState("");
   const [focused, setFocused] = useState(false);
   const [activeChip, setActiveChip] = useState<string>("All");
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null,
+  );
   const { likedIds, toggleLike } = useLikes();
 
   const { data: me } = useGetMe();
@@ -166,6 +170,7 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.chips}
+              keyboardShouldPersistTaps="handled"
             >
               {chips.map((chip) => (
                 <Pressable
@@ -221,6 +226,7 @@ export default function HomeScreen() {
                   defaultOpen={i === 0}
                   likedIds={likedIds}
                   onToggleLike={toggleLike}
+                  onBook={(id: string) => setSelectedServiceId(id)}
                 />
               ))
             )}
@@ -237,6 +243,7 @@ export default function HomeScreen() {
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{
                   paddingHorizontal: 24,
                   gap: 12,
@@ -244,13 +251,21 @@ export default function HomeScreen() {
                 }}
               >
                 {masters.map((master: MasterResponse) => (
-                  <MasterCard key={master.id} master={master} />
+                  <MasterCard
+                    key={master.id}
+                    master={master}
+                    onBook={(id: string) => setSelectedServiceId(id)}
+                  />
                 ))}
               </ScrollView>
             </View>
           )}
         </ScrollView>
       </SafeAreaView>
+      <BookingSheet
+        serviceId={selectedServiceId}
+        onClose={() => setSelectedServiceId(null)}
+      />
     </View>
   );
 }

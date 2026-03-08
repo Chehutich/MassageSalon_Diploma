@@ -4,7 +4,6 @@ import { Clock, Heart, Hand } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { ServiceSheet } from "./ServiceSheet";
 import type { ServiceResponse } from "@/src/api/generated/apiV1.schemas";
-import { BookingSheet } from "@/src/components/booking/BookingSheet";
 import { getBadgeConfig } from "@/src/utils/badgeHelpers";
 
 type Props = {
@@ -31,7 +30,6 @@ export function ServiceCard({
   const likeScale = useRef(new Animated.Value(1)).current;
   const [sheetOpen, setSheetOpen] = useState(false);
   const badge = getBadgeConfig(item.badge);
-  const [bookingOpen, setBookingOpen] = useState(false);
 
   const handleLike = () => {
     Animated.sequence([
@@ -117,7 +115,7 @@ export function ServiceCard({
       <Pressable style={styles.bottomRow}>
         <Text style={styles.price}>{item.price} ₴</Text>
         <Pressable
-          onPress={() => setBookingOpen(true)}
+          onPress={onBook}
           style={[styles.bookBtn, { backgroundColor: Palette.rose }]}
         >
           <Text style={[styles.bookText, { color: Palette.espresso }]}>
@@ -130,12 +128,8 @@ export function ServiceCard({
         itemId={sheetOpen ? item.id : null}
         accent={accent}
         Icon={Icon}
+        onBook={onBook}
         onClose={() => setSheetOpen(false)}
-      />
-
-      <BookingSheet
-        serviceId={bookingOpen ? item.id : null}
-        onClose={() => setBookingOpen(false)}
       />
     </View>
   );

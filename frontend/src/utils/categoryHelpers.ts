@@ -38,7 +38,7 @@ export const categoryColor = (slug: string) =>
   COLORS[slug.toLowerCase().split(" ")[0]] ?? Palette.taupe;
 
 export const categoryIcon = (slug: string): LucideIcon => {
-  console.log("slug:", slug); // ← подивись що приходить
+  console.log("slug:", slug);
   const key = Object.keys(ICONS).find((k) => slug.toLowerCase().includes(k));
   return key ? ICONS[key] : Leaf;
 };

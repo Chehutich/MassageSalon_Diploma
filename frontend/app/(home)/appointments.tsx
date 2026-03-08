@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -15,12 +15,17 @@ import { Palette } from "@/src/theme/tokens";
 import { AmbientBackground } from "@/src/components/AmbientBackground";
 import { useGetMyAppointments } from "@/src/api/generated/appointments/appointments";
 import { AppointmentSection } from "@/src/components/appointments/AppointmentSection";
+import { BookingSheet } from "@/src/components/booking/BookingSheet";
 import { FILTERS } from "@/src/components/appointments/appointmentHelpers";
 import { PLURAL, pluralize } from "@/src/utils/pluralize";
 
 export default function AppointmentsScreen() {
   const [activeFilter, setActiveFilter] = useState("all");
+  const [bookingServiceId, setBookingServiceId] = useState<string | null>(null);
+  const [bookingMasterId, setBookingMasterId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const lastFetchRef = useRef<number>(0);
+
   const {
     data: appointments,
     isLoading,
@@ -31,7 +36,12 @@ export default function AppointmentsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      refetch();
+      const now = Date.now();
+      const FIVE_MINUTES = 5 * 60 * 1000;
+      if (now - lastFetchRef.current > FIVE_MINUTES) {
+        lastFetchRef.current = now;
+        refetch();
+      }
     }, []),
   );
 
@@ -62,6 +72,11 @@ export default function AppointmentsScreen() {
     }),
     [filtered],
   );
+
+  const handleBookAgain = (serviceId: string, masterId: string | null) => {
+    setBookingServiceId(serviceId);
+    setBookingMasterId(masterId);
+  };
 
   return (
     <View style={styles.root}>
@@ -135,21 +150,32 @@ export default function AppointmentsScreen() {
                 title="Завершені"
                 accent={Palette.taupe}
                 items={grouped.completed}
+                onBookAgain={handleBookAgain}
               />
               <AppointmentSection
                 title="Скасовані"
                 accent={Palette.rose}
                 items={grouped.cancelled}
+                onBookAgain={handleBookAgain}
               />
               <AppointmentSection
                 title="Не з'явився"
                 accent="#B8A9C9"
                 items={grouped.noshow}
+                onBookAgain={handleBookAgain}
               />
             </>
           )}
         </ScrollView>
       </SafeAreaView>
+      <BookingSheet
+        serviceId={bookingServiceId}
+        masterId={bookingMasterId}
+        onClose={() => {
+          setBookingServiceId(null);
+          setBookingMasterId(null);
+        }}
+      />
     </View>
   );
 }

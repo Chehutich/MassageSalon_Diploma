@@ -1,44 +1,54 @@
 import { View, Text, Pressable, StyleSheet, Image } from "react-native";
+import { useState } from "react";
+import { MasterSheet } from "@/src/components/home/MasterSheet";
 import { Palette } from "@/src/theme/tokens";
 import type { MasterResponse } from "@/src/api/generated/apiV1.schemas";
 import { MasterAvatar } from "@/src/components/MasterAvatar";
 
 type Props = {
   master: MasterResponse;
-  onPress?: () => void;
+  onBook: (serviceId: string) => void;
 };
 
-export function MasterCard({ master, onPress }: Props) {
+export function MasterCard({ master, onBook }: Props) {
+  const [sheetOpen, setSheetOpen] = useState(false);
   const initials = `${master.firstName[0]}${master.lastName[0]}`.toUpperCase();
   const color = stringToColor(master.id);
   console.log("photoUrl:", master.photoUrl);
 
   return (
-    <Pressable style={styles.card} onPress={onPress}>
-      {/* Photo */}
-      <MasterAvatar
-        firstName={master.firstName}
-        lastName={master.lastName}
-        photoUrl={master.photoUrl}
-        size={56}
-        accent={color}
-      />
+    <>
+      <Pressable style={styles.card} onPress={() => setSheetOpen(true)}>
+        {/* Photo */}
+        <MasterAvatar
+          firstName={master.firstName}
+          lastName={master.lastName}
+          photoUrl={master.photoUrl}
+          size={56}
+          accent={color}
+        />
 
-      {/* Name */}
-      <Text style={styles.name} numberOfLines={1}>
-        {master.firstName}
-      </Text>
-      <Text style={styles.lastName} numberOfLines={1}>
-        {master.lastName}
-      </Text>
-
-      {/* Specialty */}
-      {master.serviceCategories?.length > 0 && (
-        <Text style={styles.specialty} numberOfLines={1}>
-          {master.serviceCategories[0].slug}
+        {/* Name */}
+        <Text style={styles.name} numberOfLines={1}>
+          {master.firstName}
         </Text>
-      )}
-    </Pressable>
+        <Text style={styles.lastName} numberOfLines={1}>
+          {master.lastName}
+        </Text>
+
+        {/* Specialty */}
+        {master.serviceCategories?.length > 0 && (
+          <Text style={styles.specialty} numberOfLines={1}>
+            {master.serviceCategories[0].slug}
+          </Text>
+        )}
+      </Pressable>
+      <MasterSheet
+        masterId={sheetOpen ? master.id : null}
+        onBook={onBook}
+        onClose={() => setSheetOpen(false)}
+      />
+    </>
   );
 }
 

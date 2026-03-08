@@ -4,7 +4,12 @@ import { Palette } from "@/src/theme/tokens";
 import { STATUS_CONFIG } from "./appointmentHelpers";
 import type { MyAppointmentResponse } from "@/src/api/generated/apiV1.schemas";
 
-export function AppointmentCard({ item }: { item: MyAppointmentResponse }) {
+type Props = {
+  item: MyAppointmentResponse;
+  onBookAgain?: (serviceId: string, masterId: string | null) => void;
+};
+
+export function AppointmentCard({ item, onBookAgain }: Props) {
   const status =
     STATUS_CONFIG[item.status?.toLowerCase() ?? ""] ?? STATUS_CONFIG.confirmed;
 
@@ -96,7 +101,19 @@ export function AppointmentCard({ item }: { item: MyAppointmentResponse }) {
           </Pressable>
         </View>
       ) : (
-        <Pressable style={styles.btnPrimary}>
+        <Pressable
+          style={styles.btnPrimary}
+          onPress={() => {
+            if (item.serviceId) {
+              console.log(
+                "Booking again:",
+                item.serviceId,
+                item.masterId ?? null,
+              );
+              onBookAgain?.(item.serviceId, item.masterId ?? null);
+            }
+          }}
+        >
           <Text style={styles.btnPrimaryText}>Забронювати ще раз</Text>
         </Pressable>
       )}

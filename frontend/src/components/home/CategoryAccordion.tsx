@@ -13,6 +13,7 @@ import { PLURAL, pluralize } from "@/src/utils/pluralize";
 
 export function CategoryAccordion({
   cat,
+  onBook,
   defaultOpen = false,
   likedIds,
   onToggleLike,
@@ -75,9 +76,9 @@ export function CategoryAccordion({
               key={i}
               item={item}
               accent={cat.color}
-              Icon={Icon}
               liked={likedIds?.has(item.id)}
               onToggleLike={() => onToggleLike?.(item.id)}
+              onBook={() => onBook(item.id)}
             />
           ))}
         </View>
