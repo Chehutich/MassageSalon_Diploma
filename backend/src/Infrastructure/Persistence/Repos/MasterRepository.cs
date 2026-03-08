@@ -66,6 +66,14 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
                 cancellationToken);
     }
 
+    public async Task<List<Schedule>> GetSchedulesForMasterAsync(Guid masterId, CancellationToken cancellationToken = default)
+    {
+        return await context.Schedules
+            .Where(s => s.MasterId == masterId)
+            .OrderBy(s => s.DayOfWeek)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<bool> IsMasterAvailableAsync(Guid masterId,
         DateTime start,
         DateTime end,

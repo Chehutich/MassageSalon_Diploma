@@ -16,6 +16,8 @@ public interface IMasterRepository
 
     Task<bool> IsOnTimeOffAsync(Guid masterId, DateTime date, CancellationToken cancellationToken = default);
 
+    Task<List<Schedule>> GetSchedulesForMasterAsync(Guid masterId, CancellationToken cancellationToken = default);
+
     Task<bool> IsMasterAvailableAsync(Guid masterId,
         DateTime start,
         DateTime end,

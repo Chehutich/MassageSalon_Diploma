@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Repos;
 using Application.Features.Catalog.GetAvailableSlots;
 using Application.Services;
+using Domain.Common;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -17,7 +18,9 @@ public class SlotServiceTests
     private readonly SlotService _sut;
 
     // Deterministic constants to prevent flaky tests
-    private static readonly DateTime FixedDate = new(2026, 3, 10, 0, 0, 0, DateTimeKind.Utc); // Tuesday
+    private static readonly DateTime Today = DateTime.UtcNow;
+    private static readonly DateTime NextMonthDate = new DateTime(Today.Year, Today.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(1);
+    private static readonly DateTime FixedDate = new(NextMonthDate.Year, NextMonthDate.Month, 10, 0, 0, 0, DateTimeKind.Utc);
     private static readonly Guid ServiceId = Guid.NewGuid();
     private static readonly Guid MasterId = Guid.NewGuid();
 
@@ -223,6 +226,84 @@ public class SlotServiceTests
         dto.LastName.Should().Be("Smith");
     }
 
+    [Fact]
+    public async Task GetAvailableDatesAsync_ShouldReturnDates_WhenMasterHasFreeSlots()
+    {
+        // Arrange
+        var testYear = FixedDate.Year;
+        var testMonth = FixedDate.Month;
+
+        SetupService(60);
+        var master = SetupMaster(MasterId);
+        SetupMastersForService(master);
+
+        // Setup master to work on the day of the week corresponding to our FixedDate
+        var schedules = new List<Schedule> { new(MasterId, (int)FixedDate.DayOfWeek, new TimeOnly(10, 0), new TimeOnly(12, 0)) };
+        _masterRepoMock.Setup(x => x.GetSchedulesForMasterAsync(MasterId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(schedules);
+
+        // No busy intervals (appointments or time-offs)
+        _appointmentRepoMock.Setup(x => x.GetBusyIntervalsAsync(MasterId, It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<BusyInterval>());
+
+        // Act
+        var result = await _sut.GetAvailableDatesAsync(ServiceId, MasterId, testYear, testMonth);
+
+        // Assert
+        result.Should().NotBeEmpty();
+        result.Should().Contain(DateOnly.FromDateTime(FixedDate));
+    }
+
+    [Fact]
+    public async Task GetAvailableDatesAsync_ShouldReturnEmpty_WhenWholeMonthIsBusy()
+    {
+        // Arrange
+        var testYear = FixedDate.Year;
+        var testMonth = FixedDate.Month;
+
+        SetupService(60);
+        var master = SetupMaster(MasterId);
+        SetupMastersForService(master);
+
+        // Master works 10:00-11:00
+        var schedules = new List<Schedule> { new(MasterId, (int)FixedDate.DayOfWeek, new TimeOnly(10, 0), new TimeOnly(11, 0)) };
+        _masterRepoMock.Setup(x => x.GetSchedulesForMasterAsync(MasterId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(schedules);
+
+        // But that specific window is fully blocked by a busy interval
+        var busy = new List<BusyInterval> { new(FixedDate.AddHours(10), FixedDate.AddHours(11)) };
+        _appointmentRepoMock.Setup(x => x.GetBusyIntervalsAsync(MasterId, It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(busy);
+
+        // Act
+        var result = await _sut.GetAvailableDatesAsync(ServiceId, MasterId, testYear, testMonth);
+
+        // Assert
+        result.Should().NotContain(DateOnly.FromDateTime(FixedDate));
+    }
+
+    [Fact]
+    public async Task GetAvailableDatesAsync_ShouldSkipDatesInPast()
+    {
+        // Arrange
+        // Mock "Now" as exactly today.
+        _timeProviderMock.Setup(x => x.GetUtcNow()).Returns(new DateTimeOffset(Today));
+
+        SetupService(60);
+        var master = SetupMaster(MasterId);
+        SetupMastersForService(master);
+
+        // Setup a working day for yesterday
+        var yesterday = Today.AddDays(-1);
+        SetupScheduleForMaster(MasterId, (int)yesterday.DayOfWeek);
+
+        // Act
+        var result = await _sut.GetAvailableDatesAsync(ServiceId, MasterId, Today.Year, Today.Month);
+
+        // Assert
+        result.Should().NotContain(DateOnly.FromDateTime(yesterday));
+    }
+
     #region Helpers
 
     private Service SetupService(int duration)
@@ -273,6 +354,16 @@ public class SlotServiceTests
     private static Appointment CreateAppointment(Guid masterId, Service service, DateTime start)
     {
         return new Appointment(Guid.NewGuid(), masterId, service, start, "Note");
+    }
+
+    private void SetupScheduleForMaster(Guid masterId, int dayOfWeek)
+    {
+        var schedules = new List<Schedule> { new(masterId, dayOfWeek, new TimeOnly(9,0), new TimeOnly(18,0)) };
+        _masterRepoMock.Setup(x => x.GetSchedulesForMasterAsync(masterId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(schedules);
+
+        _appointmentRepoMock.Setup(x => x.GetBusyIntervalsAsync(masterId, It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<BusyInterval>());
     }
 
     #endregion

@@ -4,6 +4,7 @@ using Application.Features.Appointments.CreateAppointment;
 using Application.Features.Appointments.GetAppointmentDetails;
 using Application.Features.Appointments.GetMyAppointments;
 using Application.Features.Appointments.RescheduleAppointment;
+using Application.Features.Catalog.GetAvailableDates;
 using Application.Features.Catalog.GetAvailableSlots;
 using MediatR;
 
@@ -61,6 +62,21 @@ public static class AppointmentEndpoints
             .Produces<List<SlotResponse>>()
             .WithName("GetAvailableSlots")
             .WithDescription("Retrieves a list of available time slots for a specific master and service on a given date.");
+
+        group.MapGet("/available-dates", async (
+                [AsParameters] GetAvailableDatesQuery query,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                var result = await sender.Send(query, cancellationToken);
+
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : result.ToProblemDetails();
+            })
+            .Produces<List<DateOnly>>()
+            .WithName("GetAvailableDates")
+            .WithDescription("Retrieves a list of dates that have at least one free slot for a specific service (and master).");
 
         group.MapPost("", async (CreateAppointmentCommand command,
                 ISender sender,

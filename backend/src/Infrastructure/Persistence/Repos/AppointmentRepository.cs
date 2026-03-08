@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Repos;
+using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,33 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
                 a.StartTime < endOfDay)
             .OrderBy(a => a.StartTime)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<BusyInterval>> GetBusyIntervalsAsync(Guid masterId, DateTime start, DateTime end, CancellationToken cancellationToken = default)
+    {
+        var appointments = await context.Appointments
+            .Where(a => a.MasterId == masterId &&
+                        a.StartTime < end &&
+                        a.EndTime > start &&
+                        a.Status != AppointmentStatus.Cancelled)
+            .Select(a => new BusyInterval(a.StartTime, a.EndTime))
+            .ToListAsync(cancellationToken);
+
+        var timeOffs = await context.TimeOffs
+            .Where(t => t.MasterId == masterId &&
+                        t.StartDate <= DateOnly.FromDateTime(end) &&
+                        t.EndDate >= DateOnly.FromDateTime(start))
+            .ToListAsync(cancellationToken);
+
+        var timeOffIntervals = timeOffs.Select(t => new BusyInterval(
+            t.StartDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
+            t.EndDate.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc)
+        ));
+
+        return appointments
+            .Concat(timeOffIntervals)
+            .OrderBy(x => x.Start)
+            .ToList();
     }
 
     public async Task AddAsync(Appointment appointment, CancellationToken cancellationToken = default)

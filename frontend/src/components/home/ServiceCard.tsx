@@ -4,6 +4,7 @@ import { Clock, Heart, Hand } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { ServiceSheet } from "./ServiceSheet";
 import type { ServiceResponse } from "@/src/api/generated/apiV1.schemas";
+import { BookingSheet } from "@/src/components/booking/BookingSheet";
 import { getBadgeConfig } from "@/src/utils/badgeHelpers";
 
 type Props = {
@@ -27,10 +28,10 @@ export function ServiceCard({
   onToggleLike,
   onBook,
 }: Props) {
-  const [booked, setBooked] = useState(false);
   const likeScale = useRef(new Animated.Value(1)).current;
   const [sheetOpen, setSheetOpen] = useState(false);
   const badge = getBadgeConfig(item.badge);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   const handleLike = () => {
     Animated.sequence([
@@ -116,28 +117,11 @@ export function ServiceCard({
       <Pressable style={styles.bottomRow}>
         <Text style={styles.price}>{item.price} ₴</Text>
         <Pressable
-          onPress={() => {
-            setBooked((v) => !v);
-            onBook?.();
-          }}
-          style={[
-            styles.bookBtn,
-            booked
-              ? {
-                  backgroundColor: Palette.sage + "22",
-                  borderWidth: 1.5,
-                  borderColor: Palette.sage,
-                }
-              : { backgroundColor: Palette.rose },
-          ]}
+          onPress={() => setBookingOpen(true)}
+          style={[styles.bookBtn, { backgroundColor: Palette.rose }]}
         >
-          <Text
-            style={[
-              styles.bookText,
-              { color: booked ? Palette.sage : Palette.espresso },
-            ]}
-          >
-            {booked ? "Заброньовано" : "Забронювати "}
+          <Text style={[styles.bookText, { color: Palette.espresso }]}>
+            Забронювати
           </Text>
         </Pressable>
       </Pressable>
@@ -147,6 +131,11 @@ export function ServiceCard({
         accent={accent}
         Icon={Icon}
         onClose={() => setSheetOpen(false)}
+      />
+
+      <BookingSheet
+        serviceId={bookingOpen ? item.id : null}
+        onClose={() => setBookingOpen(false)}
       />
     </View>
   );

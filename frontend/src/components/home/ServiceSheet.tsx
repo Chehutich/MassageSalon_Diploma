@@ -1,23 +1,22 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   Pressable,
   StyleSheet,
-  Animated,
-  Modal,
-  TouchableWithoutFeedback,
-  PanResponder,
   ActivityIndicator,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Clock, ChevronRight, Sparkle } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { useGetServiceById } from "@/src/api/generated/services/services";
-import { MasterShortResponse } from "@/src/api/generated/apiV1.schemas";
+import type { MasterShortResponse } from "@/src/api/generated/apiV1.schemas";
 import { MasterAvatar } from "@/src/components/MasterAvatar";
 import { getBadgeConfig } from "@/src/utils/badgeHelpers";
+import {
+  BottomSheet,
+  useBottomSheetScroll,
+} from "@/src/components/BottomSheet";
 
 type Props = {
   itemId: string | null;
@@ -31,241 +30,137 @@ type Props = {
   onBook?: () => void;
 };
 
-const SHEET_HEIGHT = 600;
-
-export function ServiceSheet({ itemId, accent, Icon, onClose, onBook }: Props) {
-  const insets = useSafeAreaInsets();
-  const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-
+function ServiceSheetContent({ itemId, accent, Icon, onClose, onBook }: Props) {
+  const { scrollEnabled, isAtTopRef } = useBottomSheetScroll();
   const { data: item, isLoading } = useGetServiceById(itemId ?? "", {
     query: { enabled: !!itemId },
   });
-
   const badge = item ? getBadgeConfig(item.badge) : null;
 
-  const slideIn = () => {
-    Animated.parallel([
-      Animated.spring(translateY, {
-        toValue: 0,
-        useNativeDriver: true,
-        damping: 22,
-        stiffness: 220,
-        mass: 0.8,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const slideOut = (cb?: () => void) => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: SHEET_HEIGHT,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-    ]).start(() => cb?.());
-  };
-
-  useEffect(() => {
-    if (itemId) {
-      translateY.setValue(SHEET_HEIGHT);
-      opacity.setValue(0);
-      slideIn();
-    }
-  }, [itemId]);
-
-  const handleClose = () => slideOut(onClose);
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, g) => g.dy > 8,
-      onPanResponderMove: (_, g) => {
-        if (g.dy > 0) translateY.setValue(g.dy);
-      },
-      onPanResponderRelease: (_, g) => {
-        if (g.dy > 80 || g.vy > 0.5) {
-          slideOut(onClose);
-        } else {
-          Animated.spring(translateY, {
-            toValue: 0,
-            useNativeDriver: true,
-            damping: 20,
-            stiffness: 200,
-          }).start();
-        }
-      },
-    }),
-  ).current;
-
-  if (!itemId) return null;
+  if (isLoading || !item) {
+    return (
+      <ActivityIndicator color={Palette.taupe} style={{ marginVertical: 60 }} />
+    );
+  }
 
   return (
-    <Modal
-      transparent
-      visible={!!itemId}
-      onRequestClose={handleClose}
-      statusBarTranslucent
+    <ScrollView
+      scrollEnabled={scrollEnabled}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.content}
+      scrollEventThrottle={16}
+      onScroll={(e) => {
+        isAtTopRef.current = e.nativeEvent.contentOffset.y <= 0;
+      }}
     >
-      <TouchableWithoutFeedback onPress={handleClose}>
-        <Animated.View style={[styles.overlay, { opacity }]} />
-      </TouchableWithoutFeedback>
-
-      <Animated.View
-        style={[
-          styles.sheet,
-          { paddingBottom: insets.bottom + 24, transform: [{ translateY }] },
-        ]}
-      >
-        {/* Handle */}
-        <View style={styles.handleWrap} {...panResponder.panHandlers}>
-          <View style={styles.handle} />
+      <View style={styles.topRow}>
+        <View style={[styles.iconBox, { backgroundColor: accent + "18" }]}>
+          {Icon && <Icon size={26} strokeWidth={1.4} color={accent} />}
         </View>
+        <Text style={styles.name}>{item.title}</Text>
+      </View>
 
-        {isLoading || !item ? (
-          <ActivityIndicator
-            color={Palette.taupe}
-            style={{ marginVertical: 60 }}
-          />
-        ) : (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.content}
-            scrollEventThrottle={16}
+      <View style={styles.pills}>
+        <View style={styles.pill}>
+          <Clock size={13} strokeWidth={1.8} color={Palette.taupe} />
+          <Text style={styles.pillText}>{item.duration} хв</Text>
+        </View>
+        <View style={styles.pill}>
+          <Text style={styles.pillPrice}>{item.price} ₴</Text>
+        </View>
+        {badge && (
+          <View
+            style={[
+              styles.pill,
+              { backgroundColor: badge.bg, borderColor: badge.borderColor },
+            ]}
           >
-            {/* Icon + Title */}
-            <View style={styles.topRow}>
-              <View
-                style={[styles.iconBox, { backgroundColor: accent + "18" }]}
-              >
-                {Icon && <Icon size={26} strokeWidth={1.4} color={accent} />}
-              </View>
-              <Text style={styles.name}>{item.title}</Text>
-            </View>
+            <Text style={[styles.pillText, { color: badge.color }]}>
+              {badge.label}
+            </Text>
+          </View>
+        )}
+      </View>
 
-            {/* Pills */}
-            <View style={styles.pills}>
-              <View style={styles.pill}>
-                <Clock size={13} strokeWidth={1.8} color={Palette.taupe} />
-                <Text style={styles.pillText}>{item.duration} хв</Text>
-              </View>
-              <View style={styles.pill}>
-                <Text style={styles.pillPrice}>{item.price} ₴</Text>
-              </View>
-              {badge && (
+      <View style={styles.divider} />
+
+      {item.description && (
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Про процедуру</Text>
+          <Text style={styles.description}>{item.description}</Text>
+        </View>
+      )}
+
+      {item.benefits && item.benefits.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Переваги</Text>
+          <View style={{ gap: 8 }}>
+            {item.benefits.map((b, i) => (
+              <View key={i} style={styles.benefitRow}>
                 <View
                   style={[
-                    styles.pill,
-                    {
-                      backgroundColor: badge.bg,
-                      borderColor: badge.borderColor,
-                    },
+                    styles.benefitDot,
+                    { backgroundColor: accent + "18" },
                   ]}
                 >
-                  <Text style={[styles.pillText, { color: badge.color }]}>
-                    {badge.label}
-                  </Text>
+                  <Sparkle size={11} strokeWidth={1.5} color={accent} />
                 </View>
-              )}
-            </View>
-            <View style={styles.divider} />
-
-            {/* Description */}
-            {item.description && (
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Про процедуру</Text>
-                <Text style={styles.description}>{item.description}</Text>
+                <Text style={styles.benefitText}>{b}</Text>
               </View>
-            )}
+            ))}
+          </View>
+        </View>
+      )}
 
-            {/* Benefits */}
-            {item.benefits && item.benefits.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Переваги</Text>
-                <View style={{ gap: 8 }}>
-                  {item.benefits.map((b, i) => (
-                    <View key={i} style={styles.benefitRow}>
-                      <View
-                        style={[
-                          styles.benefitDot,
-                          { backgroundColor: accent + "18" },
-                        ]}
-                      >
-                        <Text style={[styles.benefitCheck, { color: accent }]}>
-                          <Sparkle size={11} strokeWidth={1.5} color={accent} />
-                        </Text>
-                      </View>
-                      <Text style={styles.benefitText}>{b}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {/* Masters */}
-            {item.masters && item.masters.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Майстри</Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={{ marginHorizontal: -4 }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      gap: 10,
-                      paddingHorizontal: 4,
-                    }}
-                  >
-                    {item.masters.map((m: MasterShortResponse) => (
-                      <View key={m.id} style={styles.masterChip}>
-                        <MasterAvatar
-                          firstName={m.firstName}
-                          lastName={m.lastName}
-                          photoUrl={m.photoUrl}
-                          size={48}
-                          accent={accent}
-                        />
-                        <Text style={styles.masterName}>{m.firstName}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </ScrollView>
-              </View>
-            )}
-
-            <View style={styles.divider} />
-
-            {/* CTA */}
-            <Pressable
-              onPress={() => {
-                onBook?.();
-                handleClose();
-              }}
-              style={[styles.bookBtn, { backgroundColor: Palette.rose }]}
+      {item.masters && item.masters.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Майстри</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View
+              style={{ flexDirection: "row", gap: 10, paddingHorizontal: 4 }}
             >
-              <Text style={styles.bookText}>Забронювати · {item.price} ₴</Text>
-              <ChevronRight
-                size={18}
-                strokeWidth={2}
-                color={Palette.espresso}
-              />
-            </Pressable>
+              {item.masters.map((m: MasterShortResponse) => (
+                <View key={m.id} style={styles.masterChip}>
+                  <MasterAvatar
+                    firstName={m.firstName}
+                    lastName={m.lastName}
+                    photoUrl={m.photoUrl}
+                    size={48}
+                    accent={accent}
+                  />
+                  <Text style={styles.masterName}>{m.firstName}</Text>
+                </View>
+              ))}
+            </View>
           </ScrollView>
-        )}
-      </Animated.View>
-    </Modal>
+        </View>
+      )}
+
+      <View style={styles.divider} />
+
+      <Pressable
+        onPress={() => {
+          onBook?.();
+          onClose();
+        }}
+        style={[styles.bookBtn, { backgroundColor: Palette.rose }]}
+      >
+        <Text style={styles.bookText}>Забронювати · {item.price} ₴</Text>
+        <ChevronRight size={18} strokeWidth={2} color={Palette.espresso} />
+      </Pressable>
+    </ScrollView>
+  );
+}
+
+export function ServiceSheet(props: Props) {
+  return (
+    <BottomSheet
+      visible={!!props.itemId}
+      onClose={props.onClose}
+      maxHeight="88%"
+    >
+      <ServiceSheetContent {...props} />
+    </BottomSheet>
   );
 }
 
@@ -366,7 +261,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  benefitCheck: { fontSize: 11, fontFamily: "DMSans_500Medium" },
   benefitText: {
     flex: 1,
     fontSize: 14,
@@ -375,14 +269,6 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   masterChip: { alignItems: "center", gap: 6 },
-  masterAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  masterInitials: { fontSize: 15, fontFamily: "DMSans_500Medium" },
   masterName: {
     fontSize: 11.5,
     fontFamily: "DMSans_400Regular",

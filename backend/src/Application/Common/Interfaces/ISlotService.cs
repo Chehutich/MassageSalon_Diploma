@@ -10,4 +10,11 @@ public interface ISlotService
         Guid serviceId,
         DateTime date,
         CancellationToken cancellationToken = default);
+
+    Task<List<DateOnly>> GetAvailableDatesAsync(
+        Guid serviceId,
+        Guid? masterId,
+        int year,
+        int month,
+        CancellationToken cancellationToken = default);
 }

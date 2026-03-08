@@ -47,6 +47,15 @@ public static class ValidationErrors
         public const string NewStartTimeInvalid = "Appointment.NewStartTime.Invalid";
     }
 
+    public static class GetAvailableDates
+    {
+        public const string ServiceIdRequired = "GetAvailableDates.ServiceId.Required";
+        public const string YearRequired = "GetAvailableDates.Date.Required";
+        public const string MonthRequired = "GetAvailableDates.Date.Required";
+        public const string MasterIdNotEmpty = "GetAvailableDates.MasterId.NotEmpty";
+
+    }
+
     public static class Token
     {
         public const string InvalidToken = "Token.InvalidAccessToken";

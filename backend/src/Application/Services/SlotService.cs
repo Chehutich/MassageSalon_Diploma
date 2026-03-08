@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Common.Interfaces.Repos;
 using Application.Common.Models;
 using Application.Features.Catalog.GetAvailableSlots;
+using Domain.Common;
 using Domain.Entities;
 
 namespace Application.Services;
@@ -15,7 +16,10 @@ public class SlotService(
 {
     private const int TimeStepMinutes = 30;
 
-    public async Task<List<SlotResponse>> GetAvailableSlotsAsync(Guid? masterId, Guid serviceId, DateTime date, CancellationToken cancellationToken = default)
+    public async Task<List<SlotResponse>> GetAvailableSlotsAsync(Guid? masterId,
+        Guid serviceId,
+        DateTime date,
+        CancellationToken cancellationToken = default)
     {
         var service = await serviceRepository.GetByIdAsync(serviceId, cancellationToken);
         if (service == null)
@@ -64,11 +68,110 @@ public class SlotService(
             .ToList();
     }
 
-    private async Task<List<SlotResponse>> GetSlotsForMasterAsync(
-        Guid masterId,
+    public async Task<List<DateOnly>> GetAvailableDatesAsync(Guid serviceId,
+        Guid? masterId,
+        int year,
+        int month,
+        CancellationToken cancellationToken = default)
+    {
+        var service = await serviceRepository.GetByIdAsync(serviceId, cancellationToken);
+        if (service == null)
+        {
+            return [];
+        }
+
+        var startDate = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var endDate = startDate.AddMonths(1);
+        var nowUtc = timeProvider.GetUtcNow().UtcDateTime;
+
+        var masters = await masterRepository.GetAllWithDetailsAsync(serviceId, cancellationToken);
+        if (masterId.HasValue)
+        {
+            masters = masters.Where(m => m.Id == masterId.Value).ToList();
+        }
+
+        if (masters.Count == 0)
+        {
+            return [];
+        }
+
+        // Get busy intervals and schedules for all masters
+        var masterData = new List<(Guid Id, List<BusyInterval> Busy, List<Schedule> Schedules)>();
+        foreach (var m in masters)
+        {
+            var busy = await appointmentRepository.GetBusyIntervalsAsync(m.Id, startDate, endDate, cancellationToken);
+            var schedules = await masterRepository.GetSchedulesForMasterAsync(m.Id, cancellationToken);
+            masterData.Add((m.Id, busy, schedules));
+        }
+
+        var result = new List<DateOnly>();
+
+        for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
+        {
+            var currentDate = new DateOnly(year, month, day);
+            if (currentDate < DateOnly.FromDateTime(nowUtc))
+            {
+                continue;
+            }
+
+            // Day is free if any master has a free slot for this day
+            bool isAnyAvailable = false;
+            foreach (var data in masterData)
+            {
+                var schedule = data.Schedules.FirstOrDefault(s => s.DayOfWeek == (int)currentDate.DayOfWeek);
+                if (schedule == null)
+                {
+                    continue;
+                }
+
+                // Check if the day has a free slot for this service
+                if (CheckIfDayHasFreeSlot(currentDate, schedule, data.Busy, service.Duration, nowUtc))
+                {
+                    isAnyAvailable = true;
+                    break;
+                }
+            }
+
+            if (isAnyAvailable)
+            {
+                result.Add(currentDate);
+            }
+        }
+
+        return result;
+    }
+
+    private bool CheckIfDayHasFreeSlot(DateOnly date,
+        Schedule schedule,
+        List<BusyInterval> busy,
+        int duration,
+        DateTime nowUtc)
+    {
+        var currentStart = date.ToDateTime(schedule.StartTime, DateTimeKind.Utc);
+        var dayEnd = date.ToDateTime(schedule.EndTime, DateTimeKind.Utc);
+        var minAllowed = nowUtc.AddHours(1);
+
+        while (currentStart.AddMinutes(duration) <= dayEnd)
+        {
+            var currentEnd = currentStart.AddMinutes(duration);
+
+            if (currentStart >= minAllowed &&
+                !busy.Any(b => currentStart < b.End && b.Start < currentEnd))
+            {
+                return true;
+            }
+
+            currentStart = currentStart.AddMinutes(30);
+        }
+
+        return false;
+    }
+
+
+    private async Task<List<SlotResponse>> GetSlotsForMasterAsync(Guid masterId,
         int durationMinutes,
         DateTime date,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var schedule = await masterRepository.GetScheduleForDayAsync(masterId, (int)date.DayOfWeek, cancellationToken);
         if (schedule == null)
