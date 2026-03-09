@@ -1,10 +1,15 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Check } from "lucide-react-native";
+import { Check, ArrowRight } from "lucide-react-native";
 import { Palette } from "../../theme/tokens";
 
-export const StepSuccess = ({ name }: { name: string }) => (
-  <View style={{ alignItems: "center", gap: 20, paddingVertical: 20 }}>
+type Props = {
+  name: string;
+  onLogin: () => void;
+};
+
+export const StepSuccess = ({ name, onLogin }: Props) => (
+  <View style={{ alignItems: "center", gap: 24, paddingVertical: 20 }}>
     <View
       style={{
         width: 88,
@@ -20,48 +25,51 @@ export const StepSuccess = ({ name }: { name: string }) => (
       <Check size={38} strokeWidth={1.8} color={Palette.sage} />
     </View>
 
-    <View style={{ alignItems: "center", gap: 8 }}>
+    <View style={{ alignItems: "center", gap: 10 }}>
       <Text
         style={{
-          fontSize: 30,
+          fontSize: 28,
           fontFamily: "CormorantGaramond_600SemiBold",
           color: Palette.taupe,
           textAlign: "center",
-          lineHeight: 36,
+          lineHeight: 34,
         }}
       >
-        {"Ласкаво просимо,\n" + (name || "друже") + "."}
+        {`Чудово, ${name || "друже"}.\nАкаунт створено.`}
       </Text>
       <Text
         style={{
-          fontSize: 14,
+          fontSize: 15,
           fontFamily: "DMSans_400Regular",
           color: Palette.espresso,
-          opacity: 0.65,
+          opacity: 0.6,
           textAlign: "center",
           lineHeight: 22,
         }}
       >
-        {"Ваш акаунт готовий.\nЧас записатись на перший сеанс."}
+        {"Тепер ви можете увійти та\nкористуватися всіма перевагами."}
       </Text>
     </View>
 
-    <View style={{ flexDirection: "row", gap: 10, opacity: 0.5 }}>
+    <View style={{ flexDirection: "row", gap: 8, opacity: 0.4 }}>
       {[0, 1, 2].map((i) => (
         <View
           key={i}
           style={{
-            width: 6,
-            height: 6,
+            width: 5,
+            height: 5,
             borderRadius: 3,
-            backgroundColor: i === 1 ? Palette.rose : Palette.sage,
+            backgroundColor: i === 2 ? Palette.rose : Palette.taupe,
           }}
         />
       ))}
     </View>
 
-    <TouchableOpacity activeOpacity={0.85} style={styles.btn}>
-      <Text style={styles.btnText}>Записатись на сеанс →</Text>
+    <TouchableOpacity activeOpacity={0.8} style={styles.btn} onPress={onLogin}>
+      <View style={styles.btnContent}>
+        <Text style={styles.btnText}>Увійти до системи</Text>
+        <ArrowRight size={18} color={Palette.espresso} strokeWidth={2} />
+      </View>
     </TouchableOpacity>
   </View>
 );
@@ -70,20 +78,26 @@ const styles = StyleSheet.create({
   btn: {
     width: "100%",
     height: 58,
-    borderRadius: 16,
+    borderRadius: 18,
     backgroundColor: Palette.rose,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: Palette.rose,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 5,
+    marginTop: 10,
+  },
+  btnContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   btnText: {
     fontSize: 16,
     fontFamily: "DMSans_500Medium",
     color: Palette.espresso,
-    letterSpacing: 0.6,
+    letterSpacing: 0.4,
   },
 });

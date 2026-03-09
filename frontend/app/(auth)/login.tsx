@@ -12,11 +12,8 @@ import { InputField } from "../../src/components/InputField";
 import { AuthHeader } from "../../src/components/auth/AuthHeader";
 import { AuthFooter } from "../../src/components/auth/AuthFooter";
 import { SocialBtn, OrDivider } from "../../src/components/auth/SocialAuth";
-import {
-  EMAIL_REGEX,
-  HAS_LETTER,
-  LoginErrors,
-} from "../../src/utils/validation";
+import { LoginErrors } from "../../src/utils/validation";
+import { RegexHelper } from "@/src/utils/regexHelper";
 import { useLoginUser } from "@/src/api/generated/auth/auth";
 
 export default function LoginScreen() {
@@ -31,11 +28,12 @@ export default function LoginScreen() {
     const newErrors: Record<string, string> = {};
 
     if (!email.trim()) newErrors.email = "Введіть email";
-    else if (!EMAIL_REGEX.test(email)) newErrors.email = "Некоректний email";
+    else if (!RegexHelper.EmailRegex().test(email))
+      newErrors.email = "Некоректний email";
 
     if (!password) newErrors.password = "Введіть пароль";
     else if (password.length < 8) newErrors.password = "Мінімум 8 символів";
-    else if (!HAS_LETTER.test(password))
+    else if (!RegexHelper.HasLetter().test(password))
       newErrors.password = "Пароль має містити хоча б 1 літеру";
 
     if (Object.keys(newErrors).length) {

@@ -39,9 +39,10 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   maxHeight?: DimensionValue;
-  title?: string;
-  subtitle?: string;
+  title?: ReactNode;
+  subtitle?: ReactNode;
   children: ReactNode;
+  headerLeft?: ReactNode;
 };
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -53,6 +54,7 @@ export function BottomSheet({
   title,
   subtitle,
   children,
+  headerLeft,
 }: Props) {
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -134,17 +136,28 @@ export function BottomSheet({
         ]}
       >
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            {title ? (
-              <Text style={styles.headerTitle} numberOfLines={1}>
-                {title}
-              </Text>
-            ) : null}
-            {subtitle ? (
-              <Text style={styles.headerSub} numberOfLines={1}>
-                {subtitle}
-              </Text>
-            ) : null}
+          <View style={styles.headerMain}>
+            {headerLeft && (
+              <View style={styles.headerLeftSlot}>{headerLeft}</View>
+            )}
+
+            <View style={styles.headerTextContainer}>
+              {typeof title === "string" ? (
+                <Text style={styles.headerTitle} numberOfLines={1}>
+                  {title}
+                </Text>
+              ) : (
+                title
+              )}
+
+              {typeof subtitle === "string" ? (
+                <Text style={styles.headerSub} numberOfLines={1}>
+                  {subtitle}
+                </Text>
+              ) : (
+                subtitle
+              )}
+            </View>
           </View>
 
           <TouchableOpacity
@@ -192,11 +205,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 24,
-    paddingTop: 12,
+    paddingTop: 16,
     paddingBottom: 16,
     gap: 16,
   },
-  headerLeft: {
+  headerMain: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  headerLeftSlot: {},
+  headerTextContainer: {
     flex: 1,
   },
   headerTitle: {
@@ -218,5 +238,6 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.sand,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
 });

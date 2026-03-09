@@ -16,7 +16,7 @@ import { AvatarBadge } from "@/src/components/home/AvatarBadge";
 import { PromoBanner } from "@/src/components/home/PromoBanner";
 import { CategoryAccordion } from "@/src/components/home/CategoryAccordion";
 import { LeafLogo } from "@/src/components/LeafLogo";
-import { useGetMe } from "@/src/api/generated/auth/auth";
+import { useGetMe } from "@/src/api/generated/user/user";
 import * as categoryHelpers from "@/src/utils/categoryHelpers";
 import { useGetCategories } from "@/src/api/generated/categories/categories";
 import { useGetServices } from "@/src/api/generated/services/services";
@@ -30,8 +30,11 @@ import { useGetMasters } from "@/src/api/generated/masters/masters";
 import { PLURAL, pluralize } from "@/src/utils/pluralize";
 import { useLikes } from "@/src/context/LikesContext";
 import { useSheets } from "@/src/context/SheetContext";
+import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   const [search, setSearch] = useState("");
   const [focused, setFocused] = useState(false);
   const [activeChip, setActiveChip] = useState<string>("All");
@@ -121,11 +124,20 @@ export default function HomeScreen() {
                 <Bell size={17} strokeWidth={1.6} color={Palette.taupe} />
                 <View style={styles.bellDot} />
               </Pressable>
-              <AvatarBadge
-                initials={initials}
-                size={38}
-                bg={Palette.rose + "44"}
-              />
+              <Pressable
+                onPress={() => router.push("/profile")}
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.7 : 1,
+                  transform: [{ scale: pressed ? 0.96 : 1 }],
+                })}
+              >
+                <AvatarBadge
+                  initials={initials}
+                  photoUrl={me?.photoUrl}
+                  size={38}
+                  bg={Palette.rose + "44"}
+                />
+              </Pressable>
             </View>
           </View>
 
@@ -235,9 +247,6 @@ export default function HomeScreen() {
             <View style={{ marginTop: 22 }}>
               <View style={[styles.sectionLabel, { paddingHorizontal: 24 }]}>
                 <Text style={styles.sectionTitle}>Наші майстри</Text>
-                <Pressable>
-                  <Text style={styles.sectionCount}>Всі →</Text>
-                </Pressable>
               </View>
               <ScrollView
                 horizontal

@@ -16,8 +16,6 @@ import { LoadingScreen } from "../src/components/LoadingScreen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Palette } from "../src/theme/tokens";
-import { ToastProvider } from "@/src/context/ToastContext";
-import { SheetProvider } from "@/src/context/SheetContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,23 +54,19 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        <ToastProvider>
-          <SheetProvider>
-            <KeyboardProvider>
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  gestureEnabled: false,
-                  contentStyle: { backgroundColor: Palette.ivory },
-                  animation: "fade_from_bottom",
-                }}
-              >
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(home)" />
-              </Stack>
-            </KeyboardProvider>
-          </SheetProvider>
-        </ToastProvider>
+        <KeyboardProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              gestureEnabled: false,
+              contentStyle: { backgroundColor: Palette.ivory },
+              animation: "fade_from_bottom",
+            }}
+          >
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(home)" />
+          </Stack>
+        </KeyboardProvider>
       </SafeAreaProvider>
     </QueryClientProvider>
   );

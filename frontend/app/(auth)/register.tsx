@@ -140,7 +140,12 @@ export default function RegisterScreen() {
           {step === 2 && loading && (
             <LoadingSpinner label="Створюємо ваш акаунт…" />
           )}
-          {step === 3 && <StepSuccess name={personal.first} />}
+          {step === 3 && (
+            <StepSuccess
+              name={personal.first}
+              onLogin={() => router.replace("/(auth)/login")}
+            />
+          )}
         </View>
 
         {step < 3 && (

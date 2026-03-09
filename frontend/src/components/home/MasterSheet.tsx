@@ -47,26 +47,6 @@ function MasterSheetContent({ masterId, onClose, onBook }: Props) {
         isAtTopRef.current = e.nativeEvent.contentOffset.y <= 0;
       }}
     >
-      <View style={styles.topRow}>
-        <MasterAvatar
-          firstName={master.firstName}
-          lastName={master.lastName}
-          photoUrl={master.photoUrl}
-          size={72}
-          accent={Palette.taupe}
-        />
-        <View style={styles.nameBox}>
-          <Text style={styles.name}>
-            {master.firstName} {master.lastName}
-          </Text>
-          {master.services.length > 0 && (
-            <Text style={styles.specialty}>
-              {categoryHelpers.categoryLabel(master.services[0].categorySlug)}
-            </Text>
-          )}
-        </View>
-      </View>
-
       {master.bio && (
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Про майстра</Text>
@@ -95,11 +75,27 @@ function MasterSheetContent({ masterId, onClose, onBook }: Props) {
 }
 
 export function MasterSheet(props: Props) {
+  const { data: master } = useGetMasterDetails(props.masterId ?? "", {
+    query: { enabled: !!props.masterId },
+  });
+
   return (
     <BottomSheet
       visible={!!props.masterId}
       onClose={props.onClose}
       maxHeight="92%"
+      headerLeft={
+        master && (
+          <MasterAvatar
+            firstName={master.firstName}
+            lastName={master.lastName}
+            photoUrl={master.photoUrl}
+            size={60}
+            accent={Palette.taupe}
+          />
+        )
+      }
+      title={master ? `${master.firstName} ${master.lastName}` : "Майстер"}
     >
       <MasterSheetContent {...props} />
     </BottomSheet>
