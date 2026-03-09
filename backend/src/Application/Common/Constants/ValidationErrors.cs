@@ -4,24 +4,12 @@ public static class ValidationErrors
 {
     public static class User
     {
-        public const string EmailRequired = "User.Email.Required";
-        public const string EmailInvalidFormat = "User.Email.InvalidFormat";
-        public const string PasswordRequired = "User.Password.Required";
         public const string PasswordMinLength = "User.Password.MinLength";
-
-        public const string NewPasswordRequired = "User.NewPassword.Required";
-        public const string NewPasswordMinLength = "User.NewPassword.PasswordMinLength";
-        public const string OldPasswordRequired = "User.OldPassword.Required";
-        public const string OldPasswordMinLength = "User.OldPasswordMinLength.PasswordMinLength";
-        public const string NotEqualNewPassword = "User.OldPasswordNot.EqualNewPassword";
-
-        public const string PhoneRequired = "User.Phone.Required";
-        public const string PhoneInvalidFormat = "User.Phone.InvalidFormat";
-
-        public const string FirstNameRequired = "User.FirstName.Required";
-        public const string FirstNameMaxLength = "User.FirstName.MaxLength";
-        public const string LastNameRequired = "User.LastName.Required";
-        public const string LastNameMaxLength = "User.LastName.MaxLength";
+        public const string InvalidNameFormat = "User.InvalidNameFormat";
+        public const string InvalidEmailFormat = "User.InvalidEmailFormat";
+        public const string InvalidPhoneFormat = "User.InvalidPhoneFormat";
+        public const string NameMaxLength = "User.NameMaxLength";
+        public const string CurrentPasswordRequired = "User.CurrentPasswordRequired";
     }
 
     public static class Service

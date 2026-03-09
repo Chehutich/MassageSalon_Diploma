@@ -29,6 +29,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(255)
             .HasColumnName("email");
 
+        builder.Property(e => e.PhotoUrl)
+            .HasMaxLength(500)
+            .HasColumnName("photo_url");
+
         builder.Property(e => e.FirstName)
             .HasMaxLength(100)
             .HasColumnName("first_name");

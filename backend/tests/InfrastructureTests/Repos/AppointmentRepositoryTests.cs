@@ -21,11 +21,12 @@ public class AppointmentRepositoryTests : BaseRepositoryTest
         var category = await CreateCategoryAsync();
         var service = await CreateServiceAsync(category.Id);
 
-        var startRange = new DateTime(2026, 3, 10, 0, 0, 0, DateTimeKind.Utc);
-        var endRange = new DateTime(2026, 3, 15, 0, 0, 0, DateTimeKind.Utc);
+        var now = DateTime.UtcNow;
+        var startRange = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc).AddDays(1);
+        var endRange = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc).AddDays(5);
 
         // 1. Valid Appointment within range
-        await CreateAppointmentAsync(master.Id, service, startRange.AddHours(10)); // March 10, 10:00
+        await CreateAppointmentAsync(master.Id, service, startRange.AddHours(10));
 
         // 2. Cancelled Appointment (should be ignored)
         var cancelledAppt = await CreateAppointmentAsync(master.Id, service, startRange.AddHours(14));
@@ -35,7 +36,7 @@ public class AppointmentRepositoryTests : BaseRepositoryTest
         // 3. TimeOff within range
         await CreateTimeOffAsync(master.Id,
             DateOnly.FromDateTime(startRange.AddDays(2)),
-            DateOnly.FromDateTime(startRange.AddDays(2))); // March 12
+            DateOnly.FromDateTime(startRange.AddDays(2)));
 
         // 4. Appointment for DIFFERENT master (should be ignored)
         var otherMaster = await CreateMasterAsync();
@@ -64,8 +65,9 @@ public class AppointmentRepositoryTests : BaseRepositoryTest
         var category = await CreateCategoryAsync();
         var service = await CreateServiceAsync(category.Id);
 
-        var startRange = new DateTime(2026, 3, 10, 0, 0, 0, DateTimeKind.Utc);
-        var endRange = new DateTime(2026, 3, 11, 0, 0, 0, DateTimeKind.Utc);
+        var now = DateTime.UtcNow;
+        var startRange = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc).AddMonths(1);
+        var endRange = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc).AddMonths(1).AddDays(1);
 
         // Appointment strictly BEFORE range
         await CreateAppointmentAsync(master.Id, service, startRange.AddHours(-5));

@@ -39,7 +39,7 @@ public abstract class BaseRepositoryTest : IDisposable
         var randomPhone = $"+380{Random.Shared.Next(100000000, 999999999)}";
 
         var owner = user ?? await CreateUserAsync(Guid.NewGuid() + "@test.com", randomPhone);
-        var master = new Master(owner.Id, "Expert bio", null);
+        var master = new Master(owner.Id, "Expert bio");
         context.Masters.Add(master);
         await context.SaveChangesAsync();
         return master;

@@ -33,7 +33,7 @@ public class GetServiceByIdHandler(
             service.Category.Slug,
             service.Badge?.ToString(),
             service.Benefits,
-            mastersForService.Select(m => new MasterShortResponse(m.Id, m.User.FirstName, m.User.LastName, m.PhotoUrl)).ToList()
+            mastersForService.Select(m => new MasterShortResponse(m.Id, m.User.FirstName, m.User.LastName, m.User.PhotoUrl)).ToList()
         );
 
         return response;

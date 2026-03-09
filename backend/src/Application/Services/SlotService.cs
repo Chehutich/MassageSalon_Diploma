@@ -47,7 +47,7 @@ public class SlotService(
                 master.Id,
                 master.User.FirstName,
                 master.User.LastName,
-                master.PhotoUrl);
+                master.User.PhotoUrl);
 
             var masterSlots = await GetSlotsForMasterAsync(master.Id, service.Duration, date, cancellationToken);
 

@@ -24,7 +24,7 @@ public class GetMasterDetailsHandler(IMasterRepository masterRepository)
             master.Id,
             master.User.FirstName,
             master.User.LastName,
-            master.PhotoUrl,
+            master.User.PhotoUrl,
             master.Bio,
             master.Services.Select(s => new ServiceResponse(
                 s.Id,

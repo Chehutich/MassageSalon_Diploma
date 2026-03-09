@@ -4,23 +4,19 @@ using Domain.Enums;
 
 namespace Domain.Entities;
 
-public partial class User : IAuditableEntity
+public class User : IAuditableEntity
 {
-    [GeneratedRegex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")]
-    private static partial Regex EmailRegex();
-
-    [GeneratedRegex(@"^\+?[1-9]\d{1,14}$")]
-    private static partial Regex PhoneRegex();
-
     public Guid Id { get; private set; } = Guid.NewGuid();
 
     public string FirstName { get; private set; } = null!;
 
     public string LastName { get; private set; } = null!;
 
-    public string? Phone { get; private set; }
+    public string Phone { get; private set; }
 
     public string Email { get; private set; } = null!;
+
+    public string? PhotoUrl { get; private set; }
 
     public string PasswordHash { get; private set; } = null!;
 
@@ -38,55 +34,55 @@ public partial class User : IAuditableEntity
 
     public User(string firstName, string lastName, string email, string passwordHash, string phone)
     {
-        if (string.IsNullOrWhiteSpace(firstName))
-        {
-            throw new ArgumentException("First name cannot be empty.");
-        }
-
-        if (string.IsNullOrWhiteSpace(lastName))
-        {
-            throw new ArgumentException("Last name cannot be empty.");
-        }
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new ArgumentException("Email cannot be empty.");
-        }
-
-        if (!EmailRegex().IsMatch(email))
-        {
-            throw new ArgumentException("Invalid email format.");
-        }
-
-        if (string.IsNullOrWhiteSpace(passwordHash))
-        {
-            throw new ArgumentException("Password hash cannot be empty.");
-        }
-
-        if (string.IsNullOrWhiteSpace(phone))
-        {
-            throw new ArgumentException("Phone number cannot be empty.");
-        }
-
-        if (!PhoneRegex().IsMatch(phone))
-        {
-            throw new ArgumentException("Invalid phone number format. Use international format (e.g. +380...)");
-        }
-
-        FirstName = firstName;
-        LastName = lastName;
-        Email = email.ToLowerInvariant();
-        PasswordHash = passwordHash;
-        Phone = phone;
+        SetFirstName(firstName);
+        SetLastName(lastName);
+        SetEmail(email);
+        SetPassword(passwordHash);
+        SetPhone(phone);
     }
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
 
-    public void ChangeRole(Role newRole)
+    public void SetFirstName(string firstName)
     {
-        Role = newRole;
+        if (string.IsNullOrWhiteSpace(firstName))
+        {
+            throw new ArgumentException("First name cannot be empty.");
+        }
+
+        if (!RegexHelper.NameRegex().IsMatch(firstName))
+        {
+            throw new ArgumentException("First name contains invalid characters or is too short.");
+        }
+
+        FirstName = firstName;
+    }
+
+    public void SetLastName(string lastName)
+    {
+        if (string.IsNullOrWhiteSpace(lastName))
+        {
+            throw new ArgumentException("Last name cannot be empty.");
+        }
+
+        if (!RegexHelper.NameRegex().IsMatch(lastName))
+        {
+            throw new ArgumentException("Last name contains invalid characters or is too short.");
+        }
+
+        LastName = lastName;
+    }
+
+    public void SetPhotoUrl(string? photoUrl)
+    {
+        if (photoUrl != null && !RegexHelper.UrlRegex().IsMatch(photoUrl))
+        {
+            throw new ArgumentException("Invalid URL format.");
+        }
+
+        PhotoUrl = photoUrl;
     }
 
     public void SetRefreshToken(string token, DateTime expiry)
@@ -111,14 +107,14 @@ public partial class User : IAuditableEntity
         RefreshTokenExpiry = null;
     }
 
-    public void UpdateEmail(string newEmail)
+    public void SetEmail(string newEmail)
     {
         if (string.IsNullOrWhiteSpace(newEmail))
         {
             throw new ArgumentException("New email cannot be empty.");
         }
 
-        if (!EmailRegex().IsMatch(newEmail))
+        if (!RegexHelper.EmailRegex().IsMatch(newEmail))
         {
             throw new ArgumentException("Invalid email format.");
         }
@@ -127,7 +123,7 @@ public partial class User : IAuditableEntity
         InvalidateRefreshToken();
     }
 
-    public void UpdatePassword(string newHash)
+    public void SetPassword(string newHash)
     {
         if (string.IsNullOrWhiteSpace(newHash))
         {
@@ -138,14 +134,14 @@ public partial class User : IAuditableEntity
         InvalidateRefreshToken();
     }
 
-    public void UpdatePhone(string newPhone)
+    public void SetPhone(string newPhone)
     {
         if (string.IsNullOrWhiteSpace(newPhone))
         {
             throw new ArgumentException("New phone number cannot be empty.");
         }
 
-        if (!PhoneRegex().IsMatch(newPhone))
+        if (!RegexHelper.PhoneRegex().IsMatch(newPhone))
         {
             throw new ArgumentException("Invalid phone number format.");
         }

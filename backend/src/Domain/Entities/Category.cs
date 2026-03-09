@@ -1,15 +1,10 @@
 ﻿using System.Text.RegularExpressions;
+using Domain.Common;
 
 namespace Domain.Entities;
 
-public partial class Category
+public class Category
 {
-    [GeneratedRegex(@"[^a-z0-9\-]+")]
-    private static partial Regex NonAlphanumericRegex();
-
-    [GeneratedRegex(@"\-+")]
-    private static partial Regex MultipleHyphensRegex();
-
     public Guid Id { get; private set; } = Guid.NewGuid();
 
     public string Title { get; private set; } = null!;
@@ -44,9 +39,9 @@ public partial class Category
             .Replace(" ", "-")
             .Replace("_", "-");
 
-        result = NonAlphanumericRegex().Replace(result, "");
+        result = RegexHelper.NonAlphanumericRegex().Replace(result, "");
 
-        result = MultipleHyphensRegex().Replace(result, "-");
+        result = RegexHelper.MultipleHyphensRegex().Replace(result, "-");
 
         return result.Trim('-');
     }

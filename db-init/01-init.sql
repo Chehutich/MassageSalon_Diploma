@@ -7,6 +7,7 @@ CREATE TABLE users (
     last_name             VARCHAR(100) NOT NULL,
     phone                 VARCHAR(20)  UNIQUE,
     email                 VARCHAR(255) UNIQUE NOT NULL,
+    photo_url             VARCHAR(500),
     password_hash         VARCHAR(512) NOT NULL,
     role                  VARCHAR(50)  NOT NULL DEFAULT 'Client',
     refresh_token         VARCHAR(512),
@@ -19,7 +20,6 @@ CREATE TABLE masters (
     id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id    UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     bio        TEXT,
-    photo_url  VARCHAR(500),
     is_active  BOOLEAN     NOT NULL DEFAULT TRUE,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

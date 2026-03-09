@@ -8,8 +8,6 @@ public class Master
 
     public string? Bio { get; private set; }
 
-    public string? PhotoUrl { get; private set; }
-
     public bool IsActive { get; private set; } = true;
 
     public DateTime UpdatedAt { get; private set; }
@@ -26,11 +24,10 @@ public class Master
 
     private Master() { }
 
-    public Master(Guid userId, string? bio, string? photoUrl)
+    public Master(Guid userId, string? bio)
     {
         UserId = userId;
         Bio = bio;
-        PhotoUrl = photoUrl;
     }
 
     public void UpdateServices(IEnumerable<Service> services)

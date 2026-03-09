@@ -4,4 +4,7 @@ public record UserMeResponse(
     Guid Id,
     string FirstName,
     string LastName,
-    string Email);
+    string Email,
+    string? PhotoUrl,
+    string Phone,
+    string Role);

@@ -30,7 +30,7 @@ public class GetMastersHandlerTests
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service2, category);
 
         var user = new Domain.Entities.User("Ivan", "Test", "ivan@test.com", "hash", "+123");
-        var master = new Master(user.Id, "Pro", null);
+        var master = new Master(user.Id, "Pro");
 
         typeof(Master).GetProperty(nameof(Master.User))?.SetValue(master, user);
         typeof(Master).GetProperty(nameof(Master.Services))?.SetValue(master, new List<Service> { service1, service2 });

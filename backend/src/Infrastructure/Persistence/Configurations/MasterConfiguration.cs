@@ -22,10 +22,6 @@ public class MasterConfiguration : IEntityTypeConfiguration<Master>
             .HasDefaultValue(true)
             .HasColumnName("is_active");
 
-        builder.Property(e => e.PhotoUrl)
-            .HasMaxLength(500)
-            .HasColumnName("photo_url");
-
         builder.Property(e => e.UpdatedAt)
             .HasDefaultValueSql("now()")
             .HasColumnName("updated_at");

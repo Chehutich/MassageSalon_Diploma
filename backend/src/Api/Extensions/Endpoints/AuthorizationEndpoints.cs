@@ -2,9 +2,6 @@ using Application.Common.Models;
 using Application.Features.Auth.Login;
 using Application.Features.Auth.RefreshToken;
 using Application.Features.Auth.Register;
-using Application.Features.User.ChangeEmail;
-using Application.Features.User.ChangePassword;
-using Application.Features.User.ChangePhone;
 using Application.Features.User.GetMe;
 using Application.Features.User.Logout;
 using MediatR;
@@ -105,83 +102,6 @@ public static class AuthorizationEndpoints
             .AllowAnonymous()
             .WithName("RefreshTokenForMobile")
             .WithDescription("Refreshes the authentication tokens using the refresh token from body.");
-
-
-        group.MapGet("/me", async (ISender sender, CancellationToken cancellationToken) =>
-            {
-                var result = await sender.Send(new GetMeQuery(), cancellationToken);
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : result.ToProblemDetails();
-            })
-            .Produces<UserMeResponse>()
-            .ProducesProblem(404)
-            .ProducesProblem(401)
-            .WithName("GetMe")
-            .WithDescription("Retrieves the profile information of the currently authenticated user.")
-            .RequireAuthorization();
-
-        group.MapPut("/change-email",
-                async (ChangeEmailCommand command, ISender sender, CancellationToken cancellationToken) =>
-                {
-                    var result = await sender.Send(command, cancellationToken);
-                    return result.IsSuccess
-                        ? Results.Ok()
-                        : result.ToProblemDetails();
-                })
-            .Produces(StatusCodes.Status200OK)
-            .ProducesProblem(409)
-            .ProducesProblem(401)
-            .ProducesProblem(404)
-            .WithName("ChangeEmail")
-            .WithDescription("Updates the email address of the currently authenticated user.")
-            .RequireAuthorization();
-
-        group.MapPut("/change-password",
-                async (ChangePasswordCommand command, ISender sender, CancellationToken cancellationToken) =>
-                {
-                    var result = await sender.Send(command, cancellationToken);
-                    return result.IsSuccess
-                        ? Results.Ok()
-                        : result.ToProblemDetails();
-                })
-            .Produces(StatusCodes.Status200OK)
-            .ProducesProblem(400)
-            .ProducesProblem(401)
-            .ProducesProblem(404)
-            .WithName("ChangePassword")
-            .WithDescription("Updates the password of the currently authenticated user.")
-            .RequireAuthorization();
-
-        group.MapPut("/change-phone",
-                async (ChangePhoneCommand command, ISender sender, CancellationToken cancellationToken) =>
-                {
-                    var result = await sender.Send(command, cancellationToken);
-                    return result.IsSuccess
-                        ? Results.Ok()
-                        : result.ToProblemDetails();
-                })
-            .Produces(StatusCodes.Status200OK)
-            .ProducesProblem(400)
-            .ProducesProblem(401)
-            .ProducesProblem(404)
-            .WithName("ChangePhone")
-            .WithDescription("Updates the phone number of the currently authenticated user.")
-            .RequireAuthorization();
-
-        group.MapPost("/logout", async (HttpContext context, ISender sender, CancellationToken cancellationToken) =>
-            {
-                await sender.Send(new LogoutCommand(), cancellationToken);
-
-                var options = new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict };
-                context.Response.Cookies.Delete("accessToken", options);
-                context.Response.Cookies.Delete("refreshToken", options);
-
-                return Results.Ok();
-            })
-            .Produces(StatusCodes.Status200OK)
-            .WithName("Logout")
-            .WithDescription("Logs out the current user and clears authentication cookies.");
 
         return app;
     }

@@ -41,6 +41,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapAuthEndpoints();
+app.MapUserEndpoints();
 app.MapServiceEndpoints();
 app.MapAppointmentEndpoints();
 app.MapCategoryEndpoints();

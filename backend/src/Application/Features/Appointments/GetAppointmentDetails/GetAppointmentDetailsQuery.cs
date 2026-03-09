@@ -42,7 +42,7 @@ public class GetAppointmentDetailsHandler(
             appointment.Master.Id,
             appointment.Master.User.FirstName,
             appointment.Master.User.LastName,
-            appointment.Master.PhotoUrl
+            appointment.Master.User.PhotoUrl
         );
 
         return dto;

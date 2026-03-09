@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Catalog\" />
-    <Folder Include="Features\User\" />
   </ItemGroup>
 
 </Project>

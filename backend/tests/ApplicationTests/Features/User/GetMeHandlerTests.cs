@@ -24,7 +24,7 @@ public class GetMeHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new Domain.Entities.User("LutheR", "Test", "luther@test.com", "hash", "+123456");
+        var user = new Domain.Entities.User("Chechut", "Test", "Chechut@test.com", "hash", "+123456");
 
         _userContextMock.Setup(x => x.Id).Returns(userId);
         _userRepoMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
@@ -35,8 +35,8 @@ public class GetMeHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Email.Should().Be("luther@test.com");
-        result.Value.FirstName.Should().Be("LutheR");
+        result.Value.Email.Should().Be("chechut@test.com");
+        result.Value.FirstName.Should().Be("Chechut");
     }
 
     [Fact]

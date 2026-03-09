@@ -18,7 +18,7 @@ public class GetMastersHandler(IMasterRepository masterRepository)
             m.Id,
             m.User.FirstName,
             m.User.LastName,
-            m.PhotoUrl,
+            m.User.PhotoUrl,
             m.Bio,
             m.Services
                 .Select(s => s.Category)

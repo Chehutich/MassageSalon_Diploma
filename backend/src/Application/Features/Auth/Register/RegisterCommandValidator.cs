@@ -9,16 +9,10 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     public RegisterCommandValidator()
     {
         RuleFor(x => x.FirstName)
-            .NotEmpty()
-            .WithErrorCode(ValidationErrors.User.FirstNameRequired)
-            .MaximumLength(50)
-            .WithErrorCode(ValidationErrors.User.FirstNameMaxLength);
+            .NameRules();
 
         RuleFor(x => x.LastName)
-            .NotEmpty()
-            .WithErrorCode(ValidationErrors.User.LastNameRequired)
-            .MaximumLength(50)
-            .WithErrorCode(ValidationErrors.User.LastNameMaxLength);
+            .NameRules();
 
         RuleFor(x => x.Email)
             .EmailRules();
