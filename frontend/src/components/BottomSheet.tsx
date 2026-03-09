@@ -15,7 +15,7 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
   DimensionValue,
-  TouchableOpacity, // ИСПОЛЬЗУЕМ ЭТО ВМЕСТО Pressable
+  TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Palette } from "@/src/theme/tokens";
@@ -66,11 +66,11 @@ export function BottomSheet({
       Animated.spring(translateY, {
         toValue: 0,
         useNativeDriver: true,
-        damping: 30, // УВЕЛИЧЕНО с 22: убирает долгую микро-тряску в конце
-        stiffness: 250, // УВЕЛИЧЕНО с 220: делает анимацию четче
+        damping: 30,
+        stiffness: 250,
         mass: 0.8,
-        restDisplacementThreshold: 1, // ОЧЕНЬ ВАЖНО: останавливает анимацию быстрее
-        restSpeedThreshold: 5, // ОЧЕНЬ ВАЖНО: останавливает анимацию быстрее
+        restDisplacementThreshold: 1,
+        restSpeedThreshold: 5,
       }),
       Animated.timing(opacity, {
         toValue: 1,
@@ -85,7 +85,7 @@ export function BottomSheet({
     Animated.parallel([
       Animated.timing(translateY, {
         toValue: realHeight + 100,
-        duration: 250, // Немного ускорили закрытие
+        duration: 250,
         useNativeDriver: true,
       }),
       Animated.timing(opacity, {
@@ -147,13 +147,12 @@ export function BottomSheet({
             ) : null}
           </View>
 
-          {/* ЗАМЕНИЛ НА TouchableOpacity */}
           <TouchableOpacity
             onPress={handleClose}
-            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} // Лучше задавать объектом
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             style={styles.closeBtn}
             activeOpacity={0.6}
-            delayPressIn={0} // Заставляет реагировать мгновенно
+            delayPressIn={0}
           >
             <X size={20} strokeWidth={2} color={Palette.taupe} />
           </TouchableOpacity>

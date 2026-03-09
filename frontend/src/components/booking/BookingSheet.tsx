@@ -20,11 +20,13 @@ import {
   useGetAvailableDates,
   useGetAvailableSlots,
   useCreateAppointment,
+  getGetMyAppointmentsQueryKey,
 } from "@/src/api/generated/appointments/appointments";
 import type {
   MasterResponse,
   SlotResponse,
 } from "@/src/api/generated/apiV1.schemas";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Helpers
 import {
@@ -38,14 +40,19 @@ type Props = {
   serviceId: string | null;
   masterId?: string | null;
   onClose: () => void;
+  onSuccess?: () => void;
+  onError?: (errMessage: string) => void;
 };
 
 export function BookingSheet({
   serviceId,
   masterId: initMasterId,
   onClose,
+  onSuccess,
+  onError,
 }: Props) {
   const { scrollEnabled, isAtTopRef } = useBottomSheetScroll();
+  const queryClient = useQueryClient();
 
   const today = new Date();
   const [selectedMasterId, setSelectedMasterId] = useState<string | null>(
@@ -59,24 +66,30 @@ export function BookingSheet({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<SlotResponse | null>(null);
   const [notes, setNotes] = useState("");
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (!serviceId) {
-      setSuccess(false);
       setSelectedDate(null);
       setSelectedSlot(null);
       setNotes("");
     }
   }, [serviceId]);
 
+  const queryOptions = {
+    enabled: !!serviceId,
+    staleTime: 10 * 1000,
+    gcTime: 15 * 1000,
+    refetchOnWindowFocus: true,
+  };
+
   // API Requests
   const { data: service } = useGetServiceById(serviceId ?? "", {
-    query: { enabled: !!serviceId },
+    query: queryOptions,
   });
+
   const { data: masters, isLoading: mastersLoading } = useGetMasters(
     { ServiceId: serviceId ?? "" },
-    { query: { enabled: !!serviceId } },
+    { query: queryOptions },
   );
 
   const { data: slots, isLoading: slotsLoading } = useGetAvailableSlots(
@@ -85,7 +98,12 @@ export function BookingSheet({
       MasterId: selectedMasterId ?? undefined,
       Date: selectedDate ? toDateString(selectedDate) : "",
     },
-    { query: { enabled: !!selectedDate && !!serviceId } },
+    {
+      query: {
+        ...queryOptions,
+        enabled: !!selectedDate && !!serviceId,
+      },
+    },
   );
 
   const { data: availableDates, isLoading: datesLoading } =
@@ -96,7 +114,7 @@ export function BookingSheet({
         Year: viewYear,
         Month: viewMonth + 1,
       },
-      { query: { enabled: !!serviceId } },
+      { query: queryOptions },
     );
 
   const { mutate: createAppointment, isPending } = useCreateAppointment();
@@ -166,7 +184,23 @@ export function BookingSheet({
           notes: notes || null,
         },
       },
-      { onSuccess: () => setSuccess(true) },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetMyAppointmentsQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["/api/appointments/available-dates"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["/api/appointments/available-slots"],
+          });
+          onSuccess?.();
+        },
+        onError: (error: any) => {
+          onError?.("Упс. Не вдалося створити запис. Щось пішло не так.");
+        },
+      },
     );
   };
 
@@ -192,75 +226,64 @@ export function BookingSheet({
           isAtTopRef.current = e.nativeEvent.contentOffset.y <= 0;
         }}
       >
-        {success ? (
-          <BookingSuccess
-            onClose={onClose}
-            date={selectedDate}
-            slot={selectedSlot}
-            fmt={fmtTime}
-          />
-        ) : (
+        {/* 2. Masters */}
+        <BookingMasters
+          masters={masters}
+          loading={mastersLoading}
+          selectedMasterId={selectedMasterId}
+          selectedMaster={selectedMaster}
+          onSelectMaster={(m) => {
+            setSelectedMasterId(m?.id ?? null);
+            setSelectedMaster(m);
+            setSelectedSlot(null);
+          }}
+        />
+        <View style={styles.divider} />
+
+        {/* 3. Calendar */}
+        <BookingCalendar
+          viewYear={viewYear}
+          viewMonth={viewMonth}
+          selectedDate={selectedDate}
+          availableDates={availableDates}
+          loading={datesLoading}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+          onSelectDate={handleSelectDate}
+          isDateDisabled={checkDateDisabled}
+          isSelected={isDateSelected}
+        />
+
+        {/* 4. Slots */}
+        {selectedDate && (
           <>
-            {/* 2. Masters */}
-            <BookingMasters
-              masters={masters}
-              loading={mastersLoading}
-              selectedMasterId={selectedMasterId}
-              selectedMaster={selectedMaster}
-              onSelectMaster={(m) => {
-                setSelectedMasterId(m?.id ?? null);
-                setSelectedMaster(m);
-                setSelectedSlot(null);
-              }}
-            />
             <View style={styles.divider} />
-
-            {/* 3. Calendar */}
-            <BookingCalendar
-              viewYear={viewYear}
-              viewMonth={viewMonth}
-              selectedDate={selectedDate}
-              availableDates={availableDates}
-              loading={datesLoading}
-              onPrevMonth={handlePrevMonth}
-              onNextMonth={handleNextMonth}
-              onSelectDate={handleSelectDate}
-              isDateDisabled={checkDateDisabled}
-              isSelected={isDateSelected}
-            />
-
-            {/* 4. Slots */}
-            {selectedDate && (
-              <>
-                <View style={styles.divider} />
-                <BookingSlots
-                  slots={slots}
-                  loading={slotsLoading}
-                  selectedSlot={selectedSlot}
-                  onSelectSlot={setSelectedSlot}
-                  label={slotDateLabel}
-                  fmt={fmtTime}
-                />
-              </>
-            )}
-
-            <View style={styles.divider} />
-
-            {/* 5. Summary */}
-            <BookingSummary
-              service={service}
-              selectedDate={selectedDate}
+            <BookingSlots
+              slots={slots}
+              loading={slotsLoading}
               selectedSlot={selectedSlot}
-              selectedMaster={selectedMaster}
-              notes={notes}
-              onNotesChange={setNotes}
-              onBook={handleBook}
-              isPending={isPending}
-              dateLabel={slotDateLabel}
+              onSelectSlot={setSelectedSlot}
+              label={slotDateLabel}
               fmt={fmtTime}
             />
           </>
         )}
+
+        <View style={styles.divider} />
+
+        {/* 5. Summary */}
+        <BookingSummary
+          service={service}
+          selectedDate={selectedDate}
+          selectedSlot={selectedSlot}
+          selectedMaster={selectedMaster}
+          notes={notes}
+          onNotesChange={setNotes}
+          onBook={handleBook}
+          isPending={isPending}
+          dateLabel={slotDateLabel}
+          fmt={fmtTime}
+        />
       </ScrollView>
     </BottomSheet>
   );

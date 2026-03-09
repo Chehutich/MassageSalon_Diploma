@@ -17,6 +17,7 @@ type Props = {
   liked?: boolean;
   onToggleLike?: () => void;
   onBook?: () => void;
+  onPress?: (id: string) => void;
 };
 
 export function ServiceCard({
@@ -26,6 +27,7 @@ export function ServiceCard({
   liked = false,
   onToggleLike,
   onBook,
+  onPress,
 }: Props) {
   const likeScale = useRef(new Animated.Value(1)).current;
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -57,7 +59,7 @@ export function ServiceCard({
       ]}
     >
       {/* ── Top: icon + name + like ── */}
-      <Pressable style={styles.topRow} onPress={() => setSheetOpen(true)}>
+      <Pressable style={styles.topRow} onPress={() => onPress?.(item.id)}>
         <View style={[styles.iconBox, { backgroundColor: accent + "18" }]}>
           <Icon size={19} strokeWidth={1.5} color={accent} />
         </View>
@@ -123,14 +125,6 @@ export function ServiceCard({
           </Text>
         </Pressable>
       </Pressable>
-
-      <ServiceSheet
-        itemId={sheetOpen ? item.id : null}
-        accent={accent}
-        Icon={Icon}
-        onBook={onBook}
-        onClose={() => setSheetOpen(false)}
-      />
     </View>
   );
 }

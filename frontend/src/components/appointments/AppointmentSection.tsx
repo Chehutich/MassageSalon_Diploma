@@ -8,6 +8,7 @@ type Props = {
   accent: string;
   items: MyAppointmentResponse[];
   onBookAgain?: (serviceId: string, masterId: string | null) => void;
+  onCancelPress?: (item: MyAppointmentResponse) => void;
 };
 
 export function AppointmentSection({
@@ -15,13 +16,19 @@ export function AppointmentSection({
   accent,
   items,
   onBookAgain,
+  onCancelPress,
 }: Props) {
   if (items.length === 0) return null;
   return (
     <View style={styles.section}>
       <View style={{ gap: 10 }}>
         {items.map((a) => (
-          <AppointmentCard key={a.id} item={a} onBookAgain={onBookAgain} />
+          <AppointmentCard
+            key={a.id}
+            item={a}
+            onBookAgain={onBookAgain}
+            onCancelPress={onCancelPress}
+          />
         ))}
       </View>
     </View>

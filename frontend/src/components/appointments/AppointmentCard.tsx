@@ -7,9 +7,10 @@ import type { MyAppointmentResponse } from "@/src/api/generated/apiV1.schemas";
 type Props = {
   item: MyAppointmentResponse;
   onBookAgain?: (serviceId: string, masterId: string | null) => void;
+  onCancelPress?: (item: MyAppointmentResponse) => void;
 };
 
-export function AppointmentCard({ item, onBookAgain }: Props) {
+export function AppointmentCard({ item, onBookAgain, onCancelPress }: Props) {
   const status =
     STATUS_CONFIG[item.status?.toLowerCase() ?? ""] ?? STATUS_CONFIG.confirmed;
 
@@ -28,6 +29,12 @@ export function AppointmentCard({ item, onBookAgain }: Props) {
     hour: "2-digit",
     minute: "2-digit",
   })}`;
+
+  const now = Date.now();
+  const timeDifferenceMs = startDate.getTime() - now;
+  const ONE_HOUR_MS = 60 * 60 * 1000;
+
+  const canCancel = timeDifferenceMs > ONE_HOUR_MS;
 
   return (
     <View style={styles.card}>
@@ -93,12 +100,14 @@ export function AppointmentCard({ item, onBookAgain }: Props) {
       {/* ── Actions ── */}
       {item.status?.toLowerCase() === "confirmed" ? (
         <View style={styles.actions}>
-          <Pressable style={styles.btnSecondary}>
-            <Text style={styles.btnSecondaryText}>Перенести</Text>
-          </Pressable>
-          <Pressable style={styles.btnPrimary}>
-            <Text style={styles.btnPrimaryText}>Деталі</Text>
-          </Pressable>
+          {canCancel && (
+            <Pressable
+              style={styles.btnPrimary}
+              onPress={() => onCancelPress?.(item)}
+            >
+              <Text style={styles.btnPrimaryText}>Скасувати</Text>
+            </Pressable>
+          )}
         </View>
       ) : (
         <Pressable

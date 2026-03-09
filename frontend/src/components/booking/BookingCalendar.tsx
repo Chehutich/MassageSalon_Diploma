@@ -7,23 +7,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import * as bookingHelpers from "./booking.helpers";
 import { Palette } from "@/src/theme/tokens";
-
-const DAYS_UA = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-const MONTHS_UA_SHORT = [
-  "Січ",
-  "Лют",
-  "Бер",
-  "Кві",
-  "Тра",
-  "Чер",
-  "Лип",
-  "Сер",
-  "Вер",
-  "Жов",
-  "Лис",
-  "Гру",
-];
 
 type Props = {
   viewYear: number;
@@ -80,7 +65,7 @@ export function BookingCalendar({
             <ChevronLeft size={16} strokeWidth={1.8} color={Palette.taupe} />
           </Pressable>
           <Text style={styles.calMonthLabel}>
-            {MONTHS_UA_SHORT[viewMonth]} {viewYear}
+            {bookingHelpers.MONTHS_UA_SHORT[viewMonth]} {viewYear}
           </Text>
           <Pressable onPress={onNextMonth} style={styles.calNavBtn} hitSlop={8}>
             <ChevronRight size={16} strokeWidth={1.8} color={Palette.taupe} />
@@ -88,7 +73,7 @@ export function BookingCalendar({
         </View>
 
         <View style={styles.calGrid}>
-          {DAYS_UA.map((d) => (
+          {bookingHelpers.DAYS_OF_WEEK.map((d) => (
             <Text key={d} style={styles.calDayHeader}>
               {d}
             </Text>

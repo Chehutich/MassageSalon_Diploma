@@ -20,11 +20,13 @@ import type {
 import { categoryColor, categoryIcon } from "@/src/utils/categoryHelpers";
 import { useLikes } from "@/src/context/LikesContext";
 import { PLURAL, pluralize } from "@/src/utils/pluralize";
+import { useSheets } from "@/src/context/SheetContext";
 
 export default function FavoritesScreen() {
   const { likedIds, toggleLike } = useLikes();
   const { data: services, isLoading } = useGetServices();
   const { data: categories } = useGetCategories();
+  const { openBooking, openService } = useSheets();
 
   const grouped = useMemo(() => {
     if (!categories || !services) return [];
@@ -51,7 +53,7 @@ export default function FavoritesScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Улюблені</Text>
           <Text style={styles.subtitle}>
-            {pluralize(liked?.length ?? 0, PLURAL.service)} збережено
+            Збережено {pluralize(liked.length, PLURAL.service)}
           </Text>
         </View>
 
@@ -86,6 +88,8 @@ export default function FavoritesScreen() {
                     Icon={cat?.icon}
                     liked={likedIds.has(item.id)}
                     onToggleLike={() => toggleLike(item.id)}
+                    onBook={() => openBooking(item.id)}
+                    onPress={() => openService(item.id)}
                   />
                 );
               })}

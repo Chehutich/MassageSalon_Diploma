@@ -8,23 +8,41 @@ import {
   Pressable,
   RefreshControl,
 } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
+import { TopToast, ToastConfig } from "@/src/components/TopToast";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Calendar } from "lucide-react-native";
 import { useFocusEffect } from "expo-router";
 import { Palette } from "@/src/theme/tokens";
 import { AmbientBackground } from "@/src/components/AmbientBackground";
-import { useGetMyAppointments } from "@/src/api/generated/appointments/appointments";
+import {
+  useCancelAppointment,
+  useGetMyAppointments,
+  getGetMyAppointmentsQueryKey,
+} from "@/src/api/generated/appointments/appointments";
 import { AppointmentSection } from "@/src/components/appointments/AppointmentSection";
 import { BookingSheet } from "@/src/components/booking/BookingSheet";
 import { FILTERS } from "@/src/components/appointments/appointmentHelpers";
 import { PLURAL, pluralize } from "@/src/utils/pluralize";
+import { MyAppointmentResponse } from "@/src/api/generated/apiV1.schemas";
+import { CancelConfirmModal } from "@/src/components/appointments/CancelConfirmModal";
+import { useToast } from "@/src/context/ToastContext";
+import { useSheets } from "@/src/context/SheetContext";
 
 export default function AppointmentsScreen() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [bookingServiceId, setBookingServiceId] = useState<string | null>(null);
   const [bookingMasterId, setBookingMasterId] = useState<string | null>(null);
+  const [appointmentToCancel, setAppointmentToCancel] =
+    useState<MyAppointmentResponse | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const lastFetchRef = useRef<number>(0);
+
+  const { openBooking, openService, openMaster } = useSheets();
+
+  const { showToast } = useToast();
+
+  const queryClient = useQueryClient();
 
   const {
     data: appointments,
@@ -51,6 +69,16 @@ export default function AppointmentsScreen() {
     setRefreshing(false);
   };
 
+  const cancelAppointmentMutation = useCancelAppointment({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetMyAppointmentsQueryKey(),
+        });
+      },
+    },
+  });
+
   const filtered = useMemo(() => {
     if (!appointments) return [];
     if (activeFilter === "all") return appointments;
@@ -74,8 +102,25 @@ export default function AppointmentsScreen() {
   );
 
   const handleBookAgain = (serviceId: string, masterId: string | null) => {
-    setBookingServiceId(serviceId);
-    setBookingMasterId(masterId);
+    openBooking(serviceId, masterId);
+  };
+
+  const confirmCancel = async () => {
+    if (!appointmentToCancel?.id) return;
+    try {
+      await cancelAppointmentMutation.mutateAsync({
+        id: appointmentToCancel.id,
+      });
+
+      setAppointmentToCancel(null);
+
+      showToast("success", "Скасовано", "Запис видалено успішно");
+    } catch (error: any) {
+      console.error("Cancel error:", error);
+      setAppointmentToCancel(null);
+
+      showToast("error", "Помилка", "Упс. Щось пішло не так");
+    }
   };
 
   return (
@@ -93,7 +138,7 @@ export default function AppointmentsScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filters}
-          style={{ flexGrow: 0 }}
+          style={{ flexGrow: 0, flexShrink: 0 }}
         >
           {FILTERS.map((f) => (
             <Pressable
@@ -116,6 +161,7 @@ export default function AppointmentsScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scroll}
+          style={{ flex: 1 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -145,6 +191,7 @@ export default function AppointmentsScreen() {
                 title="Підтверджені"
                 accent={Palette.sage}
                 items={grouped.confirmed}
+                onCancelPress={(item) => setAppointmentToCancel(item)}
               />
               <AppointmentSection
                 title="Завершені"
@@ -168,13 +215,15 @@ export default function AppointmentsScreen() {
           )}
         </ScrollView>
       </SafeAreaView>
-      <BookingSheet
-        serviceId={bookingServiceId}
-        masterId={bookingMasterId}
-        onClose={() => {
-          setBookingServiceId(null);
-          setBookingMasterId(null);
+      <CancelConfirmModal
+        visible={!!appointmentToCancel}
+        appointment={{
+          serviceName: appointmentToCancel?.serviceName ?? "",
+          masterFirstName: appointmentToCancel?.masterFirstName ?? "",
+          masterLastName: appointmentToCancel?.masterLastName ?? "",
         }}
+        onCancel={confirmCancel}
+        onClose={() => setAppointmentToCancel(null)}
       />
     </View>
   );

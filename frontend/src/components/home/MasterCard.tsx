@@ -7,18 +7,17 @@ import { MasterAvatar } from "@/src/components/MasterAvatar";
 
 type Props = {
   master: MasterResponse;
-  onBook: (serviceId: string) => void;
+  onPress?: (id: string) => void;
 };
 
-export function MasterCard({ master, onBook }: Props) {
+export function MasterCard({ master, onPress }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
-  const initials = `${master.firstName[0]}${master.lastName[0]}`.toUpperCase();
   const color = stringToColor(master.id);
   console.log("photoUrl:", master.photoUrl);
 
   return (
     <>
-      <Pressable style={styles.card} onPress={() => setSheetOpen(true)}>
+      <Pressable style={styles.card} onPress={() => onPress?.(master.id)}>
         {/* Photo */}
         <MasterAvatar
           firstName={master.firstName}
@@ -43,11 +42,6 @@ export function MasterCard({ master, onBook }: Props) {
           </Text>
         )}
       </Pressable>
-      <MasterSheet
-        masterId={sheetOpen ? master.id : null}
-        onBook={onBook}
-        onClose={() => setSheetOpen(false)}
-      />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { useGetServiceById } from "@/src/api/generated/services/services";
 import type { MasterShortResponse } from "@/src/api/generated/apiV1.schemas";
 import { MasterAvatar } from "@/src/components/MasterAvatar";
 import { getBadgeConfig } from "@/src/utils/badgeHelpers";
+import * as categoryHelpers from "@/src/utils/categoryHelpers";
 import {
   BottomSheet,
   useBottomSheetScroll,
@@ -20,22 +21,24 @@ import {
 
 type Props = {
   itemId: string | null;
-  accent: string;
-  Icon?: React.ComponentType<{
-    size: number;
-    strokeWidth: number;
-    color: string;
-  }>;
   onClose: () => void;
   onBook?: () => void;
 };
 
-function ServiceSheetContent({ itemId, accent, Icon, onClose, onBook }: Props) {
+function ServiceSheetContent({ itemId, onClose, onBook }: Props) {
   const { scrollEnabled, isAtTopRef } = useBottomSheetScroll();
   const { data: item, isLoading } = useGetServiceById(itemId ?? "", {
     query: { enabled: !!itemId },
   });
+
   const badge = item ? getBadgeConfig(item.badge) : null;
+
+  const accent = item?.categorySlug
+    ? categoryHelpers.categoryColor(item.categorySlug)
+    : Palette.taupe;
+  const Icon = item?.categorySlug
+    ? categoryHelpers.categoryIcon(item.categorySlug)
+    : Sparkle;
 
   if (isLoading || !item) {
     return (
@@ -159,7 +162,7 @@ export function ServiceSheet(props: Props) {
       onClose={props.onClose}
       maxHeight="88%"
     >
-      <ServiceSheetContent {...props} />
+      {props.itemId && <ServiceSheetContent {...props} />}
     </BottomSheet>
   );
 }

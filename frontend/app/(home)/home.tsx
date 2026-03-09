@@ -29,17 +29,15 @@ import { MasterCard } from "@/src/components/home/MasterCard";
 import { useGetMasters } from "@/src/api/generated/masters/masters";
 import { PLURAL, pluralize } from "@/src/utils/pluralize";
 import { useLikes } from "@/src/context/LikesContext";
-import { BookingSheet } from "@/src/components/booking/BookingSheet";
+import { useSheets } from "@/src/context/SheetContext";
 
 export default function HomeScreen() {
   const [search, setSearch] = useState("");
   const [focused, setFocused] = useState(false);
   const [activeChip, setActiveChip] = useState<string>("All");
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null,
-  );
-  const { likedIds, toggleLike } = useLikes();
 
+  const { openBooking, openService, openMaster } = useSheets();
+  const { likedIds, toggleLike } = useLikes();
   const { data: me } = useGetMe();
   const { data: categories, isLoading: catsLoading } = useGetCategories();
   const { data: services, isLoading: srvLoading } = useGetServices();
@@ -226,7 +224,8 @@ export default function HomeScreen() {
                   defaultOpen={i === 0}
                   likedIds={likedIds}
                   onToggleLike={toggleLike}
-                  onBook={(id: string) => setSelectedServiceId(id)}
+                  onBook={openBooking}
+                  onServicePress={openService}
                 />
               ))
             )}
@@ -254,7 +253,7 @@ export default function HomeScreen() {
                   <MasterCard
                     key={master.id}
                     master={master}
-                    onBook={(id: string) => setSelectedServiceId(id)}
+                    onPress={openMaster}
                   />
                 ))}
               </ScrollView>
@@ -262,10 +261,6 @@ export default function HomeScreen() {
           )}
         </ScrollView>
       </SafeAreaView>
-      <BookingSheet
-        serviceId={selectedServiceId}
-        onClose={() => setSelectedServiceId(null)}
-      />
     </View>
   );
 }
@@ -276,8 +271,6 @@ function getGreeting(): string {
   if (h < 17) return "Доброго дня";
   return "Доброго вечора";
 }
-
-// ── Styles ───────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Palette.ivory },

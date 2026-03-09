@@ -17,6 +17,7 @@ export function CategoryAccordion({
   defaultOpen = false,
   likedIds,
   onToggleLike,
+  onServicePress,
 }: any) {
   const [open, setOpen] = useState(defaultOpen);
   const Icon = cat.icon;
@@ -79,6 +80,7 @@ export function CategoryAccordion({
               liked={likedIds?.has(item.id)}
               onToggleLike={() => onToggleLike?.(item.id)}
               onBook={() => onBook(item.id)}
+              onPress={onServicePress}
             />
           ))}
         </View>
