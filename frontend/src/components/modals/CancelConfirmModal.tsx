@@ -1,14 +1,7 @@
-import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
 import { Palette } from "@/src/theme/tokens";
-import { X, AlertCircle } from "lucide-react-native";
+import { AlertCircle } from "lucide-react-native";
+import React from "react";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 type Props = {
   visible: boolean;
@@ -38,9 +31,9 @@ export function CancelConfirmModal({
         {/* Backdrop clickable area */}
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
-        <View style={styles.modal}>
-          <View style={styles.indicator} />
+        <View style={styles.indicator} />
 
+        <View style={styles.modal}>
           <View style={styles.header}>
             <View style={styles.iconCircle}>
               <AlertCircle size={24} color={Palette.rose} strokeWidth={1.5} />

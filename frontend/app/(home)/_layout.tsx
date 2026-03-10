@@ -1,12 +1,12 @@
-import { Tabs, Redirect } from "expo-router";
-import { Home, Calendar, User, Heart } from "lucide-react-native";
-import { ActivityIndicator, View, Platform, UIManager } from "react-native";
-import { Palette } from "@/src/theme/tokens";
 import { useGetMe } from "@/src/api/generated/user/user";
 import { LikesProvider } from "@/src/context/LikesContext";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ToastProvider } from "@/src/context/ToastContext";
 import { SheetProvider } from "@/src/context/SheetContext";
+import { ToastProvider } from "@/src/context/ToastContext";
+import { Palette } from "@/src/theme/tokens";
+import { Redirect, Tabs } from "expo-router";
+import { Calendar, Heart, Home, User } from "lucide-react-native";
+import { ActivityIndicator, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function HomeLayout() {
   const { data: me, isLoading, isError } = useGetMe();

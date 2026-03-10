@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react-native";
+import { Mail } from "lucide-react-native";
 import * as SecureStore from "expo-secure-store";
 import { FontAwesome } from "@expo/vector-icons";
 import { Palette } from "../../src/theme/tokens";
@@ -15,12 +15,12 @@ import { SocialBtn, OrDivider } from "../../src/components/auth/SocialAuth";
 import { LoginErrors } from "../../src/utils/validation";
 import { RegexHelper } from "@/src/utils/regexHelper";
 import { useLoginUser } from "@/src/api/generated/auth/auth";
+import { PasswordField } from "@/src/components/PasswordField";
 
 export default function LoginScreen() {
   const [errors, setErrors] = useState<LoginErrors>({});
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const { mutate: login, isPending } = useLoginUser();
 
@@ -102,7 +102,7 @@ export default function LoginScreen() {
                 }
               />
 
-              <InputField
+              <PasswordField
                 label="Пароль"
                 value={password}
                 onChangeText={(v: string) => {
@@ -112,27 +112,7 @@ export default function LoginScreen() {
                 }}
                 isInvalid={!!errors.password}
                 errorText={errors.password}
-                secureTextEntry={!showPassword}
                 placeholder="••••••••"
-                icon={
-                  <Lock size={20} color={Palette.taupe} strokeWidth={1.5} />
-                }
-                rightElement={
-                  <TouchableOpacity
-                    onPress={() => setShowPassword((v) => !v)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    {showPassword ? (
-                      <Eye size={20} color={Palette.taupe} strokeWidth={1.5} />
-                    ) : (
-                      <EyeOff
-                        size={20}
-                        color={Palette.taupe}
-                        strokeWidth={1.5}
-                      />
-                    )}
-                  </TouchableOpacity>
-                }
               />
 
               <TouchableOpacity

@@ -1,21 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Palette } from "@/src/theme/tokens";
-import { InputField } from "@/src/components/InputField";
+import { UserMeResponse } from "@/src/api/generated/apiV1.schemas";
+import {
+  getGetMeQueryKey,
+  useGetMe,
+  useUpdateProfile,
+} from "@/src/api/generated/user/user";
 import { BottomSheet } from "@/src/components/BottomSheet";
-import { KeyboardStickyView } from "react-native-keyboard-controller";
+import { InputField } from "@/src/components/InputField";
 import { PressButton } from "@/src/components/PressButton";
-import { useGetMe, useUpdateProfile } from "@/src/api/generated/user/user";
-import { Lock } from "lucide-react-native";
+import { ToastConfig, TopToast } from "@/src/components/TopToast";
+import { Palette } from "@/src/theme/tokens";
 import { RegexHelper } from "@/src/utils/regexHelper";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { KeyboardStickyView } from "react-native-keyboard-controller";
+import { PasswordField } from "../PasswordField";
 
 export function EditUserFieldSheet({
   fieldId,
   onClose,
 }: {
-  fieldId: string | null;
+  fieldId: keyof UserMeResponse | "password" | null;
   onClose: () => void;
 }) {
+  const queryClient = useQueryClient();
   const { data: me } = useGetMe();
   const { mutate: update, isPending: isLoading } = useUpdateProfile();
 
@@ -23,16 +31,31 @@ export function EditUserFieldSheet({
   const [currentPassword, setCurrentPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const [toast, setToast] = useState<ToastConfig>({
+    visible: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
+  const showToast = (
+    type: "success" | "error",
+    title: string,
+    message: string,
+  ) => {
+    setToast({ visible: true, type, title, message });
+  };
+
   const config: any = {
     firstName: {
       label: "Ім'я",
       regex: RegexHelper.NameRegex(),
-      error: "Некоректне ім'я (мінімум 2 символи)",
+      error: "Некоректне ім'я",
     },
     lastName: {
       label: "Прізвище",
       regex: RegexHelper.NameRegex(),
-      error: "Некоректне прізвище (мінімум 2 символи)",
+      error: "Некоректне прізвище",
     },
     phone: {
       label: "Телефон",
@@ -58,8 +81,8 @@ export function EditUserFieldSheet({
 
   useEffect(() => {
     if (fieldId && fieldId !== "password" && me) {
-      // @ts-ignore
-      setValue(me[fieldId] || "");
+      const val = me[fieldId as keyof UserMeResponse];
+      setValue(val ? String(val) : "");
     } else {
       setValue("");
     }
@@ -83,60 +106,84 @@ export function EditUserFieldSheet({
       { data: payload },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetMeQueryKey(),
+          });
+
+          showToast("success", "Оновлено", "Ваші дані успішно збережено");
+
           onClose();
         },
         onError: (err: any) => {
-          setError(err.response?.data?.Detail || "Помилка оновлення");
+          showToast("error", "Помилка", "Упс. Невдалося оновити");
         },
       },
     );
   };
 
   return (
-    <BottomSheet visible={!!fieldId} onClose={onClose} title="Редагування">
-      <View style={styles.content}>
-        <InputField
-          label={config[fieldId!]?.label}
-          value={value}
-          onChangeText={(t: string) => {
-            setValue(t);
-            setError(null);
-          }}
-          isInvalid={!!error}
-          errorText={error}
-          keyboardType={config[fieldId!]?.keyboard}
-          secureTextEntry={config[fieldId!]?.isPassword}
-        />
-
-        {config[fieldId!]?.sensitive && (
-          <View style={styles.sensitiveBox}>
-            <Text style={styles.sensitiveNote}>
-              Для підтвердження введіть поточний пароль
-            </Text>
-            <InputField
-              label="Поточний пароль"
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              secureTextEntry
-              icon={<Lock size={18} color={Palette.rose} />}
+    <>
+      <BottomSheet visible={!!fieldId} onClose={onClose} title="Редагування">
+        <View style={styles.content}>
+          {fieldId === "password" ? (
+            <PasswordField
+              label={config.password.label}
+              value={value}
+              onChangeText={setValue}
+              isInvalid={!!error}
+              errorText={error}
             />
-          </View>
-        )}
+          ) : (
+            <InputField
+              label={config[fieldId!]?.label}
+              value={value}
+              onChangeText={(t: string) => {
+                setValue(t);
+                setError(null);
+              }}
+              isInvalid={!!error}
+              errorText={error}
+              keyboardType={config[fieldId!]?.keyboard}
+              secureTextEntry={config[fieldId!]?.isPassword}
+            />
+          )}
 
-        <View style={styles.keyboardSpacer} />
+          {config[fieldId!]?.sensitive && (
+            <View style={styles.sensitiveBox}>
+              <Text style={styles.sensitiveNote}>
+                Для підтвердження введіть поточний пароль
+              </Text>
+              <PasswordField
+                label="Поточний пароль"
+                value={currentPassword}
+                onChangeText={(t: string) => {
+                  setCurrentPassword(t);
+                  setError(null);
+                }}
+                isInvalid={!!error}
+              />
+            </View>
+          )}
 
-        <KeyboardStickyView offset={{ closed: 0, opened: 20 }}>
-          <PressButton
-            title={isLoading ? "Збереження..." : "Зберегти"}
-            onPress={handleSave}
-            disabled={
-              isLoading || (config[fieldId!]?.sensitive && !currentPassword)
-            }
-            style={{ marginTop: 10 }}
-          />
-        </KeyboardStickyView>
-      </View>
-    </BottomSheet>
+          <View style={styles.keyboardSpacer} />
+
+          <KeyboardStickyView offset={{ closed: 0, opened: 20 }}>
+            <PressButton
+              title={isLoading ? "Збереження..." : "Зберегти"}
+              onPress={handleSave}
+              disabled={
+                isLoading || (config[fieldId!]?.sensitive && !currentPassword)
+              }
+              style={{ marginTop: 10 }}
+            />
+          </KeyboardStickyView>
+        </View>
+      </BottomSheet>
+      <TopToast
+        {...toast}
+        onHide={() => setToast((prev) => ({ ...prev, visible: false }))}
+      />
+    </>
   );
 }
 

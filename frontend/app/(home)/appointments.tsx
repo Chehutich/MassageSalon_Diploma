@@ -1,44 +1,40 @@
-import { useMemo, useState, useCallback, useRef } from "react";
+import { MyAppointmentResponse } from "@/src/api/generated/apiV1.schemas";
 import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
+  getGetMyAppointmentsQueryKey,
+  useCancelAppointment,
+  useGetMyAppointments,
+} from "@/src/api/generated/appointments/appointments";
+import { AmbientBackground } from "@/src/components/AmbientBackground";
+import { FILTERS } from "@/src/components/appointments/appointmentHelpers";
+import { AppointmentSection } from "@/src/components/appointments/AppointmentSection";
+import { CancelConfirmModal } from "@/src/components/modals/CancelConfirmModal";
+import { useSheets } from "@/src/context/SheetContext";
+import { useToast } from "@/src/context/ToastContext";
+import { Palette } from "@/src/theme/tokens";
+import { PLURAL, pluralize } from "@/src/utils/pluralize";
+import { useQueryClient } from "@tanstack/react-query";
+import { useFocusEffect } from "expo-router";
+import { Calendar } from "lucide-react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import {
   ActivityIndicator,
   Pressable,
   RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
-import { TopToast, ToastConfig } from "@/src/components/TopToast";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Calendar } from "lucide-react-native";
-import { useFocusEffect } from "expo-router";
-import { Palette } from "@/src/theme/tokens";
-import { AmbientBackground } from "@/src/components/AmbientBackground";
-import {
-  useCancelAppointment,
-  useGetMyAppointments,
-  getGetMyAppointmentsQueryKey,
-} from "@/src/api/generated/appointments/appointments";
-import { AppointmentSection } from "@/src/components/appointments/AppointmentSection";
-import { BookingSheet } from "@/src/components/booking/BookingSheet";
-import { FILTERS } from "@/src/components/appointments/appointmentHelpers";
-import { PLURAL, pluralize } from "@/src/utils/pluralize";
-import { MyAppointmentResponse } from "@/src/api/generated/apiV1.schemas";
-import { CancelConfirmModal } from "@/src/components/appointments/CancelConfirmModal";
-import { useToast } from "@/src/context/ToastContext";
-import { useSheets } from "@/src/context/SheetContext";
 
 export default function AppointmentsScreen() {
   const [activeFilter, setActiveFilter] = useState("all");
-  const [bookingServiceId, setBookingServiceId] = useState<string | null>(null);
-  const [bookingMasterId, setBookingMasterId] = useState<string | null>(null);
   const [appointmentToCancel, setAppointmentToCancel] =
     useState<MyAppointmentResponse | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const lastFetchRef = useRef<number>(0);
 
-  const { openBooking, openService, openMaster } = useSheets();
+  const { openBooking } = useSheets();
 
   const { showToast } = useToast();
 
