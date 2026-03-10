@@ -1,16 +1,9 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  Alert,
-} from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Palette } from "@/src/theme/tokens";
-import { AmbientBackground } from "@/src/components/AmbientBackground";
-import { useGetMe } from "@/src/api/generated/user/user";
+import { AmbientBackground } from "@/src/components/ui/layout/AmbientBackground";
+import { useGetMe, useLogout } from "@/src/api/generated/user/user";
 import { AvatarBadge } from "@/src/components/home/AvatarBadge";
 import {
   User,
@@ -23,20 +16,41 @@ import {
   Pencil,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { LogoutConfirmModal } from "@/src/components/modals/LogoutConfirmModal";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: me } = useGetMe();
+  const { mutateAsync: logoutOnServer } = useLogout();
 
-  const handleLogout = () => {
-    Alert.alert("Вихід", "Ви впевнені, що хочете вийти з акаунту?", [
-      { text: "Скасувати", style: "cancel" },
-      {
-        text: "Вийти",
-        style: "destructive",
-        onPress: () => {},
-      },
-    ]);
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+
+  const handleLogoutPress = () => {
+    setLogoutModalVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    try {
+      await logoutOnServer();
+    } catch (error) {
+      console.warn(
+        "Помилка логаута на сервері (ігноруємо і чистимо локально):",
+        error,
+      );
+    } finally {
+      setLogoutModalVisible(false);
+
+      await SecureStore.deleteItemAsync("accessToken");
+      await SecureStore.deleteItemAsync("refreshToken");
+
+      queryClient.clear();
+
+      router.replace("/(auth)/login");
+    }
   };
 
   const initials = me
@@ -112,7 +126,7 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <Pressable style={styles.logoutBtn} onPress={handleLogout}>
+          <Pressable style={styles.logoutBtn} onPress={handleLogoutPress}>
             <LogOut size={20} color={Palette.rose} />
             <Text style={styles.logoutText}>Вийти з акаунту</Text>
           </Pressable>
@@ -120,6 +134,12 @@ export default function ProfileScreen() {
           <Text style={styles.version}>Версія 1.0.0 (Serenity App)</Text>
         </ScrollView>
       </SafeAreaView>
+
+      <LogoutConfirmModal
+        visible={isLogoutModalVisible}
+        onCancel={() => setLogoutModalVisible(false)}
+        onConfirm={confirmLogout}
+      />
     </View>
   );
 }

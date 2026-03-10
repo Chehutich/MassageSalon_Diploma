@@ -1,8 +1,7 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
 import { Clock, Heart, Hand } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
-import { ServiceSheet } from "./ServiceSheet";
 import type { ServiceResponse } from "@/src/api/generated/apiV1.schemas";
 import { getBadgeConfig } from "@/src/utils/badgeHelpers";
 
@@ -30,7 +29,6 @@ export function ServiceCard({
   onPress,
 }: Props) {
   const likeScale = useRef(new Animated.Value(1)).current;
-  const [sheetOpen, setSheetOpen] = useState(false);
   const badge = getBadgeConfig(item.badge);
 
   const handleLike = () => {

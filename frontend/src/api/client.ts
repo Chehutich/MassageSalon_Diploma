@@ -61,5 +61,11 @@ axiosInstance.interceptors.response.use(
 );
 
 export const api = <T>(config: AxiosRequestConfig): Promise<T> => {
+  if (config.data instanceof FormData) {
+    if (config.headers) {
+      delete config.headers["Content-Type"];
+    }
+  }
+
   return axiosInstance(config).then((r) => r.data);
 };

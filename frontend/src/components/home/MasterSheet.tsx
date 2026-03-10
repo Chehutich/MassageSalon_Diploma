@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { Palette } from "@/src/theme/tokens";
 import { useGetMasterDetails } from "@/src/api/generated/masters/masters";
-import { MasterAvatar } from "@/src/components/MasterAvatar";
+import { MasterAvatar } from "@/src/components/ui/avatars/MasterAvatar";
 import { ServiceCard } from "@/src/components/home/ServiceCard";
 import * as categoryHelpers from "@/src/utils/categoryHelpers";
 import { useLikes } from "@/src/context/LikesContext";
@@ -15,7 +15,7 @@ import type { ServiceResponse } from "@/src/api/generated/apiV1.schemas";
 import {
   BottomSheet,
   useBottomSheetScroll,
-} from "@/src/components/BottomSheet";
+} from "@/src/components/ui/layout/BottomSheet";
 
 type Props = {
   masterId: string | null;

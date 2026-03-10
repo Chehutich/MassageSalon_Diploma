@@ -5,9 +5,8 @@ import {
   StyleSheet,
   Animated,
   ActivityIndicator,
-  View,
 } from "react-native";
-import { Palette, Shadows } from "../theme/tokens";
+import { Palette, Shadows } from "@/src/theme/tokens";
 
 export const PressButton = ({ title, onPress, loading, disabled }: any) => {
   const scale = useRef(new Animated.Value(1)).current;

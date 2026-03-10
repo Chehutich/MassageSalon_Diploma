@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Palette } from "../theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 import Svg, { Circle } from "react-native-svg";
 
 export const AmbientBackground = () => (

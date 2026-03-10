@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Check, ArrowRight } from "lucide-react-native";
-import { Palette } from "../../theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 
 type Props = {
   name: string;

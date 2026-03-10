@@ -11,11 +11,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Search, Bell } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
-import { AmbientBackground } from "@/src/components/AmbientBackground";
+import { AmbientBackground } from "@/src/components/ui/layout/AmbientBackground";
 import { AvatarBadge } from "@/src/components/home/AvatarBadge";
 import { PromoBanner } from "@/src/components/home/PromoBanner";
 import { CategoryAccordion } from "@/src/components/home/CategoryAccordion";
-import { LeafLogo } from "@/src/components/LeafLogo";
+import { LeafLogo } from "@/src/components/ui/brand/LeafLogo";
 import { useGetMe } from "@/src/api/generated/user/user";
 import * as categoryHelpers from "@/src/utils/categoryHelpers";
 import { useGetCategories } from "@/src/api/generated/categories/categories";

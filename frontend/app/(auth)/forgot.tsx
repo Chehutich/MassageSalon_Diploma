@@ -4,13 +4,14 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Mail, Check } from "lucide-react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LoadingSpinner } from "../../src/components/LoadingSpinner";
-import { Palette } from "../../src/theme/tokens";
-import { InputField } from "../../src/components/InputField";
-import { AuthHeader } from "../../src/components/auth/AuthHeader";
-import { AuthFooter } from "../../src/components/auth/AuthFooter";
-import { PressButton } from "../../src/components/PressButton";
-import { EMAIL_REGEX, ForgotErrors } from "../../src/utils/validation";
+import { LoadingSpinner } from "@/src/components/ui/feedback/LoadingSpinner";
+import { Palette } from "@/src/theme/tokens";
+import { InputField } from "@/src/components/ui/forms/InputField";
+import { AuthHeader } from "@/src/components/auth/AuthHeader";
+import { AuthFooter } from "@/src/components/auth/AuthFooter";
+import { PressButton } from "@/src/components/ui/forms/PressButton";
+import { ForgotErrors } from "@/src/utils/validation";
+import { RegexHelper } from "@/src/utils/regexHelper";
 
 export default function ForgotScreen() {
   const [step, setStep] = useState(1);
@@ -23,7 +24,7 @@ export default function ForgotScreen() {
       setErrors({ email: "Введіть email" });
       return;
     }
-    if (!EMAIL_REGEX.test(email)) {
+    if (!RegexHelper.EmailRegex().test(email)) {
       setErrors({ email: "Некоректний email" });
       return;
     }

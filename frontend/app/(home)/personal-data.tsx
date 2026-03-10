@@ -1,5 +1,5 @@
-import { useGetMe, useUpdateProfile } from "@/src/api/generated/user/user";
-import { AmbientBackground } from "@/src/components/AmbientBackground";
+import { getGetMeQueryKey, useGetMe } from "@/src/api/generated/user/user";
+import { AmbientBackground } from "@/src/components/ui/layout/AmbientBackground";
 import { AvatarBadge } from "@/src/components/home/AvatarBadge";
 import { ImagePickerModal } from "@/src/components/modals/ImagePickerModal";
 import { useSheets } from "@/src/context/SheetContext";
@@ -15,25 +15,34 @@ import {
   User,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import {
-  ActionSheetIOS,
-  Alert,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { TopToast, ToastConfig } from "@/src/components/ui/feedback/TopToast";
+import * as SecureStore from "expo-secure-store";
 
 export default function PersonalDataScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: me } = useGetMe();
   const { openEditField } = useSheets();
   const [initials, setInitials] = useState("??");
   const [isPickerVisible, setPickerVisible] = useState(false);
-  const { mutate: updateProfile } = useUpdateProfile();
+
+  const [toast, setToast] = useState<ToastConfig>({
+    visible: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
+  const showToast = (
+    type: "success" | "error",
+    title: string,
+    message: string,
+  ) => {
+    setToast({ visible: true, type, title, message });
+  };
 
   useEffect(() => {
     if (me?.firstName && me?.lastName) {
@@ -44,31 +53,69 @@ export default function PersonalDataScreen() {
   }, [me]);
 
   const handleImagePicked = async (result: ImagePicker.ImagePickerResult) => {
-    if (!result.canceled && result.assets[0]) {
-      const uri = result.assets[0].uri;
-      console.log("Image ready for upload:", uri);
-      // Тут викликай updateProfile з FormData
-    }
-  };
-  const pickImage = async () => {
-    if (Platform.OS === "ios") {
-      ActionSheetIOS.showActionSheetWithOptions(
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    const safeFileName = asset.fileName || `avatar-${Date.now()}.jpg`;
+
+    const formData = new FormData();
+    formData.append("fileStream", {
+      uri: asset.uri,
+      name: safeFileName,
+      type: asset.mimeType || "image/jpeg",
+    } as any);
+    formData.append("fileName", safeFileName);
+
+    try {
+      setPickerVisible(false);
+      const token = await SecureStore.getItemAsync("accessToken");
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/api/user/upload-avatar`,
         {
-          options: ["Скасувати", "Зробити фото", "Обрати з галереї"],
-          cancelButtonIndex: 0,
-          title: "Змінити фото профілю",
-        },
-        async (buttonIndex) => {
-          if (buttonIndex === 1) takePhoto();
-          else if (buttonIndex === 2) chooseFromLibrary();
+          method: "POST",
+          body: formData,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         },
       );
-    } else {
-      Alert.alert("Змінити фото", "Оберіть джерело зображення", [
-        { text: "Галерея", onPress: chooseFromLibrary },
-        { text: "Камера", onPress: takePhoto },
-        { text: "Скасувати", style: "cancel" },
-      ]);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("Upload error:", response.status, errorText);
+        showToast("error", "Помилка", "Не вдалося завантажити файл");
+        return;
+      }
+
+      await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+      showToast("success", "Успіх", "Фото профілю оновлено");
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      showToast("error", "Помилка", "Не вдалося завантажити файл");
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    try {
+      const token = await SecureStore.getItemAsync("accessToken");
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/api/user/avatar`,
+        {
+          method: "DELETE",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+      showToast("success", "Успіх", "Фото профілю видалено");
+      setPickerVisible(false);
+    } catch (err) {
+      console.error("Delete avatar failed:", err);
+      showToast("error", "Помилка", "Не вдалося видалити фото");
     }
   };
 
@@ -211,9 +258,11 @@ export default function PersonalDataScreen() {
         onSelectCamera={takePhoto}
         onSelectLibrary={chooseFromLibrary}
         hasImage={!!me?.photoUrl}
-        onRemove={() => {
-          console.log("Remove photo");
-        }}
+        onRemove={handleRemovePhoto}
+      />
+      <TopToast
+        {...toast}
+        onHide={() => setToast((prev) => ({ ...prev, visible: false }))}
       />
     </View>
   );
@@ -246,7 +295,6 @@ const styles = StyleSheet.create({
   },
   scroll: { padding: 20, paddingBottom: 40 },
 
-  // Стилі для нового блоку аватара
   avatarSection: {
     alignItems: "center",
     marginTop: 10,

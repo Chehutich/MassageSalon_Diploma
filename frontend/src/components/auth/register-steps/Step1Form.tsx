@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { User, Mail, Phone, ChevronRight } from "lucide-react-native";
-import { Palette } from "../../../theme/tokens";
-import { InputField } from "../../InputField";
-import { PersonalData, Step1Errors } from "../../../utils/validation";
+import { Palette } from "@/src/theme/tokens";
+import { InputField } from "@/src/components/ui/forms/InputField";
+import { PersonalData, Step1Errors } from "@/src/utils/validation";
 
 type Props = {
   data: PersonalData;
@@ -40,6 +40,7 @@ export const Step1Form = ({ data, errors, onChange, onNext }: Props) => (
     <InputField
       label="Номер телефону"
       value={data.phone}
+      placeholder="+380 (XX) XXX-XX-XX"
       onChangeText={(v: string) => onChange("phone", v)}
       isInvalid={!!errors.phone}
       errorText={errors.phone}

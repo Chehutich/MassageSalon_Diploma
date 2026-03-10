@@ -1,9 +1,8 @@
-import { View, Text, Pressable, StyleSheet, Image } from "react-native";
-import { useState } from "react";
-import { MasterSheet } from "@/src/components/home/MasterSheet";
-import { Palette } from "@/src/theme/tokens";
 import type { MasterResponse } from "@/src/api/generated/apiV1.schemas";
-import { MasterAvatar } from "@/src/components/MasterAvatar";
+import { MasterAvatar } from "@/src/components/ui/avatars/MasterAvatar";
+import { Palette } from "@/src/theme/tokens";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text } from "react-native";
 
 type Props = {
   master: MasterResponse;

@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Palette } from "@/src/theme/tokens";
-import { MasterAvatar } from "@/src/components/MasterAvatar";
+import { MasterAvatar } from "@/src/components/ui/avatars/MasterAvatar";
 import { CircleUserRound } from "lucide-react-native";
 import type {
   MasterResponse,

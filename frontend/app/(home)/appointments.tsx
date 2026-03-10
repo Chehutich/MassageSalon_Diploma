@@ -4,7 +4,7 @@ import {
   useCancelAppointment,
   useGetMyAppointments,
 } from "@/src/api/generated/appointments/appointments";
-import { AmbientBackground } from "@/src/components/AmbientBackground";
+import { AmbientBackground } from "@/src/components/ui/layout/AmbientBackground";
 import { FILTERS } from "@/src/components/appointments/appointmentHelpers";
 import { AppointmentSection } from "@/src/components/appointments/AppointmentSection";
 import { CancelConfirmModal } from "@/src/components/modals/CancelConfirmModal";

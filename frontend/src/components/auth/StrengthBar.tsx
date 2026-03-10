@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { Palette } from "../../theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 
 const getStrength = (pw: string) => {
   if (!pw) return { score: 0, label: "", color: "transparent" };

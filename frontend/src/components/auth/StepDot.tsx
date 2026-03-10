@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { Check } from "lucide-react-native";
-import { Palette } from "../../theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 
 type Props = { active: boolean; done: boolean; num: number };
 

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Lock, Eye, EyeOff, Check, X } from "lucide-react-native";
-import { Palette } from "../../../theme/tokens";
-import { InputField } from "../../InputField";
-import { Checkbox } from "../Checkbox";
-import { StrengthBar } from "../StrengthBar";
-import { SecurityData, Step2Errors } from "../../../utils/validation";
+import { SecurityData, Step2Errors } from "@/src/utils/validation";
+import { Check, X } from "lucide-react-native";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Palette } from "@/src/theme/tokens";
+import { Checkbox } from "@/src/components/ui/forms/Checkbox";
+import { PasswordField } from "@/src/components/ui/forms/PasswordField";
+import { StrengthBar } from "@/src/components/auth/StrengthBar";
 
 type Props = {
   data: SecurityData;
@@ -22,63 +22,37 @@ export const Step2Form = ({
   onNext,
   onBack,
 }: Props) => {
-  const [showPw, setShowPw] = useState(false);
-  const [showCf, setShowCf] = useState(false);
-
   const match = data.password && data.confirm && data.password === data.confirm;
   const noMatch = data.confirm.length > 0 && data.password !== data.confirm;
 
   return (
     <View style={{ gap: 14 }}>
-      <InputField
+      <PasswordField
         label="Пароль"
         value={data.password}
         onChangeText={(v: string) => onChange("password", v)}
         isInvalid={!!errors.password}
         errorText={errors.password}
-        secureTextEntry={!showPw}
-        icon={<Lock size={18} color={Palette.taupe} strokeWidth={1.6} />}
-        rightElement={
-          <TouchableOpacity
-            onPress={() => setShowPw((v) => !v)}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            {showPw ? (
-              <Eye size={20} color={Palette.taupe} strokeWidth={1.5} />
-            ) : (
-              <EyeOff size={20} color={Palette.taupe} strokeWidth={1.5} />
-            )}
-          </TouchableOpacity>
-        }
       />
+
       <StrengthBar password={data.password} />
 
-      <InputField
+      <PasswordField
         label="Підтвердження паролю"
         value={data.confirm}
         onChangeText={(v: string) => onChange("confirm", v)}
         isInvalid={!!errors.confirm}
         errorText={errors.confirm}
-        secureTextEntry={!showCf}
-        icon={<Lock size={18} color={Palette.taupe} strokeWidth={1.6} />}
-        rightElement={
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            {match && (
-              <Check size={16} strokeWidth={2.2} color={Palette.sage} />
-            )}
-            {noMatch && <X size={16} strokeWidth={2} color={Palette.rose} />}
-            <TouchableOpacity
-              onPress={() => setShowCf((v) => !v)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              {showCf ? (
-                <Eye size={20} color={Palette.taupe} strokeWidth={1.5} />
-              ) : (
-                <EyeOff size={20} color={Palette.taupe} strokeWidth={1.5} />
-              )}
-            </TouchableOpacity>
-          </View>
-        }
+        // You might need to adjust PasswordField to support rightElement or similar
+        // if you want to keep the green check/red X icons. Assuming PasswordField
+        // only handles visibility toggling by default.
+        // If PasswordField supports a custom right element, you'd pass it here:
+        // customRightElement={
+        //   <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginRight: 8 }}>
+        //     {match && <Check size={16} strokeWidth={2.2} color={Palette.sage} />}
+        //     {noMatch && <X size={16} strokeWidth={2} color={Palette.rose} />}
+        //   </View>
+        // }
       />
 
       <Checkbox

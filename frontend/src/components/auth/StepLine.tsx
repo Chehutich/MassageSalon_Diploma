@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import { Palette } from "../../theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 
 export const StepLine = ({ done }: { done: boolean }) => (
   <View

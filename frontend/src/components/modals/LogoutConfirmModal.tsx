@@ -1,51 +1,40 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Palette } from "@/src/theme/tokens";
-import { AlertCircle } from "lucide-react-native";
+import { LogOut } from "lucide-react-native";
 import { BottomSheetModal } from "./BottomSheetModal";
 
 type Props = {
   visible: boolean;
-  appointment: {
-    serviceName?: string;
-    masterFirstName?: string;
-    masterLastName?: string;
-  };
   onCancel: () => void;
-  onClose: () => void;
+  onConfirm: () => void;
 };
 
-export function CancelConfirmModal({
-  visible,
-  appointment,
-  onCancel,
-  onClose,
-}: Props) {
+export function LogoutConfirmModal({ visible, onCancel, onConfirm }: Props) {
   return (
-    <BottomSheetModal visible={visible} onClose={onClose}>
+    <BottomSheetModal visible={visible} onClose={onCancel}>
       <View style={styles.header}>
         <View style={styles.iconCircle}>
-          <AlertCircle size={24} color={Palette.rose} strokeWidth={1.5} />
+          <LogOut size={24} color={Palette.rose} strokeWidth={1.5} />
         </View>
-        <Text style={styles.title}>Скасувати запис?</Text>
+        <Text style={styles.title}>Вихід з акаунту</Text>
         <Text style={styles.description}>
-          Ви впевнені, що хочете скасувати запис на{"\n"}
-          <Text style={styles.highlight}>{appointment.serviceName}?</Text>
+          Ви впевнені, що хочете вийти зі свого профілю?
         </Text>
       </View>
 
       <View style={styles.warningBox}>
         <Text style={styles.warningText}>
-          Цю дію неможливо буде відмінити після підтвердження.
+          Вам доведеться ввести свої дані знову, щоб увійти в додаток.
         </Text>
       </View>
 
       <View style={styles.footer}>
-        <Pressable style={styles.btnSecondary} onPress={onClose}>
-          <Text style={styles.btnSecondaryText}>Залишити</Text>
+        <Pressable style={styles.btnSecondary} onPress={onCancel}>
+          <Text style={styles.btnSecondaryText}>Скасувати</Text>
         </Pressable>
-        <Pressable style={styles.btnPrimary} onPress={onCancel}>
-          <Text style={styles.btnPrimaryText}>Так, скасувати</Text>
+        <Pressable style={styles.btnPrimary} onPress={onConfirm}>
+          <Text style={styles.btnPrimaryText}>Так, вийти</Text>
         </Pressable>
       </View>
     </BottomSheetModal>
@@ -53,7 +42,10 @@ export function CancelConfirmModal({
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: "center", marginBottom: 20 },
+  header: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
   iconCircle: {
     width: 56,
     height: 56,
@@ -77,7 +69,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-  highlight: { fontFamily: "DMSans_500Medium", color: Palette.espresso },
   warningBox: {
     backgroundColor: Palette.sand + "50",
     padding: 14,
@@ -94,7 +85,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     opacity: 0.8,
   },
-  footer: { flexDirection: "row", gap: 12, width: "100%" },
+  footer: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
   btnSecondary: {
     flex: 1,
     height: 48,

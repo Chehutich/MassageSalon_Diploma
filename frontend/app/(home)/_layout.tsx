@@ -97,7 +97,7 @@ export default function HomeLayout() {
             <Tabs.Screen
               name="profile"
               options={{
-                title: "Profile",
+                title: "Профіль",
                 tabBarIcon: ({ color, focused }) => (
                   <User
                     size={20}

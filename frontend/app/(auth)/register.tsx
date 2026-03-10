@@ -3,15 +3,14 @@ import { View, Text, StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { router } from "expo-router";
 import { Palette } from "../../src/theme/tokens";
-import { AmbientBackground } from "../../src/components/AmbientBackground";
-import { LoadingSpinner } from "../../src/components/LoadingSpinner";
-import { AuthHeader } from "../../src/components/auth/AuthHeader";
-import { AuthFooter } from "../../src/components/auth/AuthFooter";
-import { StepDot } from "../../src/components/auth/StepDot";
-import { StepLine } from "../../src/components/auth/StepLine";
-import { StepSuccess } from "../../src/components/auth/StepSuccess";
-import { Step1Form } from "../../src/components/auth/register-steps/Step1Form";
-import { Step2Form } from "../../src/components/auth/register-steps/Step2Form";
+import { LoadingSpinner } from "@/src/components/ui/feedback/LoadingSpinner";
+import { AuthHeader } from "@/src/components/auth/AuthHeader";
+import { AuthFooter } from "@/src/components/auth/AuthFooter";
+import { StepDot } from "@/src/components/auth/StepDot";
+import { StepLine } from "@/src/components/auth/StepLine";
+import { StepSuccess } from "@/src/components/auth/StepSuccess";
+import { Step1Form } from "@/src/components/auth/register-steps/Step1Form";
+import { Step2Form } from "@/src/components/auth/register-steps/Step2Form";
 import {
   validateStep1,
   validateStep2,
@@ -47,7 +46,6 @@ export default function RegisterScreen() {
     password: "",
     confirm: "",
     terms: false,
-    promo: true,
   });
 
   const handlePersonalChange = useCallback(

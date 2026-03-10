@@ -1,7 +1,7 @@
 // src/components/LoadingSpinner.tsx
 import React, { useEffect, useRef } from "react";
 import { View, Text, Animated, Easing } from "react-native";
-import { Palette } from "../theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 
 export const LoadingSpinner = ({ label }: { label?: string }) => {
   const rotation = useRef(new Animated.Value(0)).current;

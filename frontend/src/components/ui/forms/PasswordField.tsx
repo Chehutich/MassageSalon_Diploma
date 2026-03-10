@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 import { Eye, EyeOff, Lock } from "lucide-react-native";
 import { InputField } from "./InputField";
-import { Palette } from "../theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 
 export const PasswordField = (props: any) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -16,6 +16,7 @@ export const PasswordField = (props: any) => {
       {...props}
       icon={props.icon || <Lock size={18} color={Palette.taupe} />}
       secureTextEntry={!isPasswordVisible}
+      placeholder={props.placeholder ?? "••••••••"}
       rightElement={
         <TouchableOpacity
           onPress={toggleVisibility}

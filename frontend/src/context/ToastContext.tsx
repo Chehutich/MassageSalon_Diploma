@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { TopToast, ToastConfig } from "@/src/components/TopToast";
+import { TopToast, ToastConfig } from "@/src/components/ui/feedback/TopToast";
 
 type ToastContextType = {
   showToast: (

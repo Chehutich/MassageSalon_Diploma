@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
-import { Palette } from "../../theme/tokens";
-import { LeafLogo } from "../LeafLogo";
+import { Palette } from "@/src/theme/tokens";
+import { LeafLogo } from "@/src/components/ui/brand/LeafLogo";
 
 type Props = {
   title: string;

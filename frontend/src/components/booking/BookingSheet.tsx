@@ -1,39 +1,34 @@
-import { useState, useEffect } from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
-import { Palette } from "@/src/theme/tokens";
 import {
   BottomSheet,
   useBottomSheetScroll,
-} from "@/src/components/BottomSheet";
-
-// Components
-import { BookingMasters } from "./BookingMasters";
+} from "@/src/components/ui/layout/BottomSheet";
+import { Palette } from "@/src/theme/tokens";
+import { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { BookingCalendar } from "./BookingCalendar";
+import { BookingMasters } from "./BookingMasters";
 import { BookingSlots } from "./BookingSlots";
 import { BookingSummary } from "./BookingSummary";
-import { BookingSuccess } from "./BookingSuccess";
-
-// Hooks & Types
-import { useGetServiceById } from "@/src/api/generated/services/services";
-import { useGetMasters } from "@/src/api/generated/masters/masters";
-import {
-  useGetAvailableDates,
-  useGetAvailableSlots,
-  useCreateAppointment,
-  getGetMyAppointmentsQueryKey,
-} from "@/src/api/generated/appointments/appointments";
 import type {
   MasterResponse,
   SlotResponse,
 } from "@/src/api/generated/apiV1.schemas";
+import {
+  getGetMyAppointmentsQueryKey,
+  useCreateAppointment,
+  useGetAvailableDates,
+  useGetAvailableSlots,
+} from "@/src/api/generated/appointments/appointments";
+import { useGetMasters } from "@/src/api/generated/masters/masters";
+import { useGetServiceById } from "@/src/api/generated/services/services";
 import { useQueryClient } from "@tanstack/react-query";
 
 // Helpers
 import {
   DAYS_OF_WEEK,
-  toDateString,
   fmtTime,
   MONTHS_UA_FULL,
+  toDateString,
 } from "./booking.helpers";
 
 type Props = {

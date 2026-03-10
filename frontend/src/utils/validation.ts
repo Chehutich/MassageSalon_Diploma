@@ -6,12 +6,20 @@ export type Step1Errors = FormErrors<"first" | "last" | "phone" | "email">;
 export type Step2Errors = FormErrors<"password" | "confirm" | "terms">;
 export type ForgotErrors = FormErrors<"email">;
 
-export const validateStep1 = (d: {
+export type PersonalData = {
   first: string;
   last: string;
   phone: string;
   email: string;
-}) => {
+};
+
+export type SecurityData = {
+  password: string;
+  confirm: string;
+  terms: boolean;
+};
+
+export const validateStep1 = (d: PersonalData) => {
   const e: Step1Errors = {};
 
   if (!d.first.trim()) e.first = "Введіть ім'я";
@@ -33,11 +41,7 @@ export const validateStep1 = (d: {
   return e;
 };
 
-export const validateStep2 = (d: {
-  password: string;
-  confirm: string;
-  terms: boolean;
-}) => {
+export const validateStep2 = (d: SecurityData) => {
   const e: Step2Errors = {};
 
   if (!d.password) {

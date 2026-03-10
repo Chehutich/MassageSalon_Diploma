@@ -4,17 +4,17 @@ import {
   useGetMe,
   useUpdateProfile,
 } from "@/src/api/generated/user/user";
-import { BottomSheet } from "@/src/components/BottomSheet";
-import { InputField } from "@/src/components/InputField";
-import { PressButton } from "@/src/components/PressButton";
-import { ToastConfig, TopToast } from "@/src/components/TopToast";
+import { BottomSheet } from "@/src/components/ui/layout/BottomSheet";
+import { InputField } from "@/src/components/ui/forms/InputField";
+import { PressButton } from "@/src/components/ui/forms/PressButton";
+import { ToastConfig, TopToast } from "@/src/components/ui/feedback/TopToast";
 import { Palette } from "@/src/theme/tokens";
 import { RegexHelper } from "@/src/utils/regexHelper";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { KeyboardStickyView } from "react-native-keyboard-controller";
-import { PasswordField } from "../PasswordField";
+import { PasswordField } from "@/src/components/ui/forms/PasswordField";
 
 export function EditUserFieldSheet({
   fieldId,
@@ -49,22 +49,26 @@ export function EditUserFieldSheet({
   const config: any = {
     firstName: {
       label: "Ім'я",
+      placeholder: "Введіть ваше ім'я",
       regex: RegexHelper.NameRegex(),
       error: "Некоректне ім'я",
     },
     lastName: {
       label: "Прізвище",
+      placeholder: "Введіть ваше прізвище",
       regex: RegexHelper.NameRegex(),
       error: "Некоректне прізвище",
     },
     phone: {
       label: "Телефон",
+      placeholder: "+380 (XX) XXX-XX-XX",
       regex: RegexHelper.PhoneRegex(),
       error: "Некоректний формат телефону",
       keyboard: "phone-pad",
     },
     email: {
       label: "Email",
+      placeholder: "example@mail.com",
       regex: RegexHelper.EmailRegex(),
       error: "Невірний формат пошти",
       keyboard: "email-address",
@@ -129,6 +133,7 @@ export function EditUserFieldSheet({
             <PasswordField
               label={config.password.label}
               value={value}
+              placeholder={config.password.placeholder}
               onChangeText={setValue}
               isInvalid={!!error}
               errorText={error}
@@ -141,6 +146,7 @@ export function EditUserFieldSheet({
                 setValue(t);
                 setError(null);
               }}
+              placeholder={config[fieldId!]?.placeholder ?? ""}
               isInvalid={!!error}
               errorText={error}
               keyboardType={config[fieldId!]?.keyboard}

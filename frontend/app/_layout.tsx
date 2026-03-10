@@ -12,10 +12,10 @@ import {
   CormorantGaramond_600SemiBold,
 } from "@expo-google-fonts/cormorant-garamond";
 import { KeyboardProvider } from "react-native-keyboard-controller";
-import { LoadingScreen } from "../src/components/LoadingScreen";
+import { LoadingScreen } from "@/src/components/ui/feedback/LoadingScreen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Palette } from "../src/theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 
 const queryClient = new QueryClient({
   defaultOptions: {

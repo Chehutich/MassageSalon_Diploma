@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,13 +11,13 @@ import { Clock, ChevronRight, Sparkle } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { useGetServiceById } from "@/src/api/generated/services/services";
 import type { MasterShortResponse } from "@/src/api/generated/apiV1.schemas";
-import { MasterAvatar } from "@/src/components/MasterAvatar";
+import { MasterAvatar } from "@/src/components/ui/avatars/MasterAvatar";
 import { getBadgeConfig } from "@/src/utils/badgeHelpers";
 import * as categoryHelpers from "@/src/utils/categoryHelpers";
 import {
   BottomSheet,
   useBottomSheetScroll,
-} from "@/src/components/BottomSheet";
+} from "@/src/components/ui/layout/BottomSheet";
 
 type Props = {
   itemId: string | null;
@@ -51,9 +51,6 @@ function ServiceSheetContent({
   const accent = item?.categorySlug
     ? categoryHelpers.categoryColor(item.categorySlug)
     : Palette.taupe;
-  const Icon = item?.categorySlug
-    ? categoryHelpers.categoryIcon(item.categorySlug)
-    : Sparkle;
 
   if (isLoading || !item) {
     return (

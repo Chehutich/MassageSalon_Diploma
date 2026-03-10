@@ -6,16 +6,16 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Mail } from "lucide-react-native";
 import * as SecureStore from "expo-secure-store";
 import { FontAwesome } from "@expo/vector-icons";
-import { Palette } from "../../src/theme/tokens";
-import { PressButton } from "../../src/components/PressButton";
-import { InputField } from "../../src/components/InputField";
-import { AuthHeader } from "../../src/components/auth/AuthHeader";
-import { AuthFooter } from "../../src/components/auth/AuthFooter";
-import { SocialBtn, OrDivider } from "../../src/components/auth/SocialAuth";
-import { LoginErrors } from "../../src/utils/validation";
+import { Palette } from "@/src/theme/tokens";
+import { PressButton } from "@/src/components/ui/forms/PressButton";
+import { InputField } from "@/src/components/ui/forms/InputField";
+import { AuthHeader } from "@/src/components/auth/AuthHeader";
+import { AuthFooter } from "@/src/components/auth/AuthFooter";
+import { SocialBtn, OrDivider } from "@/src/components/auth/SocialAuth";
+import { LoginErrors } from "@/src/utils/validation";
 import { RegexHelper } from "@/src/utils/regexHelper";
 import { useLoginUser } from "@/src/api/generated/auth/auth";
-import { PasswordField } from "@/src/components/PasswordField";
+import { PasswordField } from "@/src/components/ui/forms/PasswordField";
 
 export default function LoginScreen() {
   const [errors, setErrors] = useState<LoginErrors>({});

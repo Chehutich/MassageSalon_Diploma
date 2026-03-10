@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Check, UserRound } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
-import { MasterAvatar } from "@/src/components/MasterAvatar";
+import { MasterAvatar } from "@/src/components/ui/avatars/MasterAvatar";
 import type { MasterResponse } from "@/src/api/generated/apiV1.schemas";
 
 type Props = {

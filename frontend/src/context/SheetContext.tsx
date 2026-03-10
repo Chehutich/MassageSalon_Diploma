@@ -4,6 +4,7 @@ import { ServiceSheet } from "@/src/components/home/ServiceSheet";
 import { MasterSheet } from "@/src/components/home/MasterSheet";
 import { EditUserFieldSheet } from "@/src/components/profile/EditUserFieldSheet";
 import { useToast } from "./ToastContext";
+import { UserMeResponse } from "../api/generated/apiV1.schemas";
 
 type SheetContextType = {
   openBooking: (serviceId: string, masterId?: string | null) => void;
@@ -70,7 +71,7 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
       />
 
       <EditUserFieldSheet
-        fieldId={editFieldId}
+        fieldId={editFieldId as keyof UserMeResponse | "password" | null}
         onClose={() => setEditFieldId(null)}
       />
     </SheetContext.Provider>

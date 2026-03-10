@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Palette } from "../../theme/tokens";
+import { Palette } from "@/src/theme/tokens";
 
 type Props = {
   text: string;
