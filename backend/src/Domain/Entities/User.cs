@@ -77,9 +77,11 @@ public class User : IAuditableEntity
 
     public void SetPhotoUrl(string? photoUrl)
     {
-        if (photoUrl != null && !RegexHelper.UrlRegex().IsMatch(photoUrl))
+        if (!string.IsNullOrEmpty(photoUrl) &&
+           (!Uri.TryCreate(photoUrl, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)))
         {
-            throw new ArgumentException("Invalid URL format.");
+            throw new ArgumentException($"Invalid URL: {photoUrl}");
         }
 
         PhotoUrl = photoUrl;

@@ -1,9 +1,11 @@
 using Application.Common.Models;
+using Application.Features.User.DeleteAvatarCommand;
 using Application.Features.User.GetMe;
 using Application.Features.User.Logout;
 using Application.Features.User.UpdateProfile;
 using Application.Features.User.UploadAvatar;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Extensions.Endpoints;
 
@@ -29,17 +31,34 @@ public static class UserEndpoints
             .WithName("GetMe")
             .WithDescription("Retrieves the profile information of the currently authenticated user.");
 
-        group.MapPost("/upload-avatar", async (UploadAvatarCommand command, ISender sender) =>
+        group.MapPost("/upload-avatar", async (
+                IFormFile fileStream,
+                ISender sender) =>
             {
+                var command = new UploadAvatarCommand(fileStream.OpenReadStream(), fileStream.FileName);
+
                 var result = await sender.Send(command);
+
+                return result.IsSuccess
+                    ? Results.Ok(new { url = result.Value })
+                    : result.ToProblemDetails();
+            })
+            .DisableAntiforgery()
+            .RequireAuthorization()
+            .WithName("UploadAvatar")
+            .WithDescription("Uploads an avatar image for the currently authenticated user and sets it as the profile picture.");
+
+        group.MapDelete("/avatar", async (ISender sender) =>
+            {
+                var result = await sender.Send(new DeleteAvatarCommand());
 
                 return result.IsSuccess
                     ? Results.Ok()
                     : result.ToProblemDetails();
             })
             .RequireAuthorization()
-            .WithName("UploadAvatar")
-            .WithDescription("Uploads an avatar image for the currently authenticated user.");
+            .WithName("DeleteAvatar")
+            .WithDescription("Deletes the current user's avatar.");
 
         group.MapPatch("/me", async (UpdateProfileCommand command, ISender sender) =>
             {

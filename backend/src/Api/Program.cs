@@ -2,6 +2,7 @@ using Api.Extensions;
 using Api.Extensions.Endpoints;
 using Application;
 using Infrastructure;
+using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -34,6 +35,13 @@ if (app.Environment.IsDevelopment())
             .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
     });
 }
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "AppData", "uploads")),
+    RequestPath = "/uploads"
+});
 
 //app.UseHttpsRedirection();
 

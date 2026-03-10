@@ -1,34 +1,37 @@
 using Application.Common.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Services;
 
-public class FileStorageService(
-    IWebHostEnvironment env,
-    IHttpContextAccessor httpContextAccessor) : IFileStorageService
+public class FileStorageService : IFileStorageService
 {
+    private readonly string _uploadsPath;
+    private readonly string _publicBaseUrl;
+
+    public FileStorageService(IWebHostEnvironment env, IConfiguration config, IHttpContextAccessor accessor)
+    {
+        _uploadsPath = config["FileStorage:Path"]
+                       ?? Path.Combine(env.ContentRootPath!, "AppData", "uploads");
+        Directory.CreateDirectory(_uploadsPath);
+
+        _publicBaseUrl = config["AppUrl"]
+                         ?? "http://localhost:5260";
+    }
+
     private const string UploadsFolderName = "uploads";
 
     public async Task<string> UploadAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
     {
-        var uploadsPath = Path.Combine(env.WebRootPath, UploadsFolderName);
-
-        if (!Directory.Exists(uploadsPath))
-        {
-            Directory.CreateDirectory(uploadsPath);
-        }
 
         var uniqueName = $"{Guid.NewGuid()}{Path.GetExtension(fileName)}";
-        var filePath = Path.Combine(uploadsPath, uniqueName);
+        var filePath = Path.Combine(_uploadsPath, uniqueName);
 
         await using var output = new FileStream(filePath, FileMode.Create);
         await fileStream.CopyToAsync(output, cancellationToken);
 
-        var request = httpContextAccessor.HttpContext?.Request;
-        var baseUrl = $"{request?.Scheme}://{request?.Host}";
-
-        return $"{baseUrl}/{UploadsFolderName}/{uniqueName}";
+        return $"{_publicBaseUrl.TrimEnd('/')}/uploads/{uniqueName}";
     }
 
     public Task DeleteAsync(string fileUrl, CancellationToken cancellationToken = default)
@@ -41,7 +44,7 @@ public class FileStorageService(
         try
         {
             var fileName = Path.GetFileName(fileUrl);
-            var filePath = Path.Combine(env.WebRootPath, UploadsFolderName, fileName);
+            var filePath = Path.Combine(_uploadsPath, fileName);
 
             if (File.Exists(filePath))
             {

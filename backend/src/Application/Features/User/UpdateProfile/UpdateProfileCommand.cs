@@ -12,8 +12,7 @@ public record UpdateProfileCommand(
     string? Email,
     string? Phone,
     string? CurrentPassword,
-    string? NewPassword,
-    string? PhotoUrl
+    string? NewPassword
 ) : IRequest<Result<Unit, Error>>;
 
 public class UpdateProfileCommandHandler(
@@ -31,7 +30,9 @@ public class UpdateProfileCommandHandler(
             return Errors.User.NotFound(currentUserContext.Id);
         }
 
-        if (request.Email != null || request.NewPassword != null)
+        bool isEmailChanging = request.Email != null && request.Email != user.Email;
+
+        if (isEmailChanging || request.NewPassword != null)
         {
             if (string.IsNullOrEmpty(request.CurrentPassword) ||
                 !passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
@@ -74,11 +75,6 @@ public class UpdateProfileCommandHandler(
             }
 
             user.SetPhone(request.Phone);
-        }
-
-        if (request.PhotoUrl != null)
-        {
-            user.SetPhotoUrl(request.PhotoUrl);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

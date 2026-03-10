@@ -41,7 +41,7 @@ public class UpdateProfileHandlerTests
         _userRepoMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var command = new UpdateProfileCommand("New", "Last", null, null, null, null, null);
+        var command = new UpdateProfileCommand("New", "Last", null, null, null, null);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -67,7 +67,7 @@ public class UpdateProfileHandlerTests
         _passwordHasherMock.Setup(x => x.VerifyPassword("wrong_pass", "correct_hash"))
             .Returns(false);
 
-        var command = new UpdateProfileCommand(null, null, "new@email.com", null, "wrong_pass", null, null);
+        var command = new UpdateProfileCommand(null, null, "new@email.com", null, "wrong_pass", null);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -96,7 +96,7 @@ public class UpdateProfileHandlerTests
         _userRepoMock.Setup(x => x.GetByEmailAsync("new@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingUser);
 
-        var command = new UpdateProfileCommand(null, null, "new@test.com", null, "pass", null, null);
+        var command = new UpdateProfileCommand(null, null, "new@test.com", null, "pass", null);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -120,7 +120,7 @@ public class UpdateProfileHandlerTests
         _passwordHasherMock.Setup(x => x.VerifyPassword("current_pass", "old_hash")).Returns(true);
         _passwordHasherMock.Setup(x => x.HashPassword("new_pass")).Returns("new_hash");
 
-        var command = new UpdateProfileCommand(null, null, null, null, "current_pass", "new_pass", null);
+        var command = new UpdateProfileCommand(null, null, null, null, "current_pass", "new_pass");
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
