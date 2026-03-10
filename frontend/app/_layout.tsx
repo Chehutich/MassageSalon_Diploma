@@ -1,21 +1,22 @@
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
-import {
-  useFonts,
-  DMSans_400Regular,
-  DMSans_500Medium,
-} from "@expo-google-fonts/dm-sans";
-import { FontAwesome } from "@expo/vector-icons";
+import { LoadingScreen } from "@/src/components/ui/feedback/LoadingScreen";
+import { Palette } from "@/src/theme/tokens";
 import {
   CormorantGaramond_400Regular,
   CormorantGaramond_600SemiBold,
 } from "@expo-google-fonts/cormorant-garamond";
-import { KeyboardProvider } from "react-native-keyboard-controller";
-import { LoadingScreen } from "@/src/components/ui/feedback/LoadingScreen";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  useFonts,
+} from "@expo-google-fonts/dm-sans";
+import { FontAwesome } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Palette } from "@/src/theme/tokens";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AuthGuard } from "@/src/components/auth/AuthGuard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,45 +28,41 @@ const queryClient = new QueryClient({
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     DMSans_400Regular,
     DMSans_500Medium,
     CormorantGaramond_400Regular,
     CormorantGaramond_600SemiBold,
     ...FontAwesome.font,
   });
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (loaded || error) {
+    if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
-      setReady(true);
     }
-  }, [loaded, error]);
+  }, [fontsLoaded, fontError]);
 
-  if (!ready) {
-    return (
-      <SafeAreaProvider>
-        <LoadingScreen />
-      </SafeAreaProvider>
-    );
+  if (!fontsLoaded && !fontError) {
+    return <LoadingScreen />;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
         <KeyboardProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              gestureEnabled: false,
-              contentStyle: { backgroundColor: Palette.ivory },
-              animation: "fade_from_bottom",
-            }}
-          >
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(home)" />
-          </Stack>
+          <AuthGuard>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                gestureEnabled: false,
+                contentStyle: { backgroundColor: Palette.ivory },
+                animation: "fade_from_bottom",
+              }}
+            >
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(home)" />
+            </Stack>
+          </AuthGuard>
         </KeyboardProvider>
       </SafeAreaProvider>
     </QueryClientProvider>

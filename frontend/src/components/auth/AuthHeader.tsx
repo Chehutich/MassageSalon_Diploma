@@ -8,23 +8,22 @@ type Props = {
   subtitle: string;
 };
 
-export const AuthHeader = ({ title, subtitle }: Props) => {
-  const { height } = useWindowDimensions();
-
-  return (
+export const AuthBrand = () => (
+  <View style={styles.logoRow}>
+    <LeafLogo />
     <View>
-      <View style={[styles.logoRow, { marginBottom: height * 0.08 }]}>
-        <LeafLogo />
-        <View>
-          <Text style={styles.brandName}>SERENITY</Text>
-          <Text style={styles.brandTagline}>Massage & Wellness</Text>
-        </View>
-      </View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
+      <Text style={styles.brandName}>SERENITY</Text>
+      <Text style={styles.brandTagline}>Massage & Wellness</Text>
     </View>
-  );
-};
+  </View>
+);
+
+export const AuthHeader = ({ title, subtitle }: Props) => (
+  <View>
+    <Text style={styles.title}>{title}</Text>
+    <Text style={styles.subtitle}>{subtitle}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   logoRow: {

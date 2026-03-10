@@ -56,4 +56,4 @@ app.MapCategoryEndpoints();
 app.MapMasterEndpoints();
 app.AddExceptionHandling();
 
-app.Run("http://0.0.0.0:5260");
+app.Run("http://localhost:5260");

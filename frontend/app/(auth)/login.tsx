@@ -9,7 +9,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Palette } from "@/src/theme/tokens";
 import { PressButton } from "@/src/components/ui/forms/PressButton";
 import { InputField } from "@/src/components/ui/forms/InputField";
-import { AuthHeader } from "@/src/components/auth/AuthHeader";
+import { AuthBrand, AuthHeader } from "@/src/components/auth/AuthHeader";
 import { AuthFooter } from "@/src/components/auth/AuthFooter";
 import { SocialBtn, OrDivider } from "@/src/components/auth/SocialAuth";
 import { LoginErrors } from "@/src/utils/validation";
@@ -68,16 +68,18 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
       <KeyboardAwareScrollView
         bottomOffset={24}
-        bounces={false}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={styles.scrollGrow}
       >
         <View style={styles.inner}>
-          <View style={styles.top}>
+          <AuthBrand />
+          {/* ВЕРХНЯ ЧАСТИНА: Хедер та Форма */}
+          <View style={{ flex: 1 }} />
+
+          <View style={styles.bottomContainer}>
             <AuthHeader
               title={"Ласкаво\nпросимо."}
               subtitle="Увійдіть, щоб керувати своїми записами"
@@ -87,7 +89,7 @@ export default function LoginScreen() {
               <InputField
                 label="Електронна пошта"
                 value={email}
-                onChangeText={(v: string) => {
+                onChangeText={(v) => {
                   setEmail(v);
                   if (errors.email)
                     setErrors((e) => ({ ...e, email: undefined }));
@@ -105,7 +107,7 @@ export default function LoginScreen() {
               <PasswordField
                 label="Пароль"
                 value={password}
-                onChangeText={(v: string) => {
+                onChangeText={(v) => {
                   setPassword(v);
                   if (errors.password)
                     setErrors((e) => ({ ...e, password: undefined }));
@@ -127,7 +129,10 @@ export default function LoginScreen() {
                 onPress={handleLogin}
               />
             </View>
+          </View>
 
+          {/* НИЖНЯ ЧАСТИНА: Футтер та Соціалки */}
+          <View style={styles.actions}>
             <AuthFooter
               text="Ще немає акаунту? "
               linkText="Зареєструватись"
@@ -158,22 +163,32 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: Palette.ivory },
+  scrollGrow: { flexGrow: 1 },
   inner: {
     flex: 1,
     paddingHorizontal: 28,
     paddingTop: 24,
     paddingBottom: 36,
-    justifyContent: "space-between",
   },
-  top: {
+  bottomContainer: {
+    gap: 32, // Відступ між формою та секцією дій (Actions)
+  },
+  form: {
     gap: 18,
   },
-  form: { gap: 18 },
   forgotPassword: {
     textAlign: "right",
     fontSize: 13,
     color: Palette.taupe,
     fontFamily: "DMSans_500Medium",
+    marginTop: -4,
   },
-  socialRow: { flexDirection: "row", gap: 12 },
+  actions: {
+    gap: 20,
+  },
+  socialRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
 });

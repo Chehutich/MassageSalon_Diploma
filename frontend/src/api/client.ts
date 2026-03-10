@@ -6,6 +6,7 @@ const AUTH_ENDPOINTS = [
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/refresh",
+  "/api/auth/refresh-mobile",
 ];
 
 const axiosInstance = axios.create({
@@ -38,21 +39,25 @@ axiosInstance.interceptors.response.use(
         const accessToken = await SecureStore.getItemAsync("accessToken");
         const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
-        const { data } = await axiosInstance.post("/api/auth/refresh-mobile", {
-          accessToken,
-          refreshToken,
-        });
+        const { data } = await axios.post(
+          `${axiosInstance.defaults.baseURL}/api/auth/refresh-mobile`,
+          {
+            accessToken,
+            refreshToken,
+          },
+        );
 
         await SecureStore.setItemAsync("accessToken", data.token);
         await SecureStore.setItemAsync("refreshToken", data.refreshToken);
 
         original.headers.Authorization = `Bearer ${data.token}`;
         return axiosInstance(original);
-      } catch {
+      } catch (refreshError) {
         await SecureStore.deleteItemAsync("accessToken");
         await SecureStore.deleteItemAsync("refreshToken");
+
         setTimeout(() => router.replace("/(auth)/login"), 0);
-        return Promise.reject(error);
+        return Promise.reject(refreshError);
       }
     }
 
