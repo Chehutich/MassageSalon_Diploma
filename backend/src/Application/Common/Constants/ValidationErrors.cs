@@ -35,6 +35,13 @@ public static class ValidationErrors
         public const string NewStartTimeInvalid = "Appointment.NewStartTime.Invalid";
     }
 
+    public static class File
+    {
+        public const string Empty = "FIle.Empty";
+        public const string InvalidFileType = "File.InvalidFileType";
+        public const string TooBig = "File.TooBig";
+    }
+
     public static class GetAvailableDates
     {
         public const string ServiceIdRequired = "GetAvailableDates.ServiceId.Required";

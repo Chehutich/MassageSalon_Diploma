@@ -74,6 +74,13 @@ public static class Errors
         }
     }
 
+    public static class File
+    {
+        public static Error EmptyFile => new(
+            "File.EmptyFile",
+            "File is empty.");
+    }
+
     public static class Master
     {
         public static Error NotFound(Guid id)

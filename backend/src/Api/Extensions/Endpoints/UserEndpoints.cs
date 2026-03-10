@@ -2,6 +2,7 @@ using Application.Common.Models;
 using Application.Features.User.GetMe;
 using Application.Features.User.Logout;
 using Application.Features.User.UpdateProfile;
+using Application.Features.User.UploadAvatar;
 using MediatR;
 
 namespace Api.Extensions.Endpoints;
@@ -27,6 +28,18 @@ public static class UserEndpoints
             .ProducesProblem(404)
             .WithName("GetMe")
             .WithDescription("Retrieves the profile information of the currently authenticated user.");
+
+        group.MapPost("/upload-avatar", async (UploadAvatarCommand command, ISender sender) =>
+            {
+                var result = await sender.Send(command);
+
+                return result.IsSuccess
+                    ? Results.Ok()
+                    : result.ToProblemDetails();
+            })
+            .RequireAuthorization()
+            .WithName("UploadAvatar")
+            .WithDescription("Uploads an avatar image for the currently authenticated user.");
 
         group.MapPatch("/me", async (UpdateProfileCommand command, ISender sender) =>
             {
