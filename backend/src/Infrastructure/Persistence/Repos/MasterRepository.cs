@@ -41,6 +41,12 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<Master?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await context.Masters
+            .FirstOrDefaultAsync(m => m.UserId == userId, cancellationToken);
+    }
+
     public async Task<Schedule?> GetScheduleForDayAsync(Guid masterId,
         int dayOfWeek,
         CancellationToken cancellationToken = default)
@@ -116,4 +122,5 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
 
         return !hasOverlap;
     }
+
 }

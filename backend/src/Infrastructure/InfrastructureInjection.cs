@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.Common.Interfaces.Repos;
 using Infrastructure.Authentication;
+using Infrastructure.Notifications;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repos;
 using Infrastructure.Services;
@@ -25,6 +26,8 @@ public static class InfrastructureInjection
             options.UseNpgsql(connectionString);
         });
 
+        services.AddSignalR();
+
         services.AddHttpContextAccessor();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -38,6 +41,8 @@ public static class InfrastructureInjection
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+
+        services.AddScoped<INotificationService, SignalRNotificationService>();
 
         return services;
     }

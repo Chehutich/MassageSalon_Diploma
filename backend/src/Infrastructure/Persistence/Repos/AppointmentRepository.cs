@@ -24,6 +24,7 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
             .Include(a => a.Service)
             .Include(a => a.Master)
             .ThenInclude(m => m.User)
+            .Include(a => a.Client)
             .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
@@ -81,6 +82,27 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
             .Concat(timeOffIntervals)
             .OrderBy(x => x.Start)
             .ToList();
+    }
+
+    public async Task<List<Appointment>> GetMasterScheduleAsync(
+        Guid masterId,
+        DateTime start,
+        DateTime end,
+        CancellationToken cancellationToken = default)
+    {
+
+        return await context.Appointments
+            .AsNoTracking()
+            .Where(a => a.MasterId == masterId &&
+                        a.StartTime >= start &&
+                        a.StartTime < end &&
+                        a.Status != AppointmentStatus.Cancelled)
+            .Include(a => a.Service)
+            .Include(a => a.Client)
+            .Include(a => a.Master)
+            .ThenInclude(m => m.User)
+            .OrderBy(a => a.StartTime)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Appointment appointment, CancellationToken cancellationToken = default)

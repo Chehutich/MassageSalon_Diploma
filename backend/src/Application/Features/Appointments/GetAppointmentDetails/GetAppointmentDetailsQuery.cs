@@ -40,9 +40,15 @@ public class GetAppointmentDetailsHandler(
             appointment.Service.Price,
             appointment.Service.Duration,
             appointment.Master.Id,
+            appointment.Master.User.Id,
             appointment.Master.User.FirstName,
             appointment.Master.User.LastName,
-            appointment.Master.User.PhotoUrl
+            appointment.Master.User.PhotoUrl,
+            appointment.Client.Id,
+            appointment.Client.FirstName,
+            appointment.Client.LastName,
+            appointment.Client.Phone,
+            appointment.Client.Email
         );
 
         return dto;

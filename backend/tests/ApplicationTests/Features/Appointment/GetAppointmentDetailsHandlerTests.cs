@@ -40,10 +40,13 @@ public class GetAppointmentDetailsHandlerTests
         typeof(Master).GetProperty("Id")?.SetValue(master, Guid.NewGuid());
         typeof(Master).GetProperty("User")?.SetValue(master, masterUser);
 
+        var clientUser = new Domain.Entities.User("Ivan", "Client", "ivan@test.com", "123", "+380991112233");
+        typeof(Domain.Entities.User).GetProperty("Id")?.SetValue(clientUser, userId);
 
         var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
         typeof(Domain.Entities.Appointment).GetProperty("Id")?.SetValue(appointment, appointmentId);
         typeof(Domain.Entities.Appointment).GetProperty("ClientId")?.SetValue(appointment, userId);
+        typeof(Domain.Entities.Appointment).GetProperty("Client")?.SetValue(appointment, clientUser);
         typeof(Domain.Entities.Appointment).GetProperty("StartTime")?.SetValue(appointment, DateTime.UtcNow);
         typeof(Domain.Entities.Appointment).GetProperty("EndTime")?.SetValue(appointment, DateTime.UtcNow.AddMinutes(60));
         typeof(Domain.Entities.Appointment).GetProperty("Status")?.SetValue(appointment, AppointmentStatus.Confirmed);
@@ -60,6 +63,7 @@ public class GetAppointmentDetailsHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Id.Should().Be(appointmentId);
+        result.Value.ClientFirstName.Should().Be("Ivan");
         result.Value.MasterFirstName.Should().Be("Oleg");
         result.Value.ServiceName.Should().Be("Massage");
     }

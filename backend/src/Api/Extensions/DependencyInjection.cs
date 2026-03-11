@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -56,6 +57,7 @@ public static class DependencyInjection
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtIssuer,
                     ValidAudience = jwtAudience,
+                    RoleClaimType = ClaimTypes.Role,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
                 };
 
@@ -63,10 +65,19 @@ public static class DependencyInjection
                 {
                     OnMessageReceived = context =>
                     {
-                        if (context.Request.Cookies.TryGetValue("accessToken", out var token))
+                        if (context.Request.Cookies.TryGetValue("accessToken", out var cookieToken))
                         {
-                            context.Token = token;
+                            context.Token = cookieToken;
                         }
+
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/notifications-hub"))
+                        {
+                            context.Token = accessToken;
+                        }
+
                         return Task.CompletedTask;
                     }
                 };

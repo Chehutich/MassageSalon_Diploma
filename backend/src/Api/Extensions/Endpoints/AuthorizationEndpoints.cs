@@ -45,7 +45,7 @@ public static class AuthorizationEndpoints
                     AppendAuthCookies(context, result.Value.Token, result.Value.RefreshToken);
 
                     return Results.Ok(new AuthResponse(result.Value.Id, result.Value.FirstName, result.Value.Email,
-                        result.Value.Token, result.Value.RefreshToken));
+                        result.Value.Token, result.Value.RefreshToken, result.Value.Role));
                 })
             .Produces<AuthResponse>()
             .ProducesProblem(401)

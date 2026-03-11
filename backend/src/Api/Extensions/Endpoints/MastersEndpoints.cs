@@ -7,7 +7,7 @@ namespace Api.Extensions.Endpoints;
 
 public static class MastersEndpoints
 {
-    public static IEndpointRouteBuilder MapMasterEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapMastersEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/masters")
             .WithTags("Masters")

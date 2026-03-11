@@ -15,5 +15,10 @@ public interface IAppointmentRepository
 
     Task<List<BusyInterval>> GetBusyIntervalsAsync(Guid masterId, DateTime start, DateTime end, CancellationToken cancellationToken = default);
 
+    Task<List<Appointment>> GetMasterScheduleAsync(Guid masterId,
+        DateTime start,
+        DateTime end,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(Appointment appointment, CancellationToken cancellationToken = default);
 }

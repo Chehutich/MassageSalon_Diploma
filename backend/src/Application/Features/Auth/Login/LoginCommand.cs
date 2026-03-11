@@ -36,6 +36,7 @@ public class LoginCommandHandler(
             user.FirstName,
             user.Email,
             accessToken,
-            refreshToken);
+            refreshToken,
+            user.Role.ToString());
     }
 }

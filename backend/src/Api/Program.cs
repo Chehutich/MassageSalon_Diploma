@@ -2,6 +2,7 @@ using Api.Extensions;
 using Api.Extensions.Endpoints;
 using Application;
 using Infrastructure;
+using Infrastructure.Notifications;
 using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 using Serilog;
@@ -54,6 +55,9 @@ app.MapServiceEndpoints();
 app.MapAppointmentEndpoints();
 app.MapCategoryEndpoints();
 app.MapMasterEndpoints();
+app.MapMastersEndpoints();
 app.AddExceptionHandling();
+
+app.MapHub<NotificationHub>("/notifications-hub");
 
 app.Run("http://localhost:5260");

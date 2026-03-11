@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Repos;
+using Application.Events;
 using CSharpFunctionalExtensions;
 using Domain.Entities;
 using Domain.Errors;
@@ -18,7 +19,8 @@ public class CreateAppointmentHandler(
     IServiceRepository serviceRepository,
     IMasterRepository masterRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUserContext userContext)
+    ICurrentUserContext userContext,
+    IPublisher publisher)
     : IRequestHandler<CreateAppointmentCommand, Result<Guid, Error>>
 {
     public async Task<Result<Guid, Error>> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
@@ -49,7 +51,7 @@ public class CreateAppointmentHandler(
         {
             var masters = await masterRepository.GetAllWithDetailsAsync(request.ServiceId, cancellationToken);
 
-            Master? availableMaster = null;
+            Domain.Entities.Master? availableMaster = null;
             foreach (var m in masters)
             {
                 if (await masterRepository.IsMasterAvailableAsync(m.Id, request.StartTime, endTime, null, cancellationToken))
@@ -77,6 +79,9 @@ public class CreateAppointmentHandler(
 
         await appointmentRepository.AddAsync(appointment, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        //
+        await publisher.Publish(new AppointmentCreatedEvent(appointment.Id), cancellationToken);
 
         return appointment.Id;
     }

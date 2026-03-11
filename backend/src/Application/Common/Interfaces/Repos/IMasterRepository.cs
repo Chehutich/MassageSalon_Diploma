@@ -10,6 +10,8 @@ public interface IMasterRepository
 
     Task<Master?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    Task<Master?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
     Task<Schedule?> GetScheduleForDayAsync(Guid masterId,
         int dayOfWeek,
         CancellationToken cancellationToken = default);
@@ -23,4 +25,5 @@ public interface IMasterRepository
         DateTime end,
         Guid? excludeAppointmentId = null,
         CancellationToken cancellationToken = default);
+
 }

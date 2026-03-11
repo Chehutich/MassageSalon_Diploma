@@ -13,7 +13,14 @@ public record AppointmentDetailsResponse(
     int Duration,
     // Master
     Guid MasterId,
+    Guid MasterUserId,
     string MasterFirstName,
     string MasterLastName,
-    string? MasterPhotoUrl
+    string? MasterPhotoUrl,
+    // Client
+    Guid ClientId,
+    string ClientFirstName,
+    string ClientLastName,
+    string ClientPhone,
+    string ClientEmail
 );

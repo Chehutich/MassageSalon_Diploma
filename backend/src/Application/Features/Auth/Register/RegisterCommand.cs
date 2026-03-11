@@ -53,6 +53,6 @@ public class RegisterCommandHandler(
         await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new AuthResponse(user.Id, user.FirstName, user.Email, accessToken, refreshToken);
+        return new AuthResponse(user.Id, user.FirstName, user.Email, accessToken, refreshToken, user.Role.ToString());
     }
 }

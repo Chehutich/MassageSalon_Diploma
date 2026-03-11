@@ -4,6 +4,7 @@ using Application.Features.Appointments.CreateAppointment;
 using Domain.Entities;
 using Domain.Errors;
 using FluentAssertions;
+using MediatR;
 using Moq;
 
 namespace ApplicationTests.Features.Appointment;
@@ -15,6 +16,7 @@ public class CreateAppointmentHandlerTests
     private readonly Mock<IMasterRepository> _masterRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ICurrentUserContext> _userContextMock;
+    private readonly Mock<IPublisher> _publisherMock;
     private readonly CreateAppointmentHandler _handler;
 
     public CreateAppointmentHandlerTests()
@@ -24,13 +26,15 @@ public class CreateAppointmentHandlerTests
         _masterRepoMock = new Mock<IMasterRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _userContextMock = new Mock<ICurrentUserContext>();
+        _publisherMock = new Mock<IPublisher>();
 
         _handler = new CreateAppointmentHandler(
             _appointmentRepoMock.Object,
             _serviceRepoMock.Object,
             _masterRepoMock.Object,
             _unitOfWorkMock.Object,
-            _userContextMock.Object);
+            _userContextMock.Object,
+            _publisherMock.Object);
     }
 
     [Fact]
