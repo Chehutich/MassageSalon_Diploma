@@ -9,6 +9,12 @@ const AUTH_ENDPOINTS = [
   "/api/auth/refresh-mobile",
 ];
 
+let isLoggingOut = false;
+
+export function setLoggingOut(value: boolean) {
+  isLoggingOut = value;
+}
+
 const axiosInstance = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:5260",
   timeout: 10_000,
@@ -32,12 +38,22 @@ axiosInstance.interceptors.response.use(
       original?.url?.includes(path),
     );
 
-    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
+    if (
+      error.response?.status === 401 &&
+      !original._retry &&
+      !isAuthEndpoint &&
+      !isLoggingOut
+    ) {
       original._retry = true;
 
       try {
         const accessToken = await SecureStore.getItemAsync("accessToken");
         const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+        if (!accessToken || !refreshToken) {
+          setTimeout(() => router.replace("/(auth)/login"), 0);
+          return Promise.reject(error);
+        }
 
         const { data } = await axios.post(
           `${axiosInstance.defaults.baseURL}/api/auth/refresh-mobile`,

@@ -46,13 +46,10 @@ export default function ForgotScreen() {
         contentContainerStyle={styles.scrollGrow}
       >
         <View style={styles.inner}>
-          {/* 1. БРЕНД: Статично вгорі */}
           <AuthBrand />
 
-          {/* 2. ПРУЖИНА: Штовхає контент вниз (тільки на першому кроці) */}
           {step === 1 && <View style={{ flex: 1 }} />}
 
-          {/* 3. ОСНОВНИЙ КОНТЕНТ */}
           <View style={[styles.container, step === 2 && styles.successLayout]}>
             <AuthHeader
               title={step === 1 ? "Забули\nпароль?" : "Перевірте\nпошту."}
@@ -143,7 +140,6 @@ const styles = StyleSheet.create({
     gap: 32,
   },
   successLayout: {
-    // На кроці успіху центруємо трохи вище, ніж форму
     marginTop: "20%",
   },
   formWrapper: {

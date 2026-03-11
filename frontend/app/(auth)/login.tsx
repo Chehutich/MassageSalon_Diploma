@@ -1,170 +1,132 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Mail } from "lucide-react-native";
-import * as SecureStore from "expo-secure-store";
 import { FontAwesome } from "@expo/vector-icons";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
 import { Palette } from "@/src/theme/tokens";
 import { PressButton } from "@/src/components/ui/forms/PressButton";
-import { InputField } from "@/src/components/ui/forms/InputField";
 import { AuthBrand, AuthHeader } from "@/src/components/auth/AuthHeader";
 import { AuthFooter } from "@/src/components/auth/AuthFooter";
 import { SocialBtn, OrDivider } from "@/src/components/auth/SocialAuth";
-import { LoginErrors } from "@/src/utils/validation";
-import { RegexHelper } from "@/src/utils/regexHelper";
 import { useLoginUser } from "@/src/api/generated/auth/auth";
-import { PasswordField } from "@/src/components/ui/forms/PasswordField";
+import { RHFInputField } from "@/src/components/ui/forms/RHFInputField";
+import { RHFPasswordField } from "@/src/components/ui/forms/RHFPasswordField";
+import { ScreenWrapper } from "@/src/components/layout/ScreenWrapper";
+import { useAuthSession } from "@/src/hooks/useAuthSession";
+import { useToast } from "@/src/context/ToastContext";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Введіть email").email("Некоректний email"),
+  password: z
+    .string()
+    .min(1, "Введіть пароль")
+    .min(8, "Мінімум 8 символів")
+    .regex(/[a-zA-Z]/, "Пароль має містити хоча б 1 літеру"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
-  const [errors, setErrors] = useState<LoginErrors>({});
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const { mutate: login, isPending } = useLoginUser();
+  const { login: setSession } = useAuthSession();
+  const { showToast } = useToast();
 
-  const handleLogin = () => {
-    const newErrors: Record<string, string> = {};
+  const { control, handleSubmit } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
-    if (!email.trim()) newErrors.email = "Введіть email";
-    else if (!RegexHelper.EmailRegex().test(email))
-      newErrors.email = "Некоректний email";
-
-    if (!password) newErrors.password = "Введіть пароль";
-    else if (password.length < 8) newErrors.password = "Мінімум 8 символів";
-    else if (!RegexHelper.HasLetter().test(password))
-      newErrors.password = "Пароль має містити хоча б 1 літеру";
-
-    if (Object.keys(newErrors).length) {
-      setErrors(newErrors);
-      return;
-    }
-    setErrors({});
-
+  const onSubmit = (data: LoginFormValues) => {
     login(
-      { data: { email, password } },
+      { data },
       {
-        onSuccess: async (data) => {
-          console.log("tokens to save:", data.token, data.refreshToken);
-          await SecureStore.setItemAsync("accessToken", data.token);
-          await SecureStore.setItemAsync("refreshToken", data.refreshToken);
-          router.replace("/(home)/home");
+        onSuccess: async (res) => {
+          await setSession(res.token, res.refreshToken, res.role);
         },
         onError: (e: any) => {
           const status = e.response?.status;
-          console.log("status:", e.response?.status);
-          console.log("data:", JSON.stringify(e.response?.data));
-          console.log("message:", e.message);
-
           if (status === 400 || status === 401) {
-            setErrors({ password: "Невірний email або пароль" });
+            showToast("error", "Помилка авторизації", "Невірний email або пароль");
           } else {
-            setErrors({ password: "Щось пішло не так. Спробуйте пізніше" });
+            showToast("error", "Помилка", "Щось пішло не так. Спробуйте пізніше");
           }
         },
-      },
+      }
     );
   };
 
   return (
-    <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
-      <KeyboardAwareScrollView
-        bottomOffset={24}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.scrollGrow}
-      >
-        <View style={styles.inner}>
-          <AuthBrand />
-          {/* ВЕРХНЯ ЧАСТИНА: Хедер та Форма */}
-          <View style={{ flex: 1 }} />
+    <ScreenWrapper>
+      <View style={styles.inner}>
+        <AuthBrand />
+        <View style={{ flex: 3 }} />
 
-          <View style={styles.bottomContainer}>
-            <AuthHeader
-              title={"Ласкаво\nпросимо."}
-              subtitle="Увійдіть, щоб керувати своїми записами"
+        <View style={styles.bottomContainer}>
+          <AuthHeader
+            title={"Ласкаво\nпросимо."}
+            subtitle="Увійдіть, щоб керувати своїми записами"
+          />
+
+          <View style={styles.form}>
+            <RHFInputField
+              name="email"
+              control={control}
+              label="Електронна пошта"
+              placeholder="example@mail.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              icon={<Mail size={20} color={Palette.taupe} strokeWidth={1.5} />}
             />
 
-            <View style={styles.form}>
-              <InputField
-                label="Електронна пошта"
-                value={email}
-                onChangeText={(v) => {
-                  setEmail(v);
-                  if (errors.email)
-                    setErrors((e) => ({ ...e, email: undefined }));
-                }}
-                isInvalid={!!errors.email}
-                errorText={errors.email}
-                placeholder="example@mail.com"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                icon={
-                  <Mail size={20} color={Palette.taupe} strokeWidth={1.5} />
-                }
-              />
-
-              <PasswordField
-                label="Пароль"
-                value={password}
-                onChangeText={(v) => {
-                  setPassword(v);
-                  if (errors.password)
-                    setErrors((e) => ({ ...e, password: undefined }));
-                }}
-                isInvalid={!!errors.password}
-                errorText={errors.password}
-                placeholder="••••••••"
-              />
-
-              <TouchableOpacity
-                onPress={() => router.replace("/(auth)/forgot")}
-              >
-                <Text style={styles.forgotPassword}>Забули пароль?</Text>
-              </TouchableOpacity>
-
-              <PressButton
-                title="Увійти"
-                loading={isPending}
-                onPress={handleLogin}
-              />
-            </View>
-          </View>
-
-          {/* НИЖНЯ ЧАСТИНА: Футтер та Соціалки */}
-          <View style={styles.actions}>
-            <AuthFooter
-              text="Ще немає акаунту? "
-              linkText="Зареєструватись"
-              onPress={() => router.replace("/(auth)/register")}
+            <RHFPasswordField
+              name="password"
+              control={control}
+              label="Пароль"
+              placeholder="••••••••"
             />
 
-            <OrDivider />
+            <TouchableOpacity onPress={() => router.replace("/(auth)/forgot")}>
+              <Text style={styles.forgotPassword}>Забули пароль?</Text>
+            </TouchableOpacity>
 
-            <View style={styles.socialRow}>
-              <SocialBtn
-                icon={
-                  <FontAwesome name="apple" size={20} color={Palette.taupe} />
-                }
-                label="Apple"
-              />
-              <SocialBtn
-                icon={
-                  <FontAwesome name="google" size={20} color={Palette.taupe} />
-                }
-                label="Google"
-              />
-            </View>
+            <PressButton
+              title="Увійти"
+              loading={isPending}
+              onPress={handleSubmit(onSubmit)}
+            />
           </View>
         </View>
-      </KeyboardAwareScrollView>
-    </SafeAreaView>
+
+        <View style={styles.actions}>
+          <AuthFooter
+            text="Ще немає акаунту? "
+            linkText="Зареєструватись"
+            onPress={() => router.replace("/(auth)/register")}
+          />
+
+          <OrDivider />
+
+          <View style={styles.socialRow}>
+            <SocialBtn
+              icon={<FontAwesome name="apple" size={20} color={Palette.taupe} />}
+              label="Apple"
+            />
+            <SocialBtn
+              icon={<FontAwesome name="google" size={20} color={Palette.taupe} />}
+              label="Google"
+            />
+          </View>
+        </View>
+      </View>
+    </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Palette.ivory },
-  scrollGrow: { flexGrow: 1 },
   inner: {
     flex: 1,
     paddingHorizontal: 28,
@@ -172,7 +134,7 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
   },
   bottomContainer: {
-    gap: 32, // Відступ між формою та секцією дій (Actions)
+    gap: 32,
   },
   form: {
     gap: 18,
@@ -185,7 +147,6 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   actions: {
-    gap: 20,
   },
   socialRow: {
     flexDirection: "row",

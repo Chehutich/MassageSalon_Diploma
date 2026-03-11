@@ -1,40 +1,43 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { Banknote, Calendar, Clock } from "lucide-react-native";
+import { View, Text, Pressable, StyleSheet, Linking } from "react-native";
+import {
+  Banknote,
+  Calendar,
+  Clock,
+  MessageSquare,
+  Phone,
+} from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { STATUS_CONFIG } from "./appointmentHelpers";
 import type { MyAppointmentResponse } from "@/src/api/generated/apiV1.schemas";
+import {
+  checkCanCancel,
+  formatAppointmentDate,
+  formatAppointmentTimeRange,
+} from "@/src/utils/dateHelpers";
 
 type Props = {
-  item: MyAppointmentResponse;
+  item: any;
   onBookAgain?: (serviceId: string, masterId: string | null) => void;
-  onCancelPress?: (item: MyAppointmentResponse) => void;
+  onCancelPress?: (item: any) => void;
+  isMasterView?: boolean;
 };
 
-export function AppointmentCard({ item, onBookAgain, onCancelPress }: Props) {
+export function AppointmentCard({
+  item,
+  onBookAgain,
+  onCancelPress,
+  isMasterView,
+}: Props) {
   const status =
     STATUS_CONFIG[item.status?.toLowerCase() ?? ""] ?? STATUS_CONFIG.confirmed;
 
-  const startDate = new Date(item.startTime as string);
-  const endDate = new Date(item.endTime as string);
+  const dateStr = formatAppointmentDate(item.startTime as string);
+  const timeStr = formatAppointmentTimeRange(
+    item.startTime as string,
+    item.endTime as string,
+  );
 
-  const dateStr = startDate.toLocaleDateString("uk-UA", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-  const timeStr = `${startDate.toLocaleTimeString("uk-UA", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })} – ${endDate.toLocaleTimeString("uk-UA", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}`;
-
-  const now = Date.now();
-  const timeDifferenceMs = startDate.getTime() - now;
-  const ONE_HOUR_MS = 60 * 60 * 1000;
-
-  const canCancel = timeDifferenceMs > ONE_HOUR_MS;
+  const canCancel = checkCanCancel(item.startTime as string);
 
   return (
     <View style={styles.card}>
@@ -49,82 +52,97 @@ export function AppointmentCard({ item, onBookAgain, onCancelPress }: Props) {
           {item.serviceName}
         </Text>
         <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-          <View style={[styles.statusDot, { backgroundColor: status.color }]} />
           <Text style={[styles.statusText, { color: status.color }]}>
             {status.label}
           </Text>
         </View>
       </View>
 
-      {/* ── Divider ── */}
       <View style={styles.divider} />
 
-      {/* ── Meta: master + date + time + price ── */}
+      {/* ── Meta Block ── */}
       <View style={styles.metaBlock}>
-        <View style={styles.masterRow}>
-          <Text style={styles.masterName}>
-            {item.masterFirstName} {item.masterLastName}
+        <View style={styles.mainInfoRow}>
+          <Text style={styles.mainInfoText}>
+            {isMasterView
+              ? `${item.clientFirstName} ${item.clientLastName}`
+              : `${item.masterFirstName} ${item.masterLastName}`}
           </Text>
+
+          {isMasterView && item.clientPhone && (
+            <Pressable
+              onPress={() => Linking.openURL(`tel:${item.clientPhone}`)}
+              style={styles.miniCallBtn}
+            >
+              <Phone size={14} color={Palette.sage} />
+            </Pressable>
+          )}
         </View>
+
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
-            <Calendar
-              size={12}
-              strokeWidth={1.8}
-              color={Palette.taupe}
-              style={{ opacity: 0.7 }}
-            />
-            <Text style={styles.metaText}>{dateStr}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <Clock
-              size={12}
-              strokeWidth={1.8}
-              color={Palette.taupe}
-              style={{ opacity: 0.7 }}
-            />
+            <Clock size={12} color={Palette.taupe} style={{ opacity: 0.7 }} />
             <Text style={styles.metaText}>{timeStr}</Text>
           </View>
           <View style={styles.price}>
             <Banknote
               size={12}
-              strokeWidth={1.8}
               color={Palette.taupe}
               style={{ opacity: 0.7 }}
             />
-            <Text style={styles.metaText}>{item.actualPrice} ₴</Text>
+            <Text style={styles.metaText}>
+              {item.price ?? item.actualPrice} ₴
+            </Text>
           </View>
+          {!isMasterView && (
+            <View style={styles.metaItem}>
+              <Calendar
+                size={12}
+                color={Palette.taupe}
+                style={{ opacity: 0.7 }}
+              />
+              <Text style={styles.metaText}>{dateStr}</Text>
+            </View>
+          )}
         </View>
+
+        {isMasterView && item.clientNotes && (
+          <View style={styles.notesContainer}>
+            <MessageSquare
+              size={12}
+              color={Palette.taupe}
+              style={{ marginTop: 2 }}
+            />
+            <Text style={styles.notesText} numberOfLines={2}>
+              {item.clientNotes}
+            </Text>
+          </View>
+        )}
       </View>
 
-      {/* ── Actions ── */}
-      {item.status?.toLowerCase() === "confirmed" ? (
+      {!isMasterView && (
         <View style={styles.actions}>
-          {canCancel && (
+          {item.status?.toLowerCase() === "confirmed" ? (
+            canCancel && (
+              <Pressable
+                style={styles.btnPrimary}
+                onPress={() => onCancelPress?.(item)}
+              >
+                <Text style={styles.btnPrimaryText}>Скасувати</Text>
+              </Pressable>
+            )
+          ) : (
             <Pressable
               style={styles.btnPrimary}
-              onPress={() => onCancelPress?.(item)}
+              onPress={() =>
+                item.serviceId &&
+                onBookAgain?.(item.serviceId, item.masterId ?? null)
+              }
             >
-              <Text style={styles.btnPrimaryText}>Скасувати</Text>
+              <Text style={styles.btnPrimaryText}>Забронювати ще раз</Text>
             </Pressable>
           )}
         </View>
-      ) : (
-        <Pressable
-          style={styles.btnPrimary}
-          onPress={() => {
-            if (item.serviceId) {
-              console.log(
-                "Booking again:",
-                item.serviceId,
-                item.masterId ?? null,
-              );
-              onBookAgain?.(item.serviceId, item.masterId ?? null);
-            }
-          }}
-        >
-          <Text style={styles.btnPrimaryText}>Забронювати ще раз</Text>
-        </Pressable>
       )}
     </View>
   );
@@ -137,12 +155,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     borderColor: Palette.sand,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
-    elevation: 2,
-    gap: 14,
+    gap: 12,
   },
   topRow: {
     flexDirection: "row",
@@ -155,7 +168,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
   },
   accentDot: {
     width: 6,
@@ -169,47 +181,36 @@ const styles = StyleSheet.create({
     color: Palette.espresso,
   },
   statusBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
-    flexShrink: 0,
   },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 11.5, fontFamily: "DMSans_500Medium" },
-  divider: { height: 1, backgroundColor: Palette.sand, borderRadius: 1 },
-  metaBlock: { gap: 10 },
-  masterRow: {
+  statusText: { fontSize: 11, fontFamily: "DMSans_500Medium" },
+  divider: { height: 1, backgroundColor: Palette.sand, opacity: 0.5 },
+  metaBlock: { gap: 8 },
+  mainInfoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    justifyContent: "space-between",
   },
-  avatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: {
-    fontSize: 11,
-    fontFamily: "CormorantGaramond_600SemiBold",
-  },
-  masterName: {
-    fontSize: 13,
-    fontFamily: "DMSans_400Regular",
+  mainInfoText: {
+    fontSize: 14,
+    fontFamily: "DMSans_500Medium",
     color: Palette.taupe,
+  },
+  miniCallBtn: {
+    padding: 6,
+    backgroundColor: Palette.sage + "15",
+    borderRadius: 8,
   },
   metaRow: {
     flexDirection: "row",
-    gap: 14,
+    gap: 16,
   },
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 5,
   },
   metaText: {
     fontSize: 12,
@@ -219,39 +220,31 @@ const styles = StyleSheet.create({
   price: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    fontSize: 12,
-    fontFamily: "DMSans_500Medium",
-    color: Palette.espresso,
+    gap: 5,
   },
-  actions: { flexDirection: "row", gap: 10 },
-  btnSecondary: {
-    flex: 1,
-    height: 40,
+  notesContainer: {
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: Palette.sand + "30",
+    padding: 10,
     borderRadius: 12,
-    backgroundColor: Palette.sand,
-    borderWidth: 1,
-    borderColor: Palette.sandDark,
-    alignItems: "center",
-    justifyContent: "center",
+    marginTop: 4,
   },
-  btnSecondaryText: {
-    fontSize: 13,
-    fontFamily: "DMSans_500Medium",
-    color: Palette.taupe,
-  },
-  btnPrimary: {
+  notesText: {
     flex: 1,
+    fontSize: 12,
+    fontFamily: "DMSans_400Regular",
+    color: Palette.taupe,
+    lineHeight: 16,
+    fontStyle: "italic",
+  },
+  actions: { marginTop: 4 },
+  btnPrimary: {
     height: 40,
     borderRadius: 12,
     backgroundColor: Palette.rose,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: Palette.rose,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 4,
   },
   btnPrimaryText: {
     fontSize: 13,
