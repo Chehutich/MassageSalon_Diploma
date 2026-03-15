@@ -60,7 +60,7 @@ public class RescheduleAppointmentCommandHandlerTests
         var userId = Guid.NewGuid();
         var command = new RescheduleAppointmentCommand(appointmentId, DateTime.UtcNow.AddDays(2));
 
-        var service = new Service(Guid.NewGuid(), "Haircut", "Desc", 60, 100m);
+        var service = new Service(Guid.NewGuid(), "service", "Haircut", "Desc", 60, 100m);
         var appointment = new Domain.Entities.Appointment(userId, masterId, service, DateTime.UtcNow.AddDays(3), null);
 
         typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Service))?.SetValue(appointment, service);
@@ -95,7 +95,7 @@ public class RescheduleAppointmentCommandHandlerTests
         var now = DateTime.UtcNow;
         var oldStartTime = now.AddHours(10);
 
-        var service = new Service(userId, "Haircut", "Desc", 60, 100m);
+        var service = new Service(userId, "service", "Haircut", "Desc", 60, 100m);
 
         var appointment = new Domain.Entities.Appointment(userId, Guid.NewGuid(), service, oldStartTime, null);
         typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Service))?.SetValue(appointment, service);
@@ -124,7 +124,7 @@ public class RescheduleAppointmentCommandHandlerTests
         var newStartTime = now.AddDays(3);
 
         var command = new RescheduleAppointmentCommand(appointmentId, newStartTime);
-        var service = new Service(Guid.NewGuid(), "Haircut", "Desc", 60, 100m);
+        var service = new Service(Guid.NewGuid(), "service", "Haircut", "Desc", 60, 100m);
         var appointment = new Domain.Entities.Appointment(userId, Guid.NewGuid(), service, oldStartTime, null);
 
         typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Service))?.SetValue(appointment, service);

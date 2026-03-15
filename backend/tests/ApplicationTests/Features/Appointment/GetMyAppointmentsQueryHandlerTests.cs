@@ -27,7 +27,7 @@ public class GetMyAppointmentsQueryHandlerTests
         var userId = Guid.NewGuid();
         _userContextMock.Setup(x => x.Id).Returns(userId);
 
-        var service = new Service(Guid.NewGuid(), "Massage", "Description", 60, 1000m);
+        var service = new Service(Guid.NewGuid(), "service", "Massage", "Description", 60, 1000m);
 
         var masterUser = Domain.Entities.User.CreateRegistered("Oleg", "Test", "oleg@test.com", "123", "+380");
         var master = (Master)Activator.CreateInstance(typeof(Master), true)!;

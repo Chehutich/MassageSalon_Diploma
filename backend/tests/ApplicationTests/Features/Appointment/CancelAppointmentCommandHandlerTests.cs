@@ -61,7 +61,7 @@ public class CancelAppointmentCommandHandlerTests
 
         var startTime = now.AddMinutes(30);
 
-        var service = new Service(Guid.NewGuid(), "Haircut", "Desc", 60, 100m);
+        var service = new Service(Guid.NewGuid(), "service", "Haircut", "Desc", 60, 100m);
 
         var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
         typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Id))?.SetValue(appointment, appointmentId);

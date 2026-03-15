@@ -308,7 +308,7 @@ public class SlotServiceTests
 
     private Service SetupService(int duration)
     {
-        var service = new Service(ServiceId, "Test Service", "Desc", duration, 500m);
+        var service = new Service(ServiceId, "service", "Test Service", "Desc", duration, 500m);
         _serviceRepoMock.Setup(x => x.GetByIdAsync(ServiceId, It.IsAny<CancellationToken>())).ReturnsAsync(service);
         return service;
     }

@@ -25,7 +25,7 @@ public class GetServicesQueryHandlerTests
         var category = new Category("Massage", "massage");
 
         var service = new Service(
-            categoryId,
+            categoryId, "service",
             "Classical Massage",
             "Description",
             60,

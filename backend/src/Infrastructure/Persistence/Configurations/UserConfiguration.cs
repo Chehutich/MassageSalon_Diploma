@@ -9,13 +9,16 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.HasKey(e => e.Id).HasName("users_pkey");
+        builder.HasKey(e => e.Id)
+            .HasName("users_pkey");
 
         builder.ToTable("users");
 
-        builder.HasIndex(e => e.Email, "users_email_key").IsUnique();
+        builder.HasIndex(e => e.Email, "users_email_key")
+            .IsUnique();
 
-        builder.HasIndex(e => e.Phone, "users_phone_key").IsUnique();
+        builder.HasIndex(e => e.Phone, "users_phone_key")
+            .IsUnique();
 
         builder.Property(e => e.Id)
             .HasDefaultValueSql("gen_random_uuid()")
@@ -53,7 +56,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(512)
             .HasColumnName("refresh_token");
 
-        builder.Property(e => e.RefreshTokenExpiry).HasColumnName("refresh_token_expiry");
+        builder.Property(e => e.RefreshTokenExpiry)
+            .HasColumnName("refresh_token_expiry");
 
         builder.Property(e => e.Role)
             .HasMaxLength(50)

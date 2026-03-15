@@ -60,7 +60,7 @@ public abstract class BaseRepositoryTest : IDisposable
 
     protected async Task<Service> CreateServiceAsync(Guid categoryId, string title = "Massage", int duration = 60)
     {
-        var service = new Service(categoryId, title, "Description", duration, 1000m);
+        var service = new Service(categoryId, "service", title, "Description", duration, 1000m);
         context.Services.Add(service);
         await context.SaveChangesAsync();
         return service;

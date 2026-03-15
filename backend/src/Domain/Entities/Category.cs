@@ -20,29 +20,11 @@ public class Category
     public Category(string title, string slug)
     {
         Title = title;
-        Slug = PrepareSlug(slug);
+        Slug = SlugHelper.PrepareSlug(slug);
     }
 
     public void Deactivate()
     {
         IsActive = false;
-    }
-
-    private string PrepareSlug(string slug)
-    {
-        if (string.IsNullOrWhiteSpace(slug))
-        {
-            return string.Empty;
-        }
-
-        var result = slug.ToLowerInvariant()
-            .Replace(" ", "-")
-            .Replace("_", "-");
-
-        result = RegexHelper.NonAlphanumericRegex().Replace(result, "");
-
-        result = RegexHelper.MultipleHyphensRegex().Replace(result, "-");
-
-        return result.Trim('-');
     }
 }

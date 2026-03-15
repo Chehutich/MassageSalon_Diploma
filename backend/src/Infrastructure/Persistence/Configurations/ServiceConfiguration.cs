@@ -28,6 +28,11 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .HasPrecision(10, 2)
             .HasColumnName("price");
 
+        builder.Property(e => e.Slug)
+            .HasMaxLength(50)
+            .IsRequired()
+            .HasColumnName("slug");
+
         builder.Property(e => e.Title)
             .HasMaxLength(200)
             .HasColumnName("title");

@@ -61,7 +61,7 @@ public class CreateAppointmentHandlerTests
         // Arrange
         var command = new CreateAppointmentCommand(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(1));
 
-        var service = new Service(command.ServiceId, "Haircut", "Desc", 60, 100m);
+        var service = new Service(command.ServiceId, "service", "Haircut", "Desc", 60, 100m);
 
         _serviceRepoMock
             .Setup(x => x.GetByIdAsync(command.ServiceId, It.IsAny<CancellationToken>()))
@@ -91,7 +91,7 @@ public class CreateAppointmentHandlerTests
         var clientId = Guid.NewGuid();
         var command =
             new CreateAppointmentCommand(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(1), "Some notes");
-        var service = new Service(command.ServiceId, "Haircut", "Desc", 60, 100m);
+        var service = new Service(command.ServiceId, "service", "Haircut", "Desc", 60, 100m);
 
         _userContextMock.Setup(x => x.Id).Returns(clientId);
 
@@ -142,7 +142,7 @@ public class CreateAppointmentHandlerTests
         var startTime = DateTime.UtcNow.AddDays(1);
         var command = new CreateAppointmentCommand(serviceId, null, startTime);
 
-        var service = new Service(serviceId, "Massage", "Desc", 60, 100m);
+        var service = new Service(serviceId, "service", "Massage", "Desc", 60, 100m);
         var master1 = BuildMaster(Guid.NewGuid());
         var master2 = BuildMaster(Guid.NewGuid());
         var masters = new List<Master> { master1, master2 };
@@ -179,7 +179,7 @@ public class CreateAppointmentHandlerTests
         // Arrange
         var serviceId = Guid.NewGuid();
         var command = new CreateAppointmentCommand(serviceId, null, DateTime.UtcNow.AddDays(1));
-        var service = new Service(serviceId, "Massage", "Desc", 60, 100m);
+        var service = new Service(serviceId, "service", "Massage", "Desc", 60, 100m);
         var masters = new List<Master> { BuildMaster(Guid.NewGuid()) };
 
         _serviceRepoMock.Setup(x => x.GetByIdAsync(serviceId, It.IsAny<CancellationToken>())).ReturnsAsync(service);

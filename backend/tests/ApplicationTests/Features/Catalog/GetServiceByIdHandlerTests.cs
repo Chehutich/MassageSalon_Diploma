@@ -25,7 +25,7 @@ public class GetServiceByIdHandlerTests
         // Arrange
         var serviceId = Guid.NewGuid();
         var category = new Category("Body", "massage");
-        var service = new Service(Guid.NewGuid(), "Oil Massage", "Deep relax", 60, 2000m, new List<string> { "Deep relax", "Relax" });
+        var service = new Service(Guid.NewGuid(), "service", "Oil Massage", "Deep relax", 60, 2000m, new List<string> { "Deep relax", "Relax" });
 
         typeof(Service).GetProperty(nameof(Service.Id))?.SetValue(service, serviceId);
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service, category);
@@ -75,7 +75,7 @@ public class GetServiceByIdHandlerTests
         // Arrange
         var serviceId = Guid.NewGuid();
         var category = new Category("Body", "massage");
-        var service = new Service(Guid.NewGuid(), "Zen Massage", "Relax", 60, 3000m);
+        var service = new Service(Guid.NewGuid(), "service", "Zen Massage", "Relax", 60, 3000m);
 
         typeof(Service).GetProperty(nameof(Service.Id))?.SetValue(service, serviceId);
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service, category);

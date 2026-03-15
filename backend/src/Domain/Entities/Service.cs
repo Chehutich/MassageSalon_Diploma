@@ -1,4 +1,5 @@
-﻿using Domain.Enums;
+﻿using Domain.Common;
+using Domain.Enums;
 
 namespace Domain.Entities;
 
@@ -7,6 +8,8 @@ public class Service
     public Guid Id { get; private set; } = Guid.NewGuid();
 
     public Guid CategoryId { get; private set; }
+
+    public string Slug { get; private set; } = null!;
 
     public string Title { get; private set; } = null!;
 
@@ -30,9 +33,16 @@ public class Service
 
     private Service() { }
 
-    public Service (Guid categoryId, string title, string? description, int duration, decimal price, List<string>? benefits = null)
+    public Service(Guid categoryId,
+        string slug,
+        string title,
+        string? description,
+        int duration,
+        decimal price,
+        List<string>? benefits = null)
     {
         CategoryId = categoryId;
+        Slug = SlugHelper.PrepareSlug(slug);
         Title = title;
         Description = description;
         Duration = duration;

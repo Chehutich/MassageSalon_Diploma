@@ -25,7 +25,7 @@ public class GetMasterDetailsHandlerTests
         // Arrange
         var masterId = Guid.NewGuid();
         var category = new Category("Massage", "massage");
-        var service = new Service(Guid.NewGuid(), "Classic", "Description", 60, 1000m);
+        var service = new Service(Guid.NewGuid(), "service", "Classic", "Description", 60, 1000m);
 
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service, category);
 

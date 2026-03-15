@@ -23,8 +23,8 @@ public class GetMastersHandlerTests
     {
         // Arrange
         var category = new Category("Massage", "massage");
-        var service1 = new Service(Guid.NewGuid(), "Tai", "...", 60, 1000m);
-        var service2 = new Service(Guid.NewGuid(), "Health", "...", 60, 1200m);
+        var service1 = new Service(Guid.NewGuid(), "service", "Tai", "...", 60, 1000m);
+        var service2 = new Service(Guid.NewGuid(), "service1", "Health", "...", 60, 1200m);
 
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service1, category);
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service2, category);
