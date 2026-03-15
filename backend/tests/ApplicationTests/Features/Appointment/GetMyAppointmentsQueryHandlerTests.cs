@@ -29,7 +29,7 @@ public class GetMyAppointmentsQueryHandlerTests
 
         var service = new Service(Guid.NewGuid(), "Massage", "Description", 60, 1000m);
 
-        var masterUser = new Domain.Entities.User("Oleg", "Test", "oleg@test.com", "123", "+380");
+        var masterUser = Domain.Entities.User.CreateRegistered("Oleg", "Test", "oleg@test.com", "123", "+380");
         var master = (Master)Activator.CreateInstance(typeof(Master), true)!;
         typeof(Master).GetProperty("Id")?.SetValue(master, Guid.NewGuid());
         typeof(Master).GetProperty("User")?.SetValue(master, masterUser);

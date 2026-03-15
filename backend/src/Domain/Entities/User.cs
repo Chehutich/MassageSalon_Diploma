@@ -14,13 +14,13 @@ public class User : IAuditableEntity
 
     public string Phone { get; private set; }
 
-    public string Email { get; private set; } = null!;
+    public string? Email { get; private set; }
 
     public string? PhotoUrl { get; private set; }
 
-    public string PasswordHash { get; private set; } = null!;
+    public string? PasswordHash { get; private set; }
 
-    public Role Role { get; private set; } = Role.Client;
+    public Role Role { get; private set; } = Role.Guest;
 
     public string? RefreshToken { get; private set; }
 
@@ -30,20 +30,53 @@ public class User : IAuditableEntity
 
     public virtual ICollection<Master> Masters { get; private set; } = new List<Master>();
 
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+
     private User() { }
 
-    public User(string firstName, string lastName, string email, string passwordHash, string phone)
+    /// <summary>
+    /// That constructor is used for creating any user(include guests) manually
+    /// </summary>
+    private User(string firstName, string lastName, string? email, string? passwordHash, string phone, Role role)
+    {
+        // Only validation
+        SetFirstName(firstName);
+        SetLastName(lastName);
+        SetPhone(phone);
+
+        if (email is not null)
+        {
+            SetEmail(email);
+        }
+
+        if (passwordHash is not null)
+        {
+            SetPassword(passwordHash);
+        }
+        Role = role;
+    }
+
+    public static User CreateGuest(string firstName, string lastName, string phone)
+    {
+        return new User(firstName, lastName, null, null, phone, Role.Guest);
+    }
+
+    public static User CreateRegistered(string firstName, string lastName, string email, string passwordHash, string phone)
+    {
+        return new User(firstName, lastName, email, passwordHash, phone, Role.Client);
+    }
+
+    public void UpgradeGuestToRegistered(string firstName, string lastName, string email, string passwordHash)
     {
         SetFirstName(firstName);
         SetLastName(lastName);
         SetEmail(email);
         SetPassword(passwordHash);
-        SetPhone(phone);
+
+        Role = Role.Client;
     }
-
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
 
     public void SetFirstName(string firstName)
     {

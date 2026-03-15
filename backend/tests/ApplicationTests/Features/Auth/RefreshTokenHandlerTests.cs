@@ -29,7 +29,7 @@ public class RefreshTokenHandlerTests
         // Access token is null, but refresh token is valid
         var command = new RefreshTokenCommand(string.Empty, oldRefreshToken);
 
-        var user = new Domain.Entities.User("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
+        var user = Domain.Entities.User.CreateRegistered("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
         user.SetRefreshToken(oldRefreshToken, DateTime.UtcNow.AddDays(1));
 
         _userRepoMock.Setup(x => x.GetByRefreshTokenAsync(oldRefreshToken, It.IsAny<CancellationToken>()))
@@ -57,7 +57,7 @@ public class RefreshTokenHandlerTests
         var token = "expired_token";
         var command = new RefreshTokenCommand("any_access", token);
 
-        var user = new Domain.Entities.User("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
+        var user = Domain.Entities.User.CreateRegistered("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
 
         user.SetRefreshToken(token, DateTime.UtcNow.AddDays(1));
         typeof(Domain.Entities.User).GetProperty(nameof(user.RefreshTokenExpiry))?

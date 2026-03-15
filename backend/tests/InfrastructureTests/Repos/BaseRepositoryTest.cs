@@ -28,7 +28,7 @@ public abstract class BaseRepositoryTest : IDisposable
 
     protected async Task<User> CreateUserAsync(string email = "test@test.com", string phone = "+380000000000")
     {
-        var user = new User("FirstName", "LastName", email, "password_hash", phone);
+        var user = User.CreateRegistered("FirstName", "LastName", email, "password_hash", phone);
         context.Users.Add(user);
         await context.SaveChangesAsync();
         return user;

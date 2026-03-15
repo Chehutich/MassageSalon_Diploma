@@ -23,36 +23,47 @@ public class RegisterCommandHandler(
     public async Task<Result<AuthResponse, Error>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var existingUserByEmailAsync = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
-
         if (existingUserByEmailAsync is not null)
         {
             return Errors.User.DuplicateEmail(request.Email);
         }
 
         var existingUserByPhoneAsync = await userRepository.GetByPhoneAsync(request.Phone, cancellationToken);
-
-        if (existingUserByPhoneAsync is not null)
+        if (existingUserByPhoneAsync is not null && existingUserByPhoneAsync.PasswordHash is not null)
         {
             return Errors.User.DuplicatePhone(request.Phone);
         }
 
         var hash = passwordHasher.HashPassword(request.Password);
+        Domain.Entities.User user;
 
-        var user = new Domain.Entities.User(
-            request.FirstName,
-            request.LastName,
-            request.Email,
-            hash,
-            request.Phone);
+        if (existingUserByPhoneAsync is not null)
+        {
+            // It`s a guest user, so we need to upgrade it to a registered user
+            user = existingUserByPhoneAsync;
+
+            user.UpgradeGuestToRegistered(request.FirstName, request.LastName, request.Email, hash);
+        }
+        else
+        {
+            // I`m a new user, so I need to create a new user
+            user = Domain.Entities.User.CreateRegistered(
+                request.FirstName,
+                request.LastName,
+                request.Email,
+                hash,
+                request.Phone);
+
+            await userRepository.AddAsync(user, cancellationToken);
+        }
 
         var accessToken = jwtTokenGenerator.GenerateToken(user);
         var (refreshToken, expiry) = jwtTokenGenerator.GenerateRefreshToken();
 
         user.SetRefreshToken(refreshToken, expiry);
 
-        await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new AuthResponse(user.Id, user.FirstName, user.Email, accessToken, refreshToken, user.Role.ToString());
+        return new AuthResponse(user.Id, user.FirstName, user.Email!, accessToken, refreshToken, user.Role.ToString());
     }
 }

@@ -58,7 +58,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(e => e.Role)
             .HasMaxLength(50)
             .HasConversion<string>()
-            .HasDefaultValue(Role.Client)
+            .HasDefaultValue(Role.Guest)
             .HasColumnName("role");
 
         builder.Property(e => e.UpdatedAt)

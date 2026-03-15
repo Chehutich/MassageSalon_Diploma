@@ -9,7 +9,7 @@ CREATE TABLE users (
     email                 VARCHAR(255) UNIQUE NOT NULL,
     photo_url             VARCHAR(500),
     password_hash         VARCHAR(512) NOT NULL,
-    role                  VARCHAR(50)  NOT NULL DEFAULT 'Client',
+    role                  VARCHAR(50)  NOT NULL DEFAULT 'Guest',
     refresh_token         VARCHAR(512),
     refresh_token_expiry  TIMESTAMPTZ,
     created_at            TIMESTAMPTZ  NOT NULL DEFAULT NOW(),

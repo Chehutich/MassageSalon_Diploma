@@ -24,7 +24,7 @@ public class GetMeHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new Domain.Entities.User("Chechut", "Test", "Chechut@test.com", "hash", "+123456");
+        var user = Domain.Entities.User.CreateRegistered("Chechut", "Test", "Chechut@test.com", "hash", "+123456");
 
         _userContextMock.Setup(x => x.Id).Returns(userId);
         _userRepoMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))

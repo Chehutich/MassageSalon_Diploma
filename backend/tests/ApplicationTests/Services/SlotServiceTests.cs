@@ -315,7 +315,7 @@ public class SlotServiceTests
 
     private Master SetupMaster(Guid id, string firstName = "John", string lastName = "Doe")
     {
-        var user = new User(firstName, lastName, $"{firstName.ToLower()}@test.com", "hash", "+380000000000");
+        var user = User.CreateRegistered(firstName, lastName, $"{firstName.ToLower()}@test.com", "hash", "+380000000000");
         var master = (Master)Activator.CreateInstance(typeof(Master), true)!;
         typeof(Master).GetProperty("Id")?.SetValue(master, id);
         typeof(Master).GetProperty("User")?.SetValue(master, user);

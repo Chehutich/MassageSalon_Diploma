@@ -1,16 +1,14 @@
 using System.Reflection;
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Repos;
-using Application.Common.Models;
 using Application.Features.Master.GetMasterSchedule;
 using Domain.Entities;
 using Domain.Enums;
 using FluentAssertions;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
-using Xunit;
 
-namespace Application.UnitTests.Features.Master;
+namespace ApplicationTests.Features.MasterTests;
 
 public class GetMasterScheduleHandlerTests
 {
@@ -43,12 +41,18 @@ public class GetMasterScheduleHandlerTests
         var masterId = Guid.NewGuid();
         _userContextMock.Setup(x => x.Id).Returns(masterId);
 
+        // FIX: Setup the Master repository mock to prevent early exit
+        var master = (Domain.Entities.Master)Activator.CreateInstance(typeof(Domain.Entities.Master), true)!;
+        SetPrivate(master, "Id", masterId);
+        _masterRepoMock.Setup(x => x.GetByUserIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
+        _masterRepoMock.Setup(x => x.GetByIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
+
         var expectedFrom = new DateTime(2026, 3, 11, 0, 0, 0, DateTimeKind.Utc);
         var expectedTo = expectedFrom.AddDays(7);
 
         _appointmentRepoMock
             .Setup(x => x.GetMasterScheduleAsync(masterId, expectedFrom, expectedTo, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Appointment>());
+            .ReturnsAsync(new List<Domain.Entities.Appointment>());
 
         // Act
         var result = await _handler.Handle(new GetMasterScheduleQuery(), CancellationToken.None);
@@ -69,12 +73,18 @@ public class GetMasterScheduleHandlerTests
         var masterId = Guid.NewGuid();
         _userContextMock.Setup(x => x.Id).Returns(masterId);
 
+        // FIX: Setup the Master repository mock to prevent early exit
+        var master = (Domain.Entities.Master)Activator.CreateInstance(typeof(Domain.Entities.Master), true)!;
+        SetPrivate(master, "Id", masterId);
+        _masterRepoMock.Setup(x => x.GetByUserIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
+        _masterRepoMock.Setup(x => x.GetByIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
+
         var customFrom = new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc);
         var customTo = new DateTime(2026, 4, 2, 0, 0, 0, DateTimeKind.Utc);
 
         _appointmentRepoMock
             .Setup(x => x.GetMasterScheduleAsync(masterId, customFrom, customTo, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Appointment>());
+            .ReturnsAsync(new List<Domain.Entities.Appointment>());
 
         // Act
         var result = await _handler.Handle(new GetMasterScheduleQuery(customFrom, customTo), CancellationToken.None);
@@ -100,16 +110,19 @@ public class GetMasterScheduleHandlerTests
         SetPrivate(service, "Price", 2000m);
         SetPrivate(service, "Duration", 60);
 
-        var masterUser = new Domain.Entities.User("Oleg", "Master", "oleg@test.com", "hash", "+380");
+        var masterUser = Domain.Entities.User.CreateRegistered("Oleg", "Master", "oleg@test.com", "hash", "+380");
         var master = (Domain.Entities.Master)Activator.CreateInstance(typeof(Domain.Entities.Master), true)!;
         SetPrivate(master, "Id", masterId);
         SetPrivate(master, "User", masterUser);
 
+        // FIX: Wire the master object you created up to the mock!
+        _masterRepoMock.Setup(x => x.GetByUserIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
+        _masterRepoMock.Setup(x => x.GetByIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
 
-        var clientUser = new Domain.Entities.User("test", "test", "client@test.com", "hash", "+38099");
+        var clientUser = Domain.Entities.User.CreateRegistered("test", "test", "client@test.com", "hash", "+38099");
         SetPrivate(clientUser, "Id", Guid.NewGuid());
 
-        var appointment = (Appointment)Activator.CreateInstance(typeof(Appointment), true)!;
+        var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
         SetPrivate(appointment, "Id", Guid.NewGuid());
         SetPrivate(appointment, "MasterId", masterId);
         SetPrivate(appointment, "ClientId", clientUser.Id);
@@ -125,7 +138,7 @@ public class GetMasterScheduleHandlerTests
 
         _appointmentRepoMock
             .Setup(x => x.GetMasterScheduleAsync(masterId, expectedFrom, expectedTo, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Appointment> { appointment });
+            .ReturnsAsync(new List<Domain.Entities.Appointment> { appointment });
 
         // Act
         var result = await _handler.Handle(new GetMasterScheduleQuery(), CancellationToken.None);

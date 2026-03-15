@@ -30,7 +30,7 @@ public class GetServiceByIdHandlerTests
         typeof(Service).GetProperty(nameof(Service.Id))?.SetValue(service, serviceId);
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service, category);
 
-        var user = new Domain.Entities.User("John", "Doe", "john@test.com", "hash", "+123456");
+        var user = Domain.Entities.User.CreateRegistered("John", "Doe", "john@test.com", "hash", "+123456");
         var master = new Master(user.Id, "Expert in Oil massage");
         typeof(Master).GetProperty(nameof(Master.User))?.SetValue(master, user);
 

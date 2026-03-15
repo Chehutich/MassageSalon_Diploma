@@ -35,12 +35,12 @@ public class GetAppointmentDetailsHandlerTests
 
         var service = new Service(Guid.NewGuid(), "Massage", "Description", 60, 1000m);
 
-        var masterUser = new Domain.Entities.User("Oleg", "Master", "oleg@test.com", "123", "+380");
+        var masterUser = Domain.Entities.User.CreateRegistered("Oleg", "Master", "oleg@test.com", "123", "+380");
         var master = (Master)Activator.CreateInstance(typeof(Master), true)!;
         typeof(Master).GetProperty("Id")?.SetValue(master, Guid.NewGuid());
         typeof(Master).GetProperty("User")?.SetValue(master, masterUser);
 
-        var clientUser = new Domain.Entities.User("Ivan", "Client", "ivan@test.com", "123", "+380991112233");
+        var clientUser = Domain.Entities.User.CreateRegistered("Ivan", "Client", "ivan@test.com", "123", "+380991112233");
         typeof(Domain.Entities.User).GetProperty("Id")?.SetValue(clientUser, userId);
 
         var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;

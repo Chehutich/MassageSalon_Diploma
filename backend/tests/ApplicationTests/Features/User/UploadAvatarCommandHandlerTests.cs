@@ -98,7 +98,7 @@ public class UploadAvatarCommandHandlerTests
         var fileUrl = "https://cdn.com/uploads/unique-avatar.jpg";
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes("fake image data"));
 
-        var user = new Domain.Entities.User("test", "test", "test@gmail.com", "hash", "+380");
+        var user = Domain.Entities.User.CreateRegistered("test", "test", "test@gmail.com", "hash", "+380");
 
         var command = new UploadAvatarCommand(stream, fileName);
 
@@ -137,7 +137,7 @@ public class UploadAvatarCommandHandlerTests
         var newFileUrl = "https://cdn.com/uploads/NEW-avatar.jpg";
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes("fake image data"));
 
-        var user = new Domain.Entities.User("test", "test", "test@gmail.com", "hash", "+380");
+        var user = Domain.Entities.User.CreateRegistered("test", "test", "test@gmail.com", "hash", "+380");
         user.SetPhotoUrl(oldFileUrl);
 
         var command = new UploadAvatarCommand(stream, fileName);

@@ -34,7 +34,7 @@ public class JwtTokenGeneratorTests
     public void GenerateToken_Should_CreateTokenWithCorrectClaims()
     {
         // Arrange
-        var user = new User("John", "Doe", "john@test.com", "hash", "+380000000");
+        var user = User.CreateRegistered("John", "Doe", "john@test.com", "hash", "+380000000");
 
         // Act
         var token = _sut.GenerateToken(user);
@@ -66,7 +66,7 @@ public class JwtTokenGeneratorTests
     public void GetUserIdFromExpiredToken_Should_ReturnUserId_EvenIfTokenIsExpired()
     {
         // Arrange
-        var user = new User("John", "Doe", "john@test.com", "hash", "+380000000");
+        var user = User.CreateRegistered("John", "Doe", "john@test.com", "hash", "+380000000");
         var token = _sut.GenerateToken(user);
 
         // Act

@@ -26,7 +26,7 @@ public class LogoutHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new Domain.Entities.User("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
+        var user =  Domain.Entities.User.CreateRegistered("Ivan", "Ivanov", "test@test.com", "hash", "+3800000000");
         user.SetRefreshToken("active_token", DateTime.UtcNow.AddDays(1));
 
         _userContextMock.Setup(x => x.Id).Returns(userId);

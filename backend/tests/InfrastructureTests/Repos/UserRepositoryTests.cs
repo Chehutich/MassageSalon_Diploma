@@ -65,7 +65,7 @@ public class UserRepositoryTests : BaseRepositoryTest
         var email = "oleg@test.com";
         var refreshToken = "some-very-secret-token-123";
         var expiry = DateTime.UtcNow.AddDays(7);
-        
+
         var user = await CreateUserAsync(email, "+380991112233");
 
         user.SetRefreshToken(refreshToken, expiry);
@@ -85,7 +85,7 @@ public class UserRepositoryTests : BaseRepositoryTest
     public async Task AddAsync_ShouldAddUserToDatabase()
     {
         // Arrange
-        var user = new User("Ruslan", "LastName", "Ruslan@test.com", "hash", "+3800000000");
+        var user = User.CreateRegistered("Ruslan", "LastName", "Ruslan@test.com", "hash", "+3800000000");
 
         // Act
         await _repository.AddAsync(user);

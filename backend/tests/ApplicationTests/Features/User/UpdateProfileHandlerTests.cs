@@ -35,7 +35,7 @@ public class UpdateProfileHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new Domain.Entities.User("Old", "Name", "test@test.com", "hash", "+380111");
+        var user = Domain.Entities.User.CreateRegistered("Old", "Name", "test@test.com", "hash", "+380111");
 
         _userContextMock.Setup(x => x.Id).Returns(userId);
         _userRepoMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
@@ -58,7 +58,7 @@ public class UpdateProfileHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new Domain.Entities.User("Name", "Name", "test@test.com", "correct_hash", "+380111");
+        var user = Domain.Entities.User.CreateRegistered("Name", "Name", "test@test.com", "correct_hash", "+380111");
 
         _userContextMock.Setup(x => x.Id).Returns(userId);
         _userRepoMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
@@ -83,8 +83,8 @@ public class UpdateProfileHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new Domain.Entities.User("Name", "Name", "old@test.com", "hash", "+380111");
-        var existingUser = new Domain.Entities.User("Other", "User", "new@test.com", "hash", "+380222");
+        var user = Domain.Entities.User.CreateRegistered("Name", "Name", "old@test.com", "hash", "+380111");
+        var existingUser =  Domain.Entities.User.CreateRegistered("Other", "User", "new@test.com", "hash", "+380222");
 
         _userContextMock.Setup(x => x.Id).Returns(userId);
         _userRepoMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
@@ -111,7 +111,7 @@ public class UpdateProfileHandlerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new Domain.Entities.User("Name", "Name", "test@test.com", "old_hash", "+380111");
+        var user = Domain.Entities.User.CreateRegistered("Name", "Name", "test@test.com", "old_hash", "+380111");
 
         _userContextMock.Setup(x => x.Id).Returns(userId);
         _userRepoMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))

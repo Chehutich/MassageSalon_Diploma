@@ -29,7 +29,7 @@ public class GetMasterDetailsHandlerTests
 
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service, category);
 
-        var user = new Domain.Entities.User("Hanna", "Kovalenko", "hanna@test.com", "hash", "+380");
+        var user = Domain.Entities.User.CreateRegistered("Hanna", "Kovalenko", "hanna@test.com", "hash", "+380");
         var master = new Master(user.Id, "Pro");
 
         typeof(Master).GetProperty(nameof(Master.Id))?.SetValue(master, masterId);
@@ -72,7 +72,7 @@ public class GetMasterDetailsHandlerTests
     {
         // Arrange
         var masterId = Guid.NewGuid();
-        var user = new Domain.Entities.User("Ivan", "Test", "ivan@test.com", "hash", "+380");
+        var user = Domain.Entities.User.CreateRegistered("Ivan", "Test", "ivan@test.com", "hash", "+380");
         var master = new Master(user.Id, "Біо");
 
         typeof(Master).GetProperty(nameof(Master.Id))?.SetValue(master, masterId);
