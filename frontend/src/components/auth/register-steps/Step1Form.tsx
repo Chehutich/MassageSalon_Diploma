@@ -2,58 +2,41 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { User, Mail, Phone, ChevronRight } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
-import { InputField } from "@/src/components/ui/forms/InputField";
-import { PersonalData, Step1Errors } from "@/src/utils/validation";
+import { RHFInputField } from "@/src/components/ui/forms/RHFInputField";
 
-type Props = {
-  data: PersonalData;
-  errors: Step1Errors;
-  onChange: (field: keyof PersonalData, value: string) => void;
-  onNext: () => void;
-};
+import { RHFPhoneInputField } from "@/src/components/ui/forms/RHFPhoneInputField";
 
-export const Step1Form = ({ data, errors, onChange, onNext }: Props) => (
+export const Step1Form = ({ control, onNext }: any) => (
   <View style={{ gap: 14 }}>
     <View style={{ flexDirection: "row", gap: 12 }}>
       <View style={{ flex: 1 }}>
-        <InputField
+        <RHFInputField
+          name="first"
+          control={control}
           label="Ім'я"
-          value={data.first}
-          onChangeText={(v: string) => onChange("first", v)}
-          isInvalid={!!errors.first}
-          errorText={errors.first}
           icon={<User size={18} color={Palette.taupe} strokeWidth={1.6} />}
         />
       </View>
       <View style={{ flex: 1 }}>
-        <InputField
+        <RHFInputField
+          name="last"
+          control={control}
           label="Прізвище"
-          value={data.last}
-          onChangeText={(v: string) => onChange("last", v)}
-          isInvalid={!!errors.last}
-          errorText={errors.last}
           icon={<User size={18} color={Palette.taupe} strokeWidth={1.6} />}
         />
       </View>
     </View>
 
-    <InputField
+    <RHFPhoneInputField
+      name="phone"
+      control={control}
       label="Номер телефону"
-      value={data.phone}
-      placeholder="+380 (XX) XXX-XX-XX"
-      onChangeText={(v: string) => onChange("phone", v)}
-      isInvalid={!!errors.phone}
-      errorText={errors.phone}
-      keyboardType="phone-pad"
-      icon={<Phone size={18} color={Palette.taupe} strokeWidth={1.6} />}
     />
 
-    <InputField
+    <RHFInputField
+      name="email"
+      control={control}
       label="Електронна пошта"
-      value={data.email}
-      onChangeText={(v: string) => onChange("email", v)}
-      isInvalid={!!errors.email}
-      errorText={errors.email}
       keyboardType="email-address"
       autoCapitalize="none"
       icon={<Mail size={18} color={Palette.taupe} strokeWidth={1.6} />}

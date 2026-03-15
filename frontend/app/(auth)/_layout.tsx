@@ -3,20 +3,24 @@ import { View, StyleSheet } from "react-native";
 import { AmbientBackground } from "@/src/components/ui/layout/AmbientBackground";
 import { Palette } from "@/src/theme/tokens";
 
+import { ToastProvider } from "@/src/context/ToastContext";
+
 export default function AuthLayout() {
   return (
-    <View style={styles.container}>
-      <AmbientBackground />
+    <ToastProvider>
+      <View style={styles.container}>
+        <AmbientBackground />
 
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: {
-            backgroundColor: "transparent",
-          },
-        }}
-      ></Stack>
-    </View>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: {
+              backgroundColor: "transparent",
+            },
+          }}
+        ></Stack>
+      </View>
+    </ToastProvider>
   );
 }
 

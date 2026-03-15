@@ -11,6 +11,7 @@ export const InputField = ({
   rightElement,
   errorText,
   isInvalid,
+  iconPaddingLeft = 48,
   ...props
 }: any) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -89,11 +90,11 @@ export const InputField = ({
     outputRange: [Palette.sage, Palette.taupe],
   });
 
-  const labelLeft = icon
+  const labelLeftStyle = icon
     ? anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [48, 48],
-      })
+      inputRange: [0, 1],
+      outputRange: [iconPaddingLeft, iconPaddingLeft],
+    })
     : 16;
 
   return (
@@ -109,7 +110,7 @@ export const InputField = ({
                 top: labelTop,
                 fontSize: labelFontSize,
                 color: labelColor,
-                left: labelLeft,
+                left: labelLeftStyle,
               },
             ]}
             pointerEvents="none"
@@ -124,8 +125,9 @@ export const InputField = ({
               styles.input,
               isFocused && styles.inputFocused,
               isInvalid && styles.inputError,
-              icon && { paddingLeft: 48 },
+              icon && { paddingLeft: iconPaddingLeft },
               rightElement && { paddingRight: 48 },
+              props.style,
             ]}
             value={value}
             onChangeText={onChangeText}

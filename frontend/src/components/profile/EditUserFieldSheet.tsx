@@ -5,16 +5,19 @@ import {
   useUpdateProfile,
 } from "@/src/api/generated/user/user";
 import { BottomSheet } from "@/src/components/ui/layout/BottomSheet";
-import { InputField } from "@/src/components/ui/forms/InputField";
+import { RHFInputField } from "@/src/components/ui/forms/RHFInputField";
+import { RHFPhoneInputField } from "@/src/components/ui/forms/RHFPhoneInputField";
+import { RHFPasswordField } from "@/src/components/ui/forms/RHFPasswordField";
 import { PressButton } from "@/src/components/ui/forms/PressButton";
 import { ToastConfig, TopToast } from "@/src/components/ui/feedback/TopToast";
 import { Palette } from "@/src/theme/tokens";
-import { RegexHelper } from "@/src/utils/regexHelper";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { KeyboardStickyView } from "react-native-keyboard-controller";
-import { PasswordField } from "@/src/components/ui/forms/PasswordField";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 export function EditUserFieldSheet({
   fieldId,
@@ -26,10 +29,6 @@ export function EditUserFieldSheet({
   const queryClient = useQueryClient();
   const { data: me } = useGetMe();
   const { mutate: update, isPending: isLoading } = useUpdateProfile();
-
-  const [value, setValue] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const [toast, setToast] = useState<ToastConfig>({
     visible: false,
@@ -50,60 +49,69 @@ export function EditUserFieldSheet({
     firstName: {
       label: "Ім'я",
       placeholder: "Введіть ваше ім'я",
-      regex: RegexHelper.NameRegex(),
-      error: "Некоректне ім'я",
+      schema: z.string().min(2, "Некоректне ім'я").max(100, "Некоректне ім'я"),
     },
     lastName: {
       label: "Прізвище",
       placeholder: "Введіть ваше прізвище",
-      regex: RegexHelper.NameRegex(),
-      error: "Некоректне прізвище",
+      schema: z.string().min(2, "Некоректне прізвище").max(100, "Некоректне прізвище"),
     },
     phone: {
       label: "Телефон",
       placeholder: "+380 (XX) XXX-XX-XX",
-      regex: RegexHelper.PhoneRegex(),
-      error: "Некоректний формат телефону",
+      schema: z.string().regex(/^\+[1-9]\d{6,14}$/, "Некоректний формат телефону"),
       keyboard: "phone-pad",
     },
     email: {
       label: "Email",
       placeholder: "example@mail.com",
-      regex: RegexHelper.EmailRegex(),
-      error: "Невірний формат пошти",
+      schema: z.string().email("Невірний формат пошти"),
       keyboard: "email-address",
       sensitive: true,
     },
     password: {
       label: "Новий пароль",
-      regex: RegexHelper.PasswordRegex(),
-      error: "Мінімум 8 символів та хоча б 1 літера",
+      placeholder: "••••••••",
+      schema: z.string().min(8, "Мінімум 8 символів").regex(/[a-zA-Z]/, "Хоча б 1 літера"),
       isPassword: true,
       sensitive: true,
     },
   };
 
+  const dynamicSchema = z.object({
+    value: fieldId ? config[fieldId].schema : z.string(),
+    ...(fieldId && config[fieldId].sensitive
+      ? { currentPassword: z.string().min(1, "Введіть поточний пароль") }
+      : {}),
+  });
+
+  type FormValues = z.infer<typeof dynamicSchema>;
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+  } = useForm<FormValues>({
+    resolver: zodResolver(dynamicSchema),
+    defaultValues: { value: "", currentPassword: "" },
+  });
+
+  const currentPass = watch("currentPassword");
+
   useEffect(() => {
     if (fieldId && fieldId !== "password" && me) {
       const val = me[fieldId as keyof UserMeResponse];
-      setValue(val ? String(val) : "");
+      reset({ value: val ? String(val) : "", currentPassword: "" });
     } else {
-      setValue("");
+      reset({ value: "", currentPassword: "" });
     }
-    setCurrentPassword("");
-    setError(null);
-  }, [fieldId, me]);
+  }, [fieldId, me, reset]);
 
-  const handleSave = () => {
-    const activeConfig = config[fieldId!];
-    if (activeConfig && !activeConfig.regex.test(value)) {
-      setError(activeConfig.error);
-      return;
-    }
-
-    const payload: any = { [fieldId!]: value };
-    if (activeConfig.sensitive) {
-      payload.currentPassword = currentPassword;
+  const onSubmit = (data: FormValues) => {
+    const payload: any = { [fieldId!]: data.value };
+    if (config[fieldId!].sensitive) {
+      payload.currentPassword = data.currentPassword;
     }
 
     update(
@@ -113,9 +121,7 @@ export function EditUserFieldSheet({
           queryClient.invalidateQueries({
             queryKey: getGetMeQueryKey(),
           });
-
           showToast("success", "Оновлено", "Ваші дані успішно збережено");
-
           onClose();
         },
         onError: (err: any) => {
@@ -130,25 +136,24 @@ export function EditUserFieldSheet({
       <BottomSheet visible={!!fieldId} onClose={onClose} title="Редагування">
         <View style={styles.content}>
           {fieldId === "password" ? (
-            <PasswordField
+            <RHFPasswordField
+              name="value"
+              control={control}
               label={config.password.label}
-              value={value}
               placeholder={config.password.placeholder}
-              onChangeText={setValue}
-              isInvalid={!!error}
-              errorText={error}
+            />
+          ) : fieldId === "phone" ? (
+            <RHFPhoneInputField
+              name="value"
+              control={control}
+              label={config.phone.label}
             />
           ) : (
-            <InputField
+            <RHFInputField
+              name="value"
+              control={control}
               label={config[fieldId!]?.label}
-              value={value}
-              onChangeText={(t: string) => {
-                setValue(t);
-                setError(null);
-              }}
               placeholder={config[fieldId!]?.placeholder ?? ""}
-              isInvalid={!!error}
-              errorText={error}
               keyboardType={config[fieldId!]?.keyboard}
               secureTextEntry={config[fieldId!]?.isPassword}
             />
@@ -159,14 +164,10 @@ export function EditUserFieldSheet({
               <Text style={styles.sensitiveNote}>
                 Для підтвердження введіть поточний пароль
               </Text>
-              <PasswordField
+              <RHFPasswordField
+                name="currentPassword"
+                control={control}
                 label="Поточний пароль"
-                value={currentPassword}
-                onChangeText={(t: string) => {
-                  setCurrentPassword(t);
-                  setError(null);
-                }}
-                isInvalid={!!error}
               />
             </View>
           )}
@@ -176,9 +177,9 @@ export function EditUserFieldSheet({
           <KeyboardStickyView offset={{ closed: 0, opened: 20 }}>
             <PressButton
               title={isLoading ? "Збереження..." : "Зберегти"}
-              onPress={handleSave}
+              onPress={handleSubmit(onSubmit)}
               disabled={
-                isLoading || (config[fieldId!]?.sensitive && !currentPassword)
+                isLoading || (config[fieldId!]?.sensitive && !currentPass)
               }
               style={{ marginTop: 10 }}
             />
