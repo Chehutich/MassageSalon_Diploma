@@ -26,9 +26,13 @@ public abstract class BaseRepositoryTest : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    protected async Task<User> CreateUserAsync(string email = "test@test.com", string phone = "+380000000000")
+    protected async Task<User> CreateUserAsync(
+        string email = "test@test.com",
+        string phone = "+380000000000",
+        string firstName = "FirstName",
+        string lastName = "LastName")
     {
-        var user = User.CreateRegistered("FirstName", "LastName", email, "password_hash", phone);
+        var user = User.CreateRegistered(firstName, lastName, email, "password_hash", phone);
         context.Users.Add(user);
         await context.SaveChangesAsync();
         return user;
@@ -45,7 +49,10 @@ public abstract class BaseRepositoryTest : IDisposable
         return master;
     }
 
-    protected async Task<Category> CreateCategoryAsync(string title = "General SPA", string slug = "spa", bool isActive = true)
+    protected async Task<Category> CreateCategoryAsync(
+        string title = "General SPA",
+        string slug = "spa",
+        bool isActive = true)
     {
         var category = new Category(title, slug);
         if (!isActive)
@@ -58,7 +65,10 @@ public abstract class BaseRepositoryTest : IDisposable
         return category;
     }
 
-    protected async Task<Service> CreateServiceAsync(Guid categoryId, string title = "Massage", int duration = 60)
+    protected async Task<Service> CreateServiceAsync(
+        Guid categoryId,
+        string title = "Massage",
+        int duration = 60)
     {
         var service = new Service(categoryId, "service", title, "Description", duration, 1000m);
         context.Services.Add(service);
@@ -66,7 +76,11 @@ public abstract class BaseRepositoryTest : IDisposable
         return service;
     }
 
-    protected async Task<Schedule> CreateScheduleAsync(Guid masterId, int dayOfWeek, TimeOnly start, TimeOnly end)
+    protected async Task<Schedule> CreateScheduleAsync(
+        Guid masterId,
+        int dayOfWeek,
+        TimeOnly start,
+        TimeOnly end)
     {
         var schedule = new Schedule(masterId, dayOfWeek, start, end);
         context.Schedules.Add(schedule);
@@ -116,5 +130,22 @@ public abstract class BaseRepositoryTest : IDisposable
         await context.SaveChangesAsync();
 
         return timeOff;
+    }
+
+    protected async Task LinkMasterToServiceAsync(
+        Guid masterId,
+        Guid serviceId)
+    {
+        var master = await context.Masters
+            .Include(m => m.Services)
+            .FirstOrDefaultAsync(m => m.Id == masterId);
+
+        var service = await context.Services.FindAsync(serviceId);
+
+        if (master != null && service != null)
+        {
+            master.Services.Add(service);
+            await context.SaveChangesAsync();
+        }
     }
 }

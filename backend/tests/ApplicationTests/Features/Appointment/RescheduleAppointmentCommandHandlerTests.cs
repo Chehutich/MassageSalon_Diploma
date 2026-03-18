@@ -11,7 +11,7 @@ namespace ApplicationTests.Features.Appointment;
 public class RescheduleAppointmentCommandHandlerTests
 {
     private readonly Mock<IAppointmentRepository> _appointmentRepoMock;
-    private readonly Mock<IMasterRepository> _masterRepoMock;
+    private readonly Mock<ISlotService> _slotServiceMock;
     private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<TimeProvider> _timeProviderMock;
@@ -21,14 +21,14 @@ public class RescheduleAppointmentCommandHandlerTests
     {
         _appointmentRepoMock = new Mock<IAppointmentRepository>();
         _currentUserContextMock = new Mock<ICurrentUserContext>();
-        _masterRepoMock = new Mock<IMasterRepository>();
+        _slotServiceMock = new Mock<ISlotService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _timeProviderMock = new Mock<TimeProvider>();
 
         _handler = new RescheduleAppointmentCommandHandler(
             _appointmentRepoMock.Object,
             _currentUserContextMock.Object,
-            _masterRepoMock.Object,
+            _slotServiceMock.Object,
             _unitOfWorkMock.Object,
             _timeProviderMock.Object);
     }
@@ -70,7 +70,7 @@ public class RescheduleAppointmentCommandHandlerTests
             .Setup(x => x.GetByIdAsync(appointmentId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(appointment);
 
-        _masterRepoMock
+        _slotServiceMock
             .Setup(x => x.IsMasterAvailableAsync(masterId, command.NewStartTime, command.NewStartTime.AddMinutes(service.Duration), appointmentId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
@@ -101,7 +101,7 @@ public class RescheduleAppointmentCommandHandlerTests
         typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Service))?.SetValue(appointment, service);
 
         _appointmentRepoMock.Setup(x => x.GetByIdAsync(appointmentId, It.IsAny<CancellationToken>())).ReturnsAsync(appointment);
-        _masterRepoMock.Setup(x => x.IsMasterAvailableAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _slotServiceMock.Setup(x => x.IsMasterAvailableAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _currentUserContextMock.Setup(x => x.Id).Returns(userId);
         _timeProviderMock.Setup(x => x.GetUtcNow()).Returns(new DateTimeOffset(now));
 
@@ -131,7 +131,7 @@ public class RescheduleAppointmentCommandHandlerTests
         typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Id))?.SetValue(appointment, appointmentId);
 
         _appointmentRepoMock.Setup(x => x.GetByIdAsync(appointmentId, It.IsAny<CancellationToken>())).ReturnsAsync(appointment);
-        _masterRepoMock.Setup(x => x.IsMasterAvailableAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _slotServiceMock.Setup(x => x.IsMasterAvailableAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _timeProviderMock.Setup(x => x.GetUtcNow()).Returns(new DateTimeOffset(now));
         _currentUserContextMock.Setup(x => x.Id).Returns(userId);
 

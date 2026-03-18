@@ -11,19 +11,4 @@ public interface IMasterRepository
     Task<Master?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<Master?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-
-    Task<Schedule?> GetScheduleForDayAsync(Guid masterId,
-        int dayOfWeek,
-        CancellationToken cancellationToken = default);
-
-    Task<bool> IsOnTimeOffAsync(Guid masterId, DateTime date, CancellationToken cancellationToken = default);
-
-    Task<List<Schedule>> GetSchedulesForMasterAsync(Guid masterId, CancellationToken cancellationToken = default);
-
-    Task<bool> IsMasterAvailableAsync(Guid masterId,
-        DateTime start,
-        DateTime end,
-        Guid? excludeAppointmentId = null,
-        CancellationToken cancellationToken = default);
-
 }

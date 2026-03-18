@@ -20,5 +20,11 @@ public interface IAppointmentRepository
         DateTime end,
         CancellationToken cancellationToken = default);
 
+    Task<bool> HasOverlapAsync(Guid masterId,
+        DateTime start,
+        DateTime end,
+        Guid? excludeId = null,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(Appointment appointment, CancellationToken cancellationToken = default);
 }

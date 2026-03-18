@@ -105,6 +105,23 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<bool> HasOverlapAsync(Guid masterId,
+        DateTime start,
+        DateTime end,
+        Guid? excludeId = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Appointments
+            .AnyAsync(a =>
+                    a.MasterId == masterId &&
+                    a.Status != AppointmentStatus.Cancelled &&
+                    a.Status != AppointmentStatus.NoShow &&
+                    (excludeId == null || a.Id != excludeId) &&
+                    a.StartTime < end &&
+                    start < a.EndTime,
+                cancellationToken);
+    }
+
     public async Task AddAsync(Appointment appointment, CancellationToken cancellationToken = default)
     {
         await context.Appointments.AddAsync(appointment, cancellationToken);

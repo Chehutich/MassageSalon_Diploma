@@ -10,7 +10,9 @@ namespace Application.Services;
 
 public class SlotService(
     IMasterRepository masterRepository,
+    IScheduleRepository scheduleRepository,
     IServiceRepository serviceRepository,
+    ITimeOffsRepository timeOffsRepository,
     IAppointmentRepository appointmentRepository,
     TimeProvider timeProvider) : ISlotService
 {
@@ -100,7 +102,7 @@ public class SlotService(
         foreach (var m in masters)
         {
             var busy = await appointmentRepository.GetBusyIntervalsAsync(m.Id, startDate, endDate, cancellationToken);
-            var schedules = await masterRepository.GetSchedulesForMasterAsync(m.Id, cancellationToken);
+            var schedules = await scheduleRepository.GetSchedulesForMasterAsync(m.Id, cancellationToken);
             masterData.Add((m.Id, busy, schedules));
         }
 
@@ -173,13 +175,13 @@ public class SlotService(
         DateTime date,
         CancellationToken cancellationToken = default)
     {
-        var schedule = await masterRepository.GetScheduleForDayAsync(masterId, (int)date.DayOfWeek, cancellationToken);
+        var schedule = await scheduleRepository.GetScheduleForDayAsync(masterId, (int)date.DayOfWeek, cancellationToken);
         if (schedule == null)
         {
             return new();
         }
 
-        var hasTimeOff = await masterRepository.IsOnTimeOffAsync(masterId, date, cancellationToken);
+        var hasTimeOff = await timeOffsRepository.IsMasterOnTimeOffAsync(masterId, date, cancellationToken);
         if (hasTimeOff)
         {
             return new();
@@ -213,5 +215,34 @@ public class SlotService(
         }
 
         return slots;
+    }
+
+    public async Task<bool> IsMasterAvailableAsync(Guid masterId,
+        DateTime start,
+        DateTime end,
+        Guid? excludeAppointmentId = null,
+        CancellationToken cancellationToken = default)
+    {
+        // Check our working schedule
+        var dbDayOfWeek = start.DayOfWeek;
+        var startTime = TimeOnly.FromDateTime(start);
+        var endTime = TimeOnly.FromDateTime(end);
+
+        var worksThatDay = await scheduleRepository.IsMasterWorkingAtAsync(masterId, (int)dbDayOfWeek, startTime, endTime, cancellationToken);
+
+        if (!worksThatDay)
+        {
+            return false;
+        }
+
+        if (await timeOffsRepository.IsMasterOnTimeOffAsync(masterId, start.Date, cancellationToken))
+        {
+            return false;
+        }
+
+        // Check for any appointments that overlap
+        var hasOverlap = await appointmentRepository.HasOverlapAsync(masterId, start, end, excludeAppointmentId, cancellationToken);
+
+        return !hasOverlap;
     }
 }

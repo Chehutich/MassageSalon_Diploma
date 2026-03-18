@@ -18,6 +18,7 @@ public class CreateAppointmentHandler(
     IAppointmentRepository appointmentRepository,
     IServiceRepository serviceRepository,
     IMasterRepository masterRepository,
+    ISlotService slotService,
     IUnitOfWork unitOfWork,
     ICurrentUserContext userContext,
     IPublisher publisher)
@@ -36,7 +37,7 @@ public class CreateAppointmentHandler(
 
         if (request.MasterId.HasValue)
         {
-            var isAvailable = await masterRepository.IsMasterAvailableAsync(
+            var isAvailable = await slotService.IsMasterAvailableAsync(
                 request.MasterId.Value, request.StartTime, endTime, null, cancellationToken);
 
             if (!isAvailable)
@@ -54,7 +55,7 @@ public class CreateAppointmentHandler(
             Domain.Entities.Master? availableMaster = null;
             foreach (var m in masters)
             {
-                if (await masterRepository.IsMasterAvailableAsync(m.Id, request.StartTime, endTime, null, cancellationToken))
+                if (await slotService.IsMasterAvailableAsync(m.Id, request.StartTime, endTime, null, cancellationToken))
                 {
                     availableMaster = m;
                     break;

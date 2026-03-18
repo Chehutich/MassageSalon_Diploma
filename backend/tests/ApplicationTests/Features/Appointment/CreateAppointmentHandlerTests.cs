@@ -14,6 +14,7 @@ public class CreateAppointmentHandlerTests
     private readonly Mock<IAppointmentRepository> _appointmentRepoMock;
     private readonly Mock<IServiceRepository> _serviceRepoMock;
     private readonly Mock<IMasterRepository> _masterRepoMock;
+    private readonly Mock<ISlotService> _slotServiceMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ICurrentUserContext> _userContextMock;
     private readonly Mock<IPublisher> _publisherMock;
@@ -24,6 +25,7 @@ public class CreateAppointmentHandlerTests
         _appointmentRepoMock = new Mock<IAppointmentRepository>();
         _serviceRepoMock = new Mock<IServiceRepository>();
         _masterRepoMock = new Mock<IMasterRepository>();
+        _slotServiceMock = new Mock<ISlotService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _userContextMock = new Mock<ICurrentUserContext>();
         _publisherMock = new Mock<IPublisher>();
@@ -32,6 +34,7 @@ public class CreateAppointmentHandlerTests
             _appointmentRepoMock.Object,
             _serviceRepoMock.Object,
             _masterRepoMock.Object,
+            _slotServiceMock.Object,
             _unitOfWorkMock.Object,
             _userContextMock.Object,
             _publisherMock.Object);
@@ -67,7 +70,7 @@ public class CreateAppointmentHandlerTests
             .Setup(x => x.GetByIdAsync(command.ServiceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(service);
 
-        _masterRepoMock
+        _slotServiceMock
             .Setup(x => x.IsMasterAvailableAsync(
                 command.MasterId.Value,
                 command.StartTime,
@@ -99,7 +102,7 @@ public class CreateAppointmentHandlerTests
             .Setup(x => x.GetByIdAsync(command.ServiceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(service);
 
-        _masterRepoMock
+        _slotServiceMock
             .Setup(x => x.IsMasterAvailableAsync(
                 command.MasterId.Value,
                 command.StartTime,
@@ -153,11 +156,11 @@ public class CreateAppointmentHandlerTests
         _masterRepoMock.Setup(x => x.GetAllWithDetailsAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(masters);
 
-        _masterRepoMock.Setup(x =>
+        _slotServiceMock.Setup(x =>
                 x.IsMasterAvailableAsync(master1.Id, startTime, startTime.AddMinutes(60), null,
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-        _masterRepoMock.Setup(x =>
+        _slotServiceMock.Setup(x =>
                 x.IsMasterAvailableAsync(master2.Id, startTime, startTime.AddMinutes(60), null,
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
@@ -186,7 +189,7 @@ public class CreateAppointmentHandlerTests
         _masterRepoMock.Setup(x => x.GetAllWithDetailsAsync(serviceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(masters);
 
-        _masterRepoMock.Setup(x => x.IsMasterAvailableAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(),
+        _slotServiceMock.Setup(x => x.IsMasterAvailableAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(),
                 It.IsAny<DateTime>(), null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 

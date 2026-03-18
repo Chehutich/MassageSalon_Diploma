@@ -25,7 +25,11 @@ public class GetMasterScheduleHandlerTests
         _timeProvider = new FakeTimeProvider();
         _masterRepoMock = new Mock<IMasterRepository>();
 
-        _timeProvider.SetUtcNow(new DateTimeOffset(2026, 3, 11, 10, 0, 0, TimeSpan.Zero));
+        // Set fake "now" to 1 month ahead so tests never land in the past.
+        // The concrete date doesn't matter for these unit-style tests;
+        // what matters is consistency between FakeTimeProvider and expectedFrom/To.
+        var fakeNow = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
+        _timeProvider.SetUtcNow(new DateTimeOffset(fakeNow));
 
         _handler = new GetMasterScheduleHandler(
             _appointmentRepoMock.Object,
@@ -47,7 +51,10 @@ public class GetMasterScheduleHandlerTests
         _masterRepoMock.Setup(x => x.GetByUserIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
         _masterRepoMock.Setup(x => x.GetByIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
 
-        var expectedFrom = new DateTime(2026, 3, 11, 0, 0, 0, DateTimeKind.Utc);
+        // The handler uses "start of today" as the default from-date.
+        // Derive it from whatever FakeTimeProvider reports so the assertion stays in sync.
+        var fakeNow = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
+        var expectedFrom = fakeNow.Date; // midnight of that day
         var expectedTo = expectedFrom.AddDays(7);
 
         _appointmentRepoMock
@@ -79,8 +86,9 @@ public class GetMasterScheduleHandlerTests
         _masterRepoMock.Setup(x => x.GetByUserIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
         _masterRepoMock.Setup(x => x.GetByIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
 
-        var customFrom = new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc);
-        var customTo = new DateTime(2026, 4, 2, 0, 0, 0, DateTimeKind.Utc);
+        // Use future dates relative to today (+1 month) to avoid accidental past-date edge cases.
+        var customFrom = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(2);   // start of 2 months ahead
+        var customTo   = customFrom.AddDays(1);                                                                                    // next day
 
         _appointmentRepoMock
             .Setup(x => x.GetMasterScheduleAsync(masterId, customFrom, customTo, It.IsAny<CancellationToken>()))
@@ -126,14 +134,18 @@ public class GetMasterScheduleHandlerTests
         SetPrivate(appointment, "Id", Guid.NewGuid());
         SetPrivate(appointment, "MasterId", masterId);
         SetPrivate(appointment, "ClientId", clientUser.Id);
-        SetPrivate(appointment, "StartTime", new DateTime(2026, 3, 11, 15, 0, 0, DateTimeKind.Utc));
-        SetPrivate(appointment, "EndTime", new DateTime(2026, 3, 11, 16, 0, 0, DateTimeKind.Utc));
+        // Appointment falls on the same day as fake "now"; the handler queries start-of-day to +7 days.
+        var fakeNow      = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
+        var apptStart    = fakeNow.Date.AddHours(15); // 15:00 on that day
+        var apptEnd      = apptStart.AddHours(1);     // 16:00
+        SetPrivate(appointment, "StartTime", apptStart);
+        SetPrivate(appointment, "EndTime",   apptEnd);
         SetPrivate(appointment, "Status", AppointmentStatus.Confirmed);
         SetPrivate(appointment, "Service", service);
         SetPrivate(appointment, "Client", clientUser);
         SetPrivate(appointment, "Master", master);
 
-        var expectedFrom = new DateTime(2026, 3, 11, 0, 0, 0, DateTimeKind.Utc);
+        var expectedFrom = fakeNow.Date;
         var expectedTo = expectedFrom.AddDays(7);
 
         _appointmentRepoMock

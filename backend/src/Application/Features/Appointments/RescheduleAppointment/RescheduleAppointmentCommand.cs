@@ -13,7 +13,7 @@ public record RescheduleAppointmentCommand(
 public class RescheduleAppointmentCommandHandler(
     IAppointmentRepository appointmentRepository,
     ICurrentUserContext userContext,
-    IMasterRepository masterRepository,
+    ISlotService slotService,
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : IRequestHandler<RescheduleAppointmentCommand, Result<Guid, Error>>
 {
@@ -34,7 +34,7 @@ public class RescheduleAppointmentCommandHandler(
         var newEndTime = request.NewStartTime.AddMinutes(appointment.Service.Duration);
 
         // Check availability (send appointmentId to exclude)
-        var isAvailable = await masterRepository.IsMasterAvailableAsync(
+        var isAvailable = await slotService.IsMasterAvailableAsync(
             appointment.MasterId,
             request.NewStartTime,
             newEndTime,

@@ -92,13 +92,16 @@ public class AppointmentRepositoryTests : BaseRepositoryTest
     {
         // Arrange
         var master = await CreateMasterAsync();
-        var startDate = new DateOnly(2026, 5, 20);
-        var endDate = new DateOnly(2026, 5, 21);
+        // Use future dates (+2 months ahead) to guarantee they are never in the past.
+        var baseDate  = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(2);
+        var startDate = DateOnly.FromDateTime(baseDate.AddDays(19)); // 20th of that month
+        var endDate   = DateOnly.FromDateTime(baseDate.AddDays(20)); // 21st of that month
 
         await CreateTimeOffAsync(master.Id, startDate, endDate);
 
-        var searchStart = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc);
-        var searchEnd = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        // Search window covers the whole month
+        var searchStart = baseDate;
+        var searchEnd   = baseDate.AddMonths(1);
 
         // Act
         var result = await _repository.GetBusyIntervalsAsync(master.Id, searchStart, searchEnd);

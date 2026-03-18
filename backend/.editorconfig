@@ -248,6 +248,15 @@ csharp_space_between_square_brackets = false
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-formatting-conventions#wrap-options
 csharp_preserve_single_line_statements = false
 csharp_preserve_single_line_blocks = true
+csharp_max_parameters_on_single_line = 1
+resharper_csharp_wrap_after_declaration_lpar = false
+resharper_csharp_wrap_before_declaration_rpar = false
+resharper_csharp_wrap_parameters_style = chop_if_long
+resharper_csharp_wrap_parameters_at_quantity = 2
+resharper_csharp_max_line_length = 120
+resharper_csharp_wrap_before_declaration_lpar = false
+resharper_csharp_wrap_before_declaration_rpar = false
+resharper_csharp_wrap_after_declaration_lpar = true
 
 ##########################################
 # .NET Naming Rules
