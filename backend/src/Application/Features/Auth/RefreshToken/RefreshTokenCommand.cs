@@ -15,7 +15,9 @@ public class RefreshTokenHandler(
     IJwtTokenGenerator jwtTokenGenerator,
     IUnitOfWork unitOfWork) : IRequestHandler<RefreshTokenCommand, Result<AuthResponse, Error>>
 {
-    public async Task<Result<AuthResponse, Error>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AuthResponse, Error>> Handle(
+        RefreshTokenCommand request,
+        CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
         if (user is null || user.RefreshTokenExpiry <= DateTime.UtcNow)
@@ -47,4 +49,3 @@ public class RefreshTokenHandler(
             user.Role.ToString());
     }
 }
-

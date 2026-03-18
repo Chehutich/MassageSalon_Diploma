@@ -17,7 +17,9 @@ public class RescheduleAppointmentCommandHandler(
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : IRequestHandler<RescheduleAppointmentCommand, Result<Guid, Error>>
 {
-    public async Task<Result<Guid, Error>> Handle(RescheduleAppointmentCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid, Error>> Handle(
+        RescheduleAppointmentCommand request,
+        CancellationToken cancellationToken)
     {
         // Find
         var appointment = await appointmentRepository.GetByIdAsync(request.AppointmentId, cancellationToken);

@@ -32,6 +32,7 @@ public class CancelAppointmentCommandHandler(
         {
             return Errors.Appointment.TooLateToCancel;
         }
+
         appointment.Cancel();
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -25,7 +25,8 @@ public class GetServiceByIdHandlerTests
         // Arrange
         var serviceId = Guid.NewGuid();
         var category = new Category("Body", "massage");
-        var service = new Service(Guid.NewGuid(), "service", "Oil Massage", "Deep relax", 60, 2000m, new List<string> { "Deep relax", "Relax" });
+        var service = new Service(Guid.NewGuid(), "service", "Oil Massage", "Deep relax", 60, 2000m,
+            new List<string> { "Deep relax", "Relax" });
 
         typeof(Service).GetProperty(nameof(Service.Id))?.SetValue(service, serviceId);
         typeof(Service).GetProperty(nameof(Service.Category))?.SetValue(service, category);
@@ -66,7 +67,8 @@ public class GetServiceByIdHandlerTests
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Service.NotFound");
 
-        _masterRepoMock.Verify(x => x.GetAllWithDetailsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _masterRepoMock.Verify(x => x.GetAllWithDetailsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]

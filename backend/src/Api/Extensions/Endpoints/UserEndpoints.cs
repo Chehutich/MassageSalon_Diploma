@@ -46,7 +46,8 @@ public static class UserEndpoints
             .DisableAntiforgery()
             .RequireAuthorization()
             .WithName("UploadAvatar")
-            .WithDescription("Uploads an avatar image for the currently authenticated user and sets it as the profile picture.");
+            .WithDescription(
+                "Uploads an avatar image for the currently authenticated user and sets it as the profile picture.");
 
         group.MapDelete("/avatar", async (ISender sender) =>
             {

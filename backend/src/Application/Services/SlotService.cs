@@ -18,7 +18,8 @@ public class SlotService(
 {
     private const int TimeStepMinutes = 30;
 
-    public async Task<List<SlotResponse>> GetAvailableSlotsAsync(Guid? masterId,
+    public async Task<List<SlotResponse>> GetAvailableSlotsAsync(
+        Guid? masterId,
         Guid serviceId,
         DateTime date,
         CancellationToken cancellationToken = default)
@@ -70,7 +71,8 @@ public class SlotService(
             .ToList();
     }
 
-    public async Task<List<DateOnly>> GetAvailableDatesAsync(Guid serviceId,
+    public async Task<List<DateOnly>> GetAvailableDatesAsync(
+        Guid serviceId,
         Guid? masterId,
         int year,
         int month,
@@ -143,7 +145,8 @@ public class SlotService(
         return result;
     }
 
-    private bool CheckIfDayHasFreeSlot(DateOnly date,
+    private bool CheckIfDayHasFreeSlot(
+        DateOnly date,
         Schedule schedule,
         List<BusyInterval> busy,
         int duration,
@@ -170,12 +173,14 @@ public class SlotService(
     }
 
 
-    private async Task<List<SlotResponse>> GetSlotsForMasterAsync(Guid masterId,
+    private async Task<List<SlotResponse>> GetSlotsForMasterAsync(
+        Guid masterId,
         int durationMinutes,
         DateTime date,
         CancellationToken cancellationToken = default)
     {
-        var schedule = await scheduleRepository.GetScheduleForDayAsync(masterId, (int)date.DayOfWeek, cancellationToken);
+        var schedule =
+            await scheduleRepository.GetScheduleForDayAsync(masterId, (int)date.DayOfWeek, cancellationToken);
         if (schedule == null)
         {
             return new();
@@ -217,7 +222,8 @@ public class SlotService(
         return slots;
     }
 
-    public async Task<bool> IsMasterAvailableAsync(Guid masterId,
+    public async Task<bool> IsMasterAvailableAsync(
+        Guid masterId,
         DateTime start,
         DateTime end,
         Guid? excludeAppointmentId = null,
@@ -228,7 +234,9 @@ public class SlotService(
         var startTime = TimeOnly.FromDateTime(start);
         var endTime = TimeOnly.FromDateTime(end);
 
-        var worksThatDay = await scheduleRepository.IsMasterWorkingAtAsync(masterId, (int)dbDayOfWeek, startTime, endTime, cancellationToken);
+        var worksThatDay =
+            await scheduleRepository.IsMasterWorkingAtAsync(masterId, (int)dbDayOfWeek, startTime, endTime,
+                cancellationToken);
 
         if (!worksThatDay)
         {
@@ -241,7 +249,8 @@ public class SlotService(
         }
 
         // Check for any appointments that overlap
-        var hasOverlap = await appointmentRepository.HasOverlapAsync(masterId, start, end, excludeAppointmentId, cancellationToken);
+        var hasOverlap =
+            await appointmentRepository.HasOverlapAsync(masterId, start, end, excludeAppointmentId, cancellationToken);
 
         return !hasOverlap;
     }

@@ -321,12 +321,12 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
         // Use a date 1 month ahead from "today" so the test never becomes stale by
         // landing in the past — the slot service filters out past dates.
         var testDate = DateTime.UtcNow.Date.AddMonths(1);
-        var testYear  = testDate.Year;
+        var testYear = testDate.Year;
         var testMonth = testDate.Month;
 
         var category = await CreateCategoryAsync();
-        var service  = await CreateServiceAsync(category.Id, "Massage", 60);
-        var master   = await CreateMasterAsync();
+        var service = await CreateServiceAsync(category.Id, "Massage", 60);
+        var master = await CreateMasterAsync();
         await LinkMasterToServiceAsync(master.Id, service.Id);
 
         // Create a schedule on the same day-of-week as testDate (10:00 – 12:00)
@@ -347,13 +347,13 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
     public async Task GetAvailableDatesAsync_ShouldReturnEmpty_WhenWholeMonthIsBusy()
     {
         // Arrange
-        var testDate  = DateTime.UtcNow.Date.AddMonths(1);
-        var testYear  = testDate.Year;
+        var testDate = DateTime.UtcNow.Date.AddMonths(1);
+        var testYear = testDate.Year;
         var testMonth = testDate.Month;
 
         var category = await CreateCategoryAsync();
-        var service  = await CreateServiceAsync(category.Id, "Massage", 60);
-        var master   = await CreateMasterAsync();
+        var service = await CreateServiceAsync(category.Id, "Massage", 60);
+        var master = await CreateMasterAsync();
         await LinkMasterToServiceAsync(master.Id, service.Id);
 
         // Master works 10:00 – 11:00 (fits exactly one 60-min appointment)
@@ -375,14 +375,14 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
     public async Task GetAvailableDatesAsync_ShouldSkipDatesInPast()
     {
         // Arrange
-        var testDate  = DateTime.UtcNow.Date.AddMonths(1); // reference point for "today"
-        var pastDate  = testDate.AddDays(-2);               // two days before "today" → in the past
-        var testYear  = testDate.Year;
+        var testDate = DateTime.UtcNow.Date.AddMonths(1); // reference point for "today"
+        var pastDate = testDate.AddDays(-2); // two days before "today" → in the past
+        var testYear = testDate.Year;
         var testMonth = testDate.Month;
 
         var category = await CreateCategoryAsync();
-        var service  = await CreateServiceAsync(category.Id, "Massage", 60);
-        var master   = await CreateMasterAsync();
+        var service = await CreateServiceAsync(category.Id, "Massage", 60);
+        var master = await CreateMasterAsync();
         await LinkMasterToServiceAsync(master.Id, service.Id);
 
         // Give the master a working schedule on the day-of-week matching pastDate
@@ -406,14 +406,14 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
         // Arrange
         // Use a future date so the appointment time (18:30) is not in the past right now.
         var testDate = DateTime.UtcNow.Date.AddMonths(1);
-        var master   = await CreateMasterAsync();
+        var master = await CreateMasterAsync();
 
         // Schedule: 10:00 – 18:00
         await CreateScheduleAsync(master.Id, (int)testDate.DayOfWeek, new TimeOnly(10, 0, 0), new TimeOnly(18, 0, 0));
 
         // Attempt to book 18:30 – 19:00 (after closing time)
         var start = testDate.AddHours(18).AddMinutes(30);
-        var end   = start.AddMinutes(30);
+        var end = start.AddMinutes(30);
 
         // Act
         var result = await _sut.IsMasterAvailableAsync(master.Id, start, end, null, CancellationToken.None);
@@ -427,7 +427,7 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
     {
         // Arrange
         var testDate = DateTime.UtcNow.Date.AddMonths(1);
-        var master   = await CreateMasterAsync();
+        var master = await CreateMasterAsync();
 
         // Wide schedule (9:00 – 21:00) so availability isn't blocked by hours
         await CreateScheduleAsync(master.Id, (int)testDate.DayOfWeek, new TimeOnly(9, 0, 0), new TimeOnly(21, 0, 0));
@@ -436,7 +436,7 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
         await CreateTimeOffAsync(master.Id, DateOnly.FromDateTime(testDate));
 
         var start = testDate.AddHours(12);
-        var end   = start.AddHours(1);
+        var end = start.AddHours(1);
 
         // Act
         var result = await _sut.IsMasterAvailableAsync(master.Id, start, end, null, CancellationToken.None);
@@ -450,9 +450,9 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
     {
         // Arrange
         var testDate = DateTime.UtcNow.Date.AddMonths(1);
-        var master   = await CreateMasterAsync();
+        var master = await CreateMasterAsync();
         var category = await CreateCategoryAsync();
-        var service  = await CreateServiceAsync(category.Id, "Massage", 60);
+        var service = await CreateServiceAsync(category.Id, "Massage", 60);
 
         // Full-day schedule so only appointments block the master
         await CreateScheduleAsync(master.Id, (int)testDate.DayOfWeek, new TimeOnly(0, 0), new TimeOnly(23, 59));
@@ -480,22 +480,25 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
     {
         // Arrange
         var testDate = DateTime.UtcNow.Date.AddMonths(1);
-        var master   = await CreateMasterAsync();
+        var master = await CreateMasterAsync();
 
         // Schedule: 10:00 – 18:00
         await CreateScheduleAsync(master.Id, (int)testDate.DayOfWeek, new TimeOnly(10, 0, 0), new TimeOnly(18, 0, 0));
 
         // Act 1: 10:00 – 11:00 (starts exactly at opening) → valid
-        var startOpening  = testDate.AddHours(10);
-        var resultOpening = await _sut.IsMasterAvailableAsync(master.Id, startOpening, startOpening.AddHours(1), null, CancellationToken.None);
+        var startOpening = testDate.AddHours(10);
+        var resultOpening = await _sut.IsMasterAvailableAsync(master.Id, startOpening, startOpening.AddHours(1), null,
+            CancellationToken.None);
 
         // Act 2: 17:00 – 18:00 (ends exactly at closing) → valid
-        var startClosing  = testDate.AddHours(17);
-        var resultClosing = await _sut.IsMasterAvailableAsync(master.Id, startClosing, startClosing.AddHours(1), null, CancellationToken.None);
+        var startClosing = testDate.AddHours(17);
+        var resultClosing = await _sut.IsMasterAvailableAsync(master.Id, startClosing, startClosing.AddHours(1), null,
+            CancellationToken.None);
 
         // Act 3: 17:30 – 18:30 (overruns closing by 30 min) → invalid
-        var startTooLate  = testDate.AddHours(17).AddMinutes(30);
-        var resultTooLate = await _sut.IsMasterAvailableAsync(master.Id, startTooLate, startTooLate.AddHours(1), null, CancellationToken.None);
+        var startTooLate = testDate.AddHours(17).AddMinutes(30);
+        var resultTooLate = await _sut.IsMasterAvailableAsync(master.Id, startTooLate, startTooLate.AddHours(1), null,
+            CancellationToken.None);
 
         // Assert
         resultOpening.Should().BeTrue();
@@ -508,38 +511,38 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
     {
         // Arrange
         var testDate = DateTime.UtcNow.Date.AddMonths(1);
-        var master   = await CreateMasterAsync();
+        var master = await CreateMasterAsync();
         var category = await CreateCategoryAsync();
-        var service  = await CreateServiceAsync(category.Id, "Massage", 60);
+        var service = await CreateServiceAsync(category.Id, "Massage", 60);
 
         // Full-day schedule so checking is only against appointments
         await CreateScheduleAsync(master.Id, (int)testDate.DayOfWeek, new TimeOnly(0, 0), new TimeOnly(23, 59));
 
         // Existing appointment: 12:00 – 13:00
         var existingStart = testDate.AddHours(12);
-        var existingEnd   = existingStart.AddHours(1);
+        var existingEnd = existingStart.AddHours(1);
         await CreateAppointmentAsync(master.Id, service, existingStart);
 
         // Act & Assert
 
         // Case 1: surrounds existing (11:30 – 13:30) → blocked
         (await _sut.IsMasterAvailableAsync(
-            master.Id, existingStart.AddMinutes(-30), existingEnd.AddMinutes(30), null, CancellationToken.None))
+                master.Id, existingStart.AddMinutes(-30), existingEnd.AddMinutes(30), null, CancellationToken.None))
             .Should().BeFalse();
 
         // Case 2: fully inside existing (12:15 – 12:45) → blocked
         (await _sut.IsMasterAvailableAsync(
-            master.Id, existingStart.AddMinutes(15), existingEnd.AddMinutes(-15), null, CancellationToken.None))
+                master.Id, existingStart.AddMinutes(15), existingEnd.AddMinutes(-15), null, CancellationToken.None))
             .Should().BeFalse();
 
         // Case 3: starts exactly when existing ends (13:00 – 14:00) → free
         (await _sut.IsMasterAvailableAsync(
-            master.Id, existingEnd, existingEnd.AddHours(1), null, CancellationToken.None))
+                master.Id, existingEnd, existingEnd.AddHours(1), null, CancellationToken.None))
             .Should().BeTrue();
 
         // Case 4: exact same window (12:00 – 13:00) → blocked
         (await _sut.IsMasterAvailableAsync(
-            master.Id, existingStart, existingEnd, null, CancellationToken.None))
+                master.Id, existingStart, existingEnd, null, CancellationToken.None))
             .Should().BeFalse();
     }
 }

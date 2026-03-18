@@ -11,7 +11,9 @@ public record GetServicesQuery() : IRequest<Result<List<ServiceResponse>, Error>
 public class GetServicesQueryHandler(IServiceRepository serviceRepository)
     : IRequestHandler<GetServicesQuery, Result<List<ServiceResponse>, Error>>
 {
-    public async Task<Result<List<ServiceResponse>, Error>> Handle(GetServicesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<ServiceResponse>, Error>> Handle(
+        GetServicesQuery request,
+        CancellationToken cancellationToken)
     {
         var services = await serviceRepository.GetAllAsync(cancellationToken);
 

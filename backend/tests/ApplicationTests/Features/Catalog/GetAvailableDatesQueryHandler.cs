@@ -28,11 +28,7 @@ public class GetAvailableDatesQueryHandlerTests
 
         var query = new GetAvailableDatesQuery(serviceId, masterId, year, month);
 
-        var expectedDates = new List<DateOnly>
-        {
-            new(2026, 8, 6),
-            new(2026, 8, 7)
-        };
+        var expectedDates = new List<DateOnly> { new(2026, 8, 6), new(2026, 8, 7) };
 
         _slotServiceMock
             .Setup(x => x.GetAvailableDatesAsync(
@@ -52,11 +48,11 @@ public class GetAvailableDatesQueryHandlerTests
         result.Value.Should().BeEquivalentTo(expectedDates);
 
         _slotServiceMock.Verify(x => x.GetAvailableDatesAsync(
-            query.ServiceId,
-            query.MasterId,
-            query.Year,
-            query.Month,
-            It.IsAny<CancellationToken>()),
+                query.ServiceId,
+                query.MasterId,
+                query.Year,
+                query.Month,
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

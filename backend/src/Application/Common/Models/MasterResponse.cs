@@ -8,4 +8,3 @@ public record MasterResponse(
     string? Bio,
     List<CategoryResponse> ServiceCategories
 );
-

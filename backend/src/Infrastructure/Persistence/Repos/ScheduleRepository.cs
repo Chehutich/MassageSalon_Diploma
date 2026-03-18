@@ -6,7 +6,8 @@ namespace Infrastructure.Persistence.Repos;
 
 public class ScheduleRepository(ApplicationDbContext context) : IScheduleRepository
 {
-    public async Task<Schedule?> GetScheduleForDayAsync(Guid masterId,
+    public async Task<Schedule?> GetScheduleForDayAsync(
+        Guid masterId,
         int dayOfWeek,
         CancellationToken cancellationToken = default)
     {
@@ -17,7 +18,9 @@ public class ScheduleRepository(ApplicationDbContext context) : IScheduleReposit
                 cancellationToken);
     }
 
-    public async Task<List<Schedule>> GetSchedulesForMasterAsync(Guid masterId, CancellationToken cancellationToken = default)
+    public async Task<List<Schedule>> GetSchedulesForMasterAsync(
+        Guid masterId,
+        CancellationToken cancellationToken = default)
     {
         return await context.Schedules
             .Where(s => s.MasterId == masterId)

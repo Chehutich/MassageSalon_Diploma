@@ -21,7 +21,7 @@ public static class MasterEndpoints
             {
                 var result = await sender.Send(new GetMasterScheduleQuery(from, to), cancellationToken);
 
-                return  Results.Ok(result.Value);
+                return Results.Ok(result.Value);
             })
             .Produces<List<AppointmentDetailsResponse>>()
             .WithName("Get My Schedule")

@@ -10,4 +10,3 @@ public record ServiceDetailsResponse(
     string? Badge,
     List<string> Benefits,
     List<MasterShortResponse> Masters);
-

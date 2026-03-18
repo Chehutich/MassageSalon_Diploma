@@ -22,9 +22,11 @@ public class FileStorageService : IFileStorageService
 
     private const string UploadsFolderName = "uploads";
 
-    public async Task<string> UploadAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
+    public async Task<string> UploadAsync(
+        Stream fileStream,
+        string fileName,
+        CancellationToken cancellationToken = default)
     {
-
         var uniqueName = $"{Guid.NewGuid()}{Path.GetExtension(fileName)}";
         var filePath = Path.Combine(_uploadsPath, uniqueName);
 

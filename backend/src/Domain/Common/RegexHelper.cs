@@ -13,7 +13,8 @@ public static partial class RegexHelper
     [GeneratedRegex(@"^[a-zA-Zа-яА-ЯіІїЇєЄґҐ' \-]{2,100}$")]
     public static partial Regex NameRegex();
 
-    [GeneratedRegex(@"^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$")]
+    [GeneratedRegex(
+        @"^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$")]
     public static partial Regex UrlRegex();
 
     [GeneratedRegex(@"[^a-z0-9\-]+")]

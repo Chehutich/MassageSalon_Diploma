@@ -25,7 +25,8 @@ public class Schedule
 
         if (dayOfWeek < 0 || dayOfWeek > 6)
         {
-            throw new ArgumentOutOfRangeException(nameof(dayOfWeek), "Day of week must be between 0 and 6 (Monday to Sunday).");
+            throw new ArgumentOutOfRangeException(nameof(dayOfWeek),
+                "Day of week must be between 0 and 6 (Monday to Sunday).");
         }
 
         MasterId = masterId;

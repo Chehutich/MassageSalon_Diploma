@@ -40,15 +40,18 @@ public class GetAppointmentDetailsHandlerTests
         typeof(Master).GetProperty("Id")?.SetValue(master, Guid.NewGuid());
         typeof(Master).GetProperty("User")?.SetValue(master, masterUser);
 
-        var clientUser = Domain.Entities.User.CreateRegistered("Ivan", "Client", "ivan@test.com", "123", "+380991112233");
+        var clientUser =
+            Domain.Entities.User.CreateRegistered("Ivan", "Client", "ivan@test.com", "123", "+380991112233");
         typeof(Domain.Entities.User).GetProperty("Id")?.SetValue(clientUser, userId);
 
-        var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
+        var appointment =
+            (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
         typeof(Domain.Entities.Appointment).GetProperty("Id")?.SetValue(appointment, appointmentId);
         typeof(Domain.Entities.Appointment).GetProperty("ClientId")?.SetValue(appointment, userId);
         typeof(Domain.Entities.Appointment).GetProperty("Client")?.SetValue(appointment, clientUser);
         typeof(Domain.Entities.Appointment).GetProperty("StartTime")?.SetValue(appointment, DateTime.UtcNow);
-        typeof(Domain.Entities.Appointment).GetProperty("EndTime")?.SetValue(appointment, DateTime.UtcNow.AddMinutes(60));
+        typeof(Domain.Entities.Appointment).GetProperty("EndTime")
+            ?.SetValue(appointment, DateTime.UtcNow.AddMinutes(60));
         typeof(Domain.Entities.Appointment).GetProperty("Status")?.SetValue(appointment, AppointmentStatus.Confirmed);
         typeof(Domain.Entities.Appointment).GetProperty("Service")?.SetValue(appointment, service);
         typeof(Domain.Entities.Appointment).GetProperty("Master")?.SetValue(appointment, master);
@@ -78,7 +81,8 @@ public class GetAppointmentDetailsHandlerTests
 
         _userContextMock.Setup(x => x.Id).Returns(currentUserId);
 
-        var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
+        var appointment =
+            (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
         typeof(Domain.Entities.Appointment).GetProperty("Id")?.SetValue(appointment, appointmentId);
         typeof(Domain.Entities.Appointment).GetProperty("ClientId")?.SetValue(appointment, someoneElseId);
 

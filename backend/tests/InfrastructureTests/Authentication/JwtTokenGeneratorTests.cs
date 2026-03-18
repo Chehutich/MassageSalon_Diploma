@@ -17,10 +17,9 @@ public class JwtTokenGeneratorTests
 
     public JwtTokenGeneratorTests()
     {
-        var inMemorySettings = new Dictionary<string, string> {
-            {"Jwt:Key", SecretKey},
-            {"Jwt:Issuer", "TestIssuer"},
-            {"Jwt:Audience", "TestAudience"},
+        var inMemorySettings = new Dictionary<string, string>
+        {
+            { "Jwt:Key", SecretKey }, { "Jwt:Issuer", "TestIssuer" }, { "Jwt:Audience", "TestAudience" },
         };
 
         _config = new ConfigurationBuilder()

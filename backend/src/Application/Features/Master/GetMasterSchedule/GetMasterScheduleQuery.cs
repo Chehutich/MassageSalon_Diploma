@@ -16,7 +16,8 @@ public class GetMasterScheduleHandler(
     TimeProvider timeProvider)
     : IRequestHandler<GetMasterScheduleQuery, Result<List<AppointmentDetailsResponse>>>
 {
-    public async Task<Result<List<AppointmentDetailsResponse>>> Handle(GetMasterScheduleQuery request,
+    public async Task<Result<List<AppointmentDetailsResponse>>> Handle(
+        GetMasterScheduleQuery request,
         CancellationToken cancellationToken)
     {
         var userId = userContext.Id;

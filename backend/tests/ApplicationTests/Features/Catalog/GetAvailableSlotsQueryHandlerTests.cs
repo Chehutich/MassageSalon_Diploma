@@ -42,10 +42,10 @@ public class GetAvailableSlotsQueryHandlerTests
         result.Value.Should().BeSameAs(expectedSlots);
 
         _slotServiceMock.Verify(x => x.GetAvailableSlotsAsync(
-            query.MasterId,
-            query.ServiceId,
-            query.Date,
-            It.IsAny<CancellationToken>()),
+                query.MasterId,
+                query.ServiceId,
+                query.Date,
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }

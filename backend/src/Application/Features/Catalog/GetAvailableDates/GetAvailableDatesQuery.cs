@@ -11,7 +11,9 @@ public record GetAvailableDatesQuery(Guid ServiceId, Guid? MasterId, int Year, i
 public class GetAvailableDatesQueryHandler(
     ISlotService slotService) : IRequestHandler<GetAvailableDatesQuery, Result<List<DateOnly>, Error>>
 {
-    public async Task<Result<List<DateOnly>, Error>> Handle(GetAvailableDatesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<DateOnly>, Error>> Handle(
+        GetAvailableDatesQuery request,
+        CancellationToken cancellationToken)
     {
         var dates = await slotService.GetAvailableDatesAsync(
             request.ServiceId,

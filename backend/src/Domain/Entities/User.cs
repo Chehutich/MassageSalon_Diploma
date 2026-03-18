@@ -55,6 +55,7 @@ public class User : IAuditableEntity
         {
             SetPassword(passwordHash);
         }
+
         Role = role;
     }
 
@@ -63,7 +64,12 @@ public class User : IAuditableEntity
         return new User(firstName, lastName, null, null, phone, Role.Guest);
     }
 
-    public static User CreateRegistered(string firstName, string lastName, string email, string passwordHash, string phone)
+    public static User CreateRegistered(
+        string firstName,
+        string lastName,
+        string email,
+        string passwordHash,
+        string phone)
     {
         return new User(firstName, lastName, email, passwordHash, phone, Role.Client);
     }
@@ -111,8 +117,8 @@ public class User : IAuditableEntity
     public void SetPhotoUrl(string? photoUrl)
     {
         if (!string.IsNullOrEmpty(photoUrl) &&
-           (!Uri.TryCreate(photoUrl, UriKind.Absolute, out var uri) ||
-            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)))
+            (!Uri.TryCreate(photoUrl, UriKind.Absolute, out var uri) ||
+             (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)))
         {
             throw new ArgumentException($"Invalid URL: {photoUrl}");
         }

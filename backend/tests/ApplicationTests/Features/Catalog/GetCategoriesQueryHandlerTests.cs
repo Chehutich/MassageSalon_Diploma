@@ -23,8 +23,7 @@ public class GetCategoriesQueryHandlerTests
         // Arrange
         var categories = new List<Category>
         {
-            new Category("Massage", "Massage-"),
-            new Category("Spa Procedures", "sPA")
+            new Category("Massage", "Massage-"), new Category("Spa Procedures", "sPA")
         };
 
         _categoryRepositoryMock

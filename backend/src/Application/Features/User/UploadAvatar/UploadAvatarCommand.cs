@@ -40,4 +40,3 @@ public class UploadAvatarCommandHandler(
         return Result.Success<string, Error>(newPhotoUrl);
     }
 }
-

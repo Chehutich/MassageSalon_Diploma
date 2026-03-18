@@ -21,7 +21,7 @@ public class Service
 
     public bool IsActive { get; private set; } = true;
 
-    public ServiceBadge? Badge { get; private set;}
+    public ServiceBadge? Badge { get; private set; }
 
     public List<string> Benefits { get; private set; } = new();
 
@@ -33,7 +33,8 @@ public class Service
 
     private Service() { }
 
-    public Service(Guid categoryId,
+    public Service(
+        Guid categoryId,
         string slug,
         string title,
         string? description,

@@ -84,7 +84,7 @@ public class UpdateProfileHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var user = Domain.Entities.User.CreateRegistered("Name", "Name", "old@test.com", "hash", "+380111");
-        var existingUser =  Domain.Entities.User.CreateRegistered("Other", "User", "new@test.com", "hash", "+380222");
+        var existingUser = Domain.Entities.User.CreateRegistered("Other", "User", "new@test.com", "hash", "+380222");
 
         _userContextMock.Setup(x => x.Id).Returns(userId);
         _userRepoMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))

@@ -5,7 +5,8 @@ namespace Infrastructure.Persistence.Repos;
 
 public class TimeOffsRepository(ApplicationDbContext context) : ITimeOffsRepository
 {
-    public async Task<bool> IsMasterOnTimeOffAsync(Guid masterId,
+    public async Task<bool> IsMasterOnTimeOffAsync(
+        Guid masterId,
         DateTime date,
         CancellationToken cancellationToken = default)
     {

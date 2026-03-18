@@ -31,7 +31,8 @@ public static class AuthorizationEndpoints
             .WithDescription("Registers a new user.");
 
         group.MapPost("/login",
-                async (LoginCommand command,
+                async (
+                    LoginCommand command,
                     ISender sender,
                     HttpContext context,
                     CancellationToken cancellationToken) =>
@@ -81,22 +82,23 @@ public static class AuthorizationEndpoints
             .WithDescription("Refreshes the authentication tokens using the refresh token from cookies.");
 
         group.MapPost("/refresh-mobile",
-            async (RefreshTokenCommand command, ISender sender, CancellationToken cancellationToken) =>
-            {
-                if (string.IsNullOrEmpty(command.RefreshToken))
+                async (RefreshTokenCommand command, ISender sender, CancellationToken cancellationToken) =>
                 {
-                    return Results.Unauthorized();
-                }
+                    if (string.IsNullOrEmpty(command.RefreshToken))
+                    {
+                        return Results.Unauthorized();
+                    }
 
-                var result = await sender.Send(new RefreshTokenCommand(command.AccessToken, command.RefreshToken), cancellationToken);
+                    var result = await sender.Send(new RefreshTokenCommand(command.AccessToken, command.RefreshToken),
+                        cancellationToken);
 
-                if (result.IsFailure)
-                {
-                    return result.ToProblemDetails();
-                }
+                    if (result.IsFailure)
+                    {
+                        return result.ToProblemDetails();
+                    }
 
-                return Results.Ok(result.Value);
-            })
+                    return Results.Ok(result.Value);
+                })
             .Produces<AuthResponse>()
             .ProducesProblem(401)
             .AllowAnonymous()

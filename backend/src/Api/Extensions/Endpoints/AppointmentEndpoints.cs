@@ -61,7 +61,8 @@ public static class AppointmentEndpoints
             })
             .Produces<List<SlotResponse>>()
             .WithName("GetAvailableSlots")
-            .WithDescription("Retrieves a list of available time slots for a specific master and service on a given date.");
+            .WithDescription(
+                "Retrieves a list of available time slots for a specific master and service on a given date.");
 
         group.MapGet("/available-dates", async (
                 [AsParameters] GetAvailableDatesQuery query,
@@ -76,9 +77,11 @@ public static class AppointmentEndpoints
             })
             .Produces<List<DateOnly>>()
             .WithName("GetAvailableDates")
-            .WithDescription("Retrieves a list of dates that have at least one free slot for a specific service (and master).");
+            .WithDescription(
+                "Retrieves a list of dates that have at least one free slot for a specific service (and master).");
 
-        group.MapPost("", async (CreateAppointmentCommand command,
+        group.MapPost("", async (
+                CreateAppointmentCommand command,
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
@@ -136,7 +139,8 @@ public static class AppointmentEndpoints
             .ProducesProblem(404)
             .ProducesProblem(409)
             .WithName("RescheduleAppointment")
-            .WithDescription("Reschedules an existing appointment to a new time. Must be done at least 24 hours in advance.");
+            .WithDescription(
+                "Reschedules an existing appointment to a new time. Must be done at least 24 hours in advance.");
 
         group.MapPost("/{id:guid}/cancel", async (
                 Guid id,

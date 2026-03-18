@@ -63,12 +63,17 @@ public class CancelAppointmentCommandHandlerTests
 
         var service = new Service(Guid.NewGuid(), "service", "Haircut", "Desc", 60, 100m);
 
-        var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
-        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Id))?.SetValue(appointment, appointmentId);
-        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.StartTime))?.SetValue(appointment, startTime);
-        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Status))?.SetValue(appointment, AppointmentStatus.Confirmed);
+        var appointment =
+            (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
+        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Id))
+            ?.SetValue(appointment, appointmentId);
+        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.StartTime))
+            ?.SetValue(appointment, startTime);
+        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Status))
+            ?.SetValue(appointment, AppointmentStatus.Confirmed);
 
-        _appointmentRepoMock.Setup(x => x.GetByIdAsync(appointmentId, It.IsAny<CancellationToken>())).ReturnsAsync(appointment);
+        _appointmentRepoMock.Setup(x => x.GetByIdAsync(appointmentId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(appointment);
         _timeProviderMock.Setup(x => x.GetUtcNow()).Returns(new DateTimeOffset(now));
 
         // Act
@@ -91,12 +96,17 @@ public class CancelAppointmentCommandHandlerTests
 
         var startTime = now.AddHours(2);
 
-        var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
-        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Id))?.SetValue(appointment, appointmentId);
-        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.StartTime))?.SetValue(appointment, startTime);
-        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Status))?.SetValue(appointment, AppointmentStatus.Confirmed);
+        var appointment =
+            (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
+        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Id))
+            ?.SetValue(appointment, appointmentId);
+        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.StartTime))
+            ?.SetValue(appointment, startTime);
+        typeof(Domain.Entities.Appointment).GetProperty(nameof(Domain.Entities.Appointment.Status))
+            ?.SetValue(appointment, AppointmentStatus.Confirmed);
 
-        _appointmentRepoMock.Setup(x => x.GetByIdAsync(appointmentId, It.IsAny<CancellationToken>())).ReturnsAsync(appointment);
+        _appointmentRepoMock.Setup(x => x.GetByIdAsync(appointmentId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(appointment);
         _timeProviderMock.Setup(x => x.GetUtcNow()).Returns(new DateTimeOffset(now));
 
         // Act

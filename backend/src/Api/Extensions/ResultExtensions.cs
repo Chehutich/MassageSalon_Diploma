@@ -37,9 +37,9 @@ public static class ResultExtensions
         {
             var c when c.StartsWith("Duplicate", StringComparison.Ordinal) => "Conflict",
             var c when c.StartsWith("Conflict", StringComparison.Ordinal) => "Conflict",
-            var c when c.StartsWith("InvalidCredentials",  StringComparison.Ordinal) => "Authentication Failed",
-            var c when c.Contains("NotFound",  StringComparison.Ordinal) => "Not Found",
-            var c when c.StartsWith("Auth.",  StringComparison.Ordinal) => "Authorization Error",
+            var c when c.StartsWith("InvalidCredentials", StringComparison.Ordinal) => "Authentication Failed",
+            var c when c.Contains("NotFound", StringComparison.Ordinal) => "Not Found",
+            var c when c.StartsWith("Auth.", StringComparison.Ordinal) => "Authorization Error",
             _ => "Bad Request",
         };
 

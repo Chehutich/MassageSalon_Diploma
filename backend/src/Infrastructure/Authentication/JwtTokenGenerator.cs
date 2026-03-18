@@ -24,8 +24,7 @@ public class JwtTokenGenerator(IConfiguration config) : IJwtTokenGenerator
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email), new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim("first_name", user.FirstName),
         };
 
@@ -70,7 +69,8 @@ public class JwtTokenGenerator(IConfiguration config) : IJwtTokenGenerator
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
             if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                    StringComparison.InvariantCultureIgnoreCase))
             {
                 return null;
             }

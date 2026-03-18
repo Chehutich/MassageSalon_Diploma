@@ -11,7 +11,9 @@ public record GetMasterDetailsQuery(Guid Id) : IRequest<Result<MasterDetailsResp
 public class GetMasterDetailsHandler(IMasterRepository masterRepository)
     : IRequestHandler<GetMasterDetailsQuery, Result<MasterDetailsResponse, Error>>
 {
-    public async Task<Result<MasterDetailsResponse, Error>> Handle(GetMasterDetailsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<MasterDetailsResponse, Error>> Handle(
+        GetMasterDetailsQuery request,
+        CancellationToken cancellationToken)
     {
         var master = await masterRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken);
 

@@ -42,7 +42,8 @@ public class RegisterCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("User.DuplicateEmail");
-        _userRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.User>(), It.IsAny<CancellationToken>()), Times.Never);
+        _userRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.User>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -50,7 +51,8 @@ public class RegisterCommandHandlerTests
     {
         // Arrange
         var command = new RegisterCommand("Ivan", "Ivanov", "new@test.com", "password123", "+380991112233");
-        var existingUserByPhone = Domain.Entities.User.CreateRegistered("Other", "User", "other@test.com", "hash", command.Phone);
+        var existingUserByPhone =
+            Domain.Entities.User.CreateRegistered("Other", "User", "other@test.com", "hash", command.Phone);
 
         _userRepositoryMock.Setup(x => x.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.User?)null);
@@ -88,7 +90,8 @@ public class RegisterCommandHandlerTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Token.Should().Be("access_token");
 
-        _userRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.User>(), It.IsAny<CancellationToken>()), Times.Once);
+        _userRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.User>(), It.IsAny<CancellationToken>()),
+            Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -118,7 +121,8 @@ public class RegisterCommandHandlerTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Token.Should().Be("access_token");
 
-        _userRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.User>(), It.IsAny<CancellationToken>()), Times.Never);
+        _userRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Domain.Entities.User>(), It.IsAny<CancellationToken>()),
+            Times.Never);
 
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
 

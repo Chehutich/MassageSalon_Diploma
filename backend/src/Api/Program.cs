@@ -16,10 +16,10 @@ builder.Services.AddApplication();
 var app = builder.Build();
 
 app.UseCors(policy => policy
-        .WithOrigins("http://localhost:8081") // Expo
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials()
+    .WithOrigins("http://localhost:8081") // Expo
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
 );
 
 app.UseSerilogRequestLogging();

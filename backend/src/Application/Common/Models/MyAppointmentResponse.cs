@@ -4,10 +4,8 @@ public record MyAppointmentResponse(
     Guid Id,
     DateTime StartTime,
     DateTime EndTime,
-
     Guid ServiceId,
     string ServiceName,
-
     Guid MasterId,
     string MasterFirstName,
     string MasterLastName,

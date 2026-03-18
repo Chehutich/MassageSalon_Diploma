@@ -14,9 +14,10 @@ public class GetAppointmentDetailsHandler(
     ICurrentUserContext userContext)
     : IRequestHandler<GetAppointmentDetailsQuery, Result<AppointmentDetailsResponse, Error>>
 {
-    public async Task<Result<AppointmentDetailsResponse, Error>> Handle(GetAppointmentDetailsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<AppointmentDetailsResponse, Error>> Handle(
+        GetAppointmentDetailsQuery request,
+        CancellationToken cancellationToken)
     {
-
         var appointment = await appointmentRepository.GetByIdWithDetailsAsync(request.AppointmentId, cancellationToken);
 
         if (appointment == null)

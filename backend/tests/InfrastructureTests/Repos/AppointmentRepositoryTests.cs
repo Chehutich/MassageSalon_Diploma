@@ -93,15 +93,16 @@ public class AppointmentRepositoryTests : BaseRepositoryTest
         // Arrange
         var master = await CreateMasterAsync();
         // Use future dates (+2 months ahead) to guarantee they are never in the past.
-        var baseDate  = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(2);
+        var baseDate =
+            new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(2);
         var startDate = DateOnly.FromDateTime(baseDate.AddDays(19)); // 20th of that month
-        var endDate   = DateOnly.FromDateTime(baseDate.AddDays(20)); // 21st of that month
+        var endDate = DateOnly.FromDateTime(baseDate.AddDays(20)); // 21st of that month
 
         await CreateTimeOffAsync(master.Id, startDate, endDate);
 
         // Search window covers the whole month
         var searchStart = baseDate;
-        var searchEnd   = baseDate.AddMonths(1);
+        var searchEnd = baseDate.AddMonths(1);
 
         // Act
         var result = await _repository.GetBusyIntervalsAsync(master.Id, searchStart, searchEnd);
@@ -187,7 +188,7 @@ public class AppointmentRepositoryTests : BaseRepositoryTest
         for (int i = 0; i < result.Count - 1; i++)
         {
             Assert.True(result[i].Start <= result[i + 1].Start,
-                $"Interval at index {i} starts after interval at index {i+1}");
+                $"Interval at index {i} starts after interval at index {i + 1}");
         }
     }
 

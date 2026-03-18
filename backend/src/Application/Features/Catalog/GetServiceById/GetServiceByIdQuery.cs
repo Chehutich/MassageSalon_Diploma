@@ -13,7 +13,9 @@ public class GetServiceByIdHandler(
     IMasterRepository masterRepository)
     : IRequestHandler<GetServiceByIdQuery, Result<ServiceDetailsResponse, Error>>
 {
-    public async Task<Result<ServiceDetailsResponse, Error>> Handle(GetServiceByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ServiceDetailsResponse, Error>> Handle(
+        GetServiceByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var service = await serviceRepository.GetByIdAsync(request.Id, cancellationToken);
 
@@ -33,7 +35,8 @@ public class GetServiceByIdHandler(
             service.Category.Slug,
             service.Badge?.ToString(),
             service.Benefits,
-            mastersForService.Select(m => new MasterShortResponse(m.Id, m.User.FirstName, m.User.LastName, m.User.PhotoUrl)).ToList()
+            mastersForService
+                .Select(m => new MasterShortResponse(m.Id, m.User.FirstName, m.User.LastName, m.User.PhotoUrl)).ToList()
         );
 
         return response;

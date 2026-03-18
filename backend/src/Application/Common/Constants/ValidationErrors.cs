@@ -48,7 +48,6 @@ public static class ValidationErrors
         public const string YearRequired = "GetAvailableDates.Date.Required";
         public const string MonthRequired = "GetAvailableDates.Date.Required";
         public const string MasterIdNotEmpty = "GetAvailableDates.MasterId.NotEmpty";
-
     }
 
     public static class Token

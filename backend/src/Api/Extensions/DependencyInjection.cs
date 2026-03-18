@@ -102,11 +102,9 @@ public static class DependencyInjection
                     Description = "Enter only JWT token",
                 });
 
-                document.Security = [
-                    new OpenApiSecurityRequirement
-                    {
-                        [new OpenApiSecuritySchemeReference("jwt")] = [],
-                    },
+                document.Security =
+                [
+                    new OpenApiSecurityRequirement { [new OpenApiSecuritySchemeReference("jwt")] = [], },
                 ];
 
                 return Task.CompletedTask;

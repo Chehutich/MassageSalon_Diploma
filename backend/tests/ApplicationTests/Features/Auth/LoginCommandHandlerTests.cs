@@ -46,7 +46,8 @@ public class LoginCommandHandlerTests
     {
         // Arrange
         var query = new LoginCommand("user@test.com", "wrong_password");
-        var user = Domain.Entities.User.CreateRegistered("Ivan", "Ivanov", query.Email, "correct_hash", "+380990000000");
+        var user = Domain.Entities.User.CreateRegistered("Ivan", "Ivanov", query.Email, "correct_hash",
+            "+380990000000");
 
         _userRepositoryMock.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
@@ -67,7 +68,8 @@ public class LoginCommandHandlerTests
     {
         // Arrange
         var query = new LoginCommand("user@test.com", "correct_password");
-        var user = Domain.Entities.User.CreateRegistered("Ivan", "Ivanov", query.Email, "correct_hash", "+380990000000");
+        var user = Domain.Entities.User.CreateRegistered("Ivan", "Ivanov", query.Email, "correct_hash",
+            "+380990000000");
 
         _userRepositoryMock.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);

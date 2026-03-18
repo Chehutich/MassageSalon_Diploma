@@ -8,7 +8,8 @@ namespace Infrastructure.Persistence.Repos;
 
 public class AppointmentRepository(ApplicationDbContext context) : IAppointmentRepository
 {
-    public async Task<Appointment?> GetByIdAsync(Guid id,
+    public async Task<Appointment?> GetByIdAsync(
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         return await context.Appointments
@@ -28,19 +29,24 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
             .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
-    public async Task<List<Appointment>> GetAppointmentsByUserId(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<List<Appointment>> GetAppointmentsByUserId(
+        Guid userId,
+        CancellationToken cancellationToken = default)
     {
         return await context.Appointments
             .AsNoTracking()
             .Where(a => a.ClientId == userId)
             .Include(a => a.Service)
             .Include(a => a.Master)
-                .ThenInclude(m => m.User)
+            .ThenInclude(m => m.User)
             .OrderByDescending(a => a.StartTime)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Appointment>> GetByMasterAndDateAsync(Guid masterId, DateTime date, CancellationToken cancellationToken = default)
+    public async Task<List<Appointment>> GetByMasterAndDateAsync(
+        Guid masterId,
+        DateTime date,
+        CancellationToken cancellationToken = default)
     {
         var startOfDay = date.Date.ToUniversalTime();
         var endOfDay = startOfDay.AddDays(1);
@@ -57,7 +63,11 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<BusyInterval>> GetBusyIntervalsAsync(Guid masterId, DateTime start, DateTime end, CancellationToken cancellationToken = default)
+    public async Task<List<BusyInterval>> GetBusyIntervalsAsync(
+        Guid masterId,
+        DateTime start,
+        DateTime end,
+        CancellationToken cancellationToken = default)
     {
         var appointments = await context.Appointments
             .Where(a => a.MasterId == masterId &&
@@ -90,7 +100,6 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
         DateTime end,
         CancellationToken cancellationToken = default)
     {
-
         return await context.Appointments
             .AsNoTracking()
             .Where(a => a.MasterId == masterId &&
@@ -105,7 +114,8 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<bool> HasOverlapAsync(Guid masterId,
+    public async Task<bool> HasOverlapAsync(
+        Guid masterId,
         DateTime start,
         DateTime end,
         Guid? excludeId = null,

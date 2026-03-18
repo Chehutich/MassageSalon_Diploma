@@ -16,7 +16,9 @@ public class MasterRepository(ApplicationDbContext context) : IMasterRepository
             .FirstOrDefaultAsync(m => m.Id == id && m.IsActive, cancellationToken);
     }
 
-    public async Task<List<Master>> GetAllWithDetailsAsync(Guid? serviceId = null, CancellationToken cancellationToken = default)
+    public async Task<List<Master>> GetAllWithDetailsAsync(
+        Guid? serviceId = null,
+        CancellationToken cancellationToken = default)
     {
         var query = context.Masters
             .Include(m => m.User)

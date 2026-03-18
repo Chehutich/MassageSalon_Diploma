@@ -28,7 +28,8 @@ public class GetMasterScheduleHandlerTests
         // Set fake "now" to 1 month ahead so tests never land in the past.
         // The concrete date doesn't matter for these unit-style tests;
         // what matters is consistency between FakeTimeProvider and expectedFrom/To.
-        var fakeNow = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
+        var fakeNow =
+            new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
         _timeProvider.SetUtcNow(new DateTimeOffset(fakeNow));
 
         _handler = new GetMasterScheduleHandler(
@@ -53,7 +54,8 @@ public class GetMasterScheduleHandlerTests
 
         // The handler uses "start of today" as the default from-date.
         // Derive it from whatever FakeTimeProvider reports so the assertion stays in sync.
-        var fakeNow = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
+        var fakeNow =
+            new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
         var expectedFrom = fakeNow.Date; // midnight of that day
         var expectedTo = expectedFrom.AddDays(7);
 
@@ -87,8 +89,9 @@ public class GetMasterScheduleHandlerTests
         _masterRepoMock.Setup(x => x.GetByIdAsync(masterId, It.IsAny<CancellationToken>())).ReturnsAsync(master);
 
         // Use future dates relative to today (+1 month) to avoid accidental past-date edge cases.
-        var customFrom = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(2);   // start of 2 months ahead
-        var customTo   = customFrom.AddDays(1);                                                                                    // next day
+        var customFrom = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc)
+            .AddMonths(2); // start of 2 months ahead
+        var customTo = customFrom.AddDays(1); // next day
 
         _appointmentRepoMock
             .Setup(x => x.GetMasterScheduleAsync(masterId, customFrom, customTo, It.IsAny<CancellationToken>()))
@@ -130,16 +133,18 @@ public class GetMasterScheduleHandlerTests
         var clientUser = Domain.Entities.User.CreateRegistered("test", "test", "client@test.com", "hash", "+38099");
         SetPrivate(clientUser, "Id", Guid.NewGuid());
 
-        var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
+        var appointment =
+            (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
         SetPrivate(appointment, "Id", Guid.NewGuid());
         SetPrivate(appointment, "MasterId", masterId);
         SetPrivate(appointment, "ClientId", clientUser.Id);
         // Appointment falls on the same day as fake "now"; the handler queries start-of-day to +7 days.
-        var fakeNow      = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
-        var apptStart    = fakeNow.Date.AddHours(15); // 15:00 on that day
-        var apptEnd      = apptStart.AddHours(1);     // 16:00
+        var fakeNow =
+            new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 10, 0, 0, DateTimeKind.Utc).AddMonths(1);
+        var apptStart = fakeNow.Date.AddHours(15); // 15:00 on that day
+        var apptEnd = apptStart.AddHours(1); // 16:00
         SetPrivate(appointment, "StartTime", apptStart);
-        SetPrivate(appointment, "EndTime",   apptEnd);
+        SetPrivate(appointment, "EndTime", apptEnd);
         SetPrivate(appointment, "Status", AppointmentStatus.Confirmed);
         SetPrivate(appointment, "Service", service);
         SetPrivate(appointment, "Client", clientUser);
@@ -174,7 +179,8 @@ public class GetMasterScheduleHandlerTests
         }
         else
         {
-            var field = type.GetField($"<{propertyName}>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = type.GetField($"<{propertyName}>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Instance);
             if (field != null)
             {
                 field.SetValue(obj, value);

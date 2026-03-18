@@ -18,7 +18,8 @@ public interface ISlotService
         int month,
         CancellationToken cancellationToken = default);
 
-    Task<bool> IsMasterAvailableAsync(Guid masterId,
+    Task<bool> IsMasterAvailableAsync(
+        Guid masterId,
         DateTime start,
         DateTime end,
         Guid? excludeAppointmentId = null,

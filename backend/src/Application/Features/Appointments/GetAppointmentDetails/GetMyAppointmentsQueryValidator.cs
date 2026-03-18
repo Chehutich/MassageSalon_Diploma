@@ -12,4 +12,3 @@ public class GetMyAppointmentDetailsValidator : AbstractValidator<GetAppointment
             .WithErrorCode(ValidationErrors.Appointment.IdRequired);
     }
 }
-
