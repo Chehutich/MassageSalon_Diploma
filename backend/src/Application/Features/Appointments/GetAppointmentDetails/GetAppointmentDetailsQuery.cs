@@ -25,9 +25,12 @@ public class GetAppointmentDetailsHandler(
             return Errors.Appointment.NotFound(request.AppointmentId);
         }
 
-        if (appointment.ClientId != userContext.Id)
+        bool isClient = appointment.ClientId == userContext.Id;
+        bool isMaster = appointment.Master.User.Id == userContext.Id;
+
+        if (!isClient && !isMaster)
         {
-            return Errors.Appointment.NotFound(appointment.Id);
+            return Errors.Appointment.NotFound(request.AppointmentId);
         }
 
         var dto = new AppointmentDetailsResponse(
@@ -49,7 +52,8 @@ public class GetAppointmentDetailsHandler(
             appointment.Client.FirstName,
             appointment.Client.LastName,
             appointment.Client.Phone,
-            appointment.Client.Email
+            appointment.Client.Email,
+            appointment.Client.PhotoUrl
         );
 
         return dto;

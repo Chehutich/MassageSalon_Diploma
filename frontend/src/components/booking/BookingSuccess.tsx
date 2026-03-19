@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Check } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
-import { DAYS_OF_WEEK, MONTHS_UA_FULL } from "./booking.helpers";
+import { DAYS_OF_WEEK, MONTHS_UA_FULL } from "@/src/utils/calendarHelpers";
 import type { SlotResponse } from "@/src/api/generated/apiV1.schemas";
 
 type Props = {

@@ -22,5 +22,6 @@ public record AppointmentDetailsResponse(
     string ClientFirstName,
     string ClientLastName,
     string ClientPhone,
-    string ClientEmail
+    string? ClientEmail,
+    string? ClientPhotoUrl
 );

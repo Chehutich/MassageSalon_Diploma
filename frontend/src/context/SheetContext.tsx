@@ -3,6 +3,7 @@ import { BookingSheet } from "@/src/components/booking/BookingSheet";
 import { ServiceSheet } from "@/src/components/home/ServiceSheet";
 import { MasterSheet } from "@/src/components/home/MasterSheet";
 import { EditUserFieldSheet } from "@/src/components/profile/EditUserFieldSheet";
+import { AppointmentDetailsSheet } from "@/src/components/master/AppointmentDetailsSheet";
 import { useToast } from "./ToastContext";
 import { UserMeResponse } from "../api/generated/apiV1.schemas";
 
@@ -10,6 +11,7 @@ type SheetContextType = {
   openBooking: (serviceId: string, masterId?: string | null) => void;
   openService: (serviceId: string) => void;
   openMaster: (masterId: string) => void;
+  openAppointment: (id: string) => void;
   openEditField: (
     fieldId: "firstName" | "lastName" | "phone" | "email" | "password",
   ) => void;
@@ -26,6 +28,7 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [masterId, setMasterId] = useState<string | null>(null);
   const [editFieldId, setEditFieldId] = useState<string | null>(null);
+  const [appointmentId, setAppointmentId] = useState<string | null>(null);
 
   const openBooking = useCallback((sId: string, mId: string | null = null) => {
     setBookingData({ sId, mId });
@@ -35,11 +38,18 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
 
   const openService = useCallback((id: string) => setServiceId(id), []);
   const openMaster = useCallback((id: string) => setMasterId(id), []);
+  const openAppointment = useCallback((id: string) => setAppointmentId(id), []);
   const openEditField = useCallback((id: string) => setEditFieldId(id), []);
 
   return (
     <SheetContext.Provider
-      value={{ openBooking, openService, openMaster, openEditField }}
+      value={{
+        openBooking,
+        openService,
+        openMaster,
+        openEditField,
+        openAppointment,
+      }}
     >
       {children}
 
@@ -73,6 +83,11 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
       <EditUserFieldSheet
         fieldId={editFieldId as keyof UserMeResponse | "password" | null}
         onClose={() => setEditFieldId(null)}
+      />
+
+      <AppointmentDetailsSheet
+        appointmentId={appointmentId}
+        onClose={() => setAppointmentId(null)}
       />
     </SheetContext.Provider>
   );

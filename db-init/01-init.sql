@@ -48,7 +48,6 @@ CREATE TABLE services (
 
 -- Таблиця зв'язку: які саме послуги може надавати конкретний майстер (Many-to-Many)
 CREATE TABLE master_services (
-CREATE TABLE master_services (
     master_id  UUID NOT NULL REFERENCES masters(id) ON DELETE CASCADE,
     service_id UUID NOT NULL REFERENCES services(id) ON DELETE CASCADE,
     PRIMARY KEY (master_id, service_id)

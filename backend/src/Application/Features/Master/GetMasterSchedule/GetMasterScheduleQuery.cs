@@ -56,7 +56,8 @@ public class GetMasterScheduleHandler(
             a.Client.FirstName,
             a.Client.LastName,
             a.Client.Phone,
-            a.Client.Email
+            a.Client.Email,
+            a.Client.PhotoUrl
         )).ToList();
 
         return Result.Success(response);

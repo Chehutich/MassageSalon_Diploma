@@ -29,7 +29,7 @@ import {
   fmtTime,
   MONTHS_UA_FULL,
   toDateString,
-} from "./booking.helpers";
+} from "@/src/utils/calendarHelpers";
 
 type Props = {
   serviceId: string | null;

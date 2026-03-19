@@ -9,7 +9,7 @@ public class SignalRNotificationService(
 {
     public async Task NotifyUserAsync(Guid userId, string title, string message, object? data = null)
     {
-        await hubContext.Clients.Group(userId.ToString())
+        await hubContext.Clients.User(userId.ToString())
             .ReceiveAppointmentUpdate(title, message, data ?? new { });
     }
 }

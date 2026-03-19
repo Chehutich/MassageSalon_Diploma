@@ -4,12 +4,13 @@ import {
   isAfter,
   subHours,
   isToday as isTodayDateFns,
+  isTomorrow as isTomorrowDateFns,
 } from "date-fns";
 import { uk } from "date-fns/locale";
 
 export const formatAppointmentDate = (date: string | Date) => {
   const d = typeof date === "string" ? parseISO(date) : date;
-  return format(d, "eee, d MMM", { locale: uk });
+  return format(d, "eeeeee, d MMM", { locale: uk });
 };
 
 export const formatAppointmentTimeRange = (
@@ -31,6 +32,11 @@ export const checkCanCancel = (startTime: string | Date, limitHours = 1) => {
 export const isToday = (date: string | Date) => {
   const d = typeof date === "string" ? parseISO(date) : date;
   return isTodayDateFns(d);
+};
+
+export const isTomorrow = (date: string | Date) => {
+  const d = typeof date === "string" ? parseISO(date) : date;
+  return isTomorrowDateFns(d);
 };
 
 export const formatTime = (date: string | Date) => {

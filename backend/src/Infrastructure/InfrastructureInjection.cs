@@ -31,6 +31,9 @@ public static class InfrastructureInjection
         services.AddHttpContextAccessor();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IScheduleRepository, ScheduleRepository>();
+        services.AddScoped<ITimeOffsRepository, TimeOffsRepository>();
+
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<ICurrentUserContext, CurrentUserContext>();
