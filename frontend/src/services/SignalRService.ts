@@ -22,12 +22,13 @@ class SignalRService {
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
+    this.connection.off("ReceiveAppointmentUpdate");
+
     this.connection.on(
       "ReceiveAppointmentUpdate",
       (title: string, message: string, data: any) => {
         console.log("SignalR Event:", { title, message, data });
         // toast will be shown here
-        alert(`${title}\n${message}`);
       },
     );
 
@@ -42,9 +43,14 @@ class SignalRService {
 
   async stop() {
     if (this.connection) {
-      await this.connection.stop();
-      this.connection = null;
-      console.log("SignalR Disconnected");
+      try {
+        await this.connection.stop();
+        console.log("SignalR Stopped Successfully");
+      } catch (err) {
+        console.error("Error while stopping SignalR:", err);
+      } finally {
+        this.connection = null;
+      }
     }
   }
 }

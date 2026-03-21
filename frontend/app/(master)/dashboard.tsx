@@ -16,9 +16,16 @@ import { LeafLogo } from "@/src/components/ui/brand/LeafLogo";
 import { useGetMe } from "@/src/api/generated/user/user";
 import { useGetMySchedule } from "@/src/api/generated/master-personal-cabinet/master-personal-cabinet";
 import { signalRService } from "@/src/services/SignalRService";
-import { isToday, formatTime } from "@/src/utils/dateHelpers";
+import {
+  isToday,
+  formatTime,
+  isTomorrow,
+  formatAppointmentDate,
+} from "@/src/utils/dateHelpers";
 import { AppointmentCard } from "@/src/components/appointments/AppointmentCard";
 import { useSheets } from "@/src/context/SheetContext";
+import { PLURAL, pluralize } from "@/src/utils/pluralize";
+import { router } from "expo-router";
 
 export default function MasterDashboard() {
   const { data: me } = useGetMe();
@@ -42,41 +49,77 @@ export default function MasterDashboard() {
   }, [refetch]);
 
   const stats = useMemo(() => {
+    const now = new Date();
     const todayApps =
       schedule?.filter((a) => isToday(a.startTime as string)) || [];
-    const totalMinutes = todayApps.reduce(
-      (acc, curr) => acc + (Number(curr.duration) || 0),
-      0,
+
+    const sortedToday = [...todayApps].sort(
+      (a, b) =>
+        new Date(a.startTime as string).getTime() -
+        new Date(b.startTime as string).getTime(),
     );
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
+
+    const currentOrNext = sortedToday.find(
+      (a) => new Date(a.endTime as string) > now,
+    );
+
+    const breakTime = currentOrNext
+      ? formatTime(currentOrNext.endTime as string)
+      : "Зараз";
 
     return {
       count: todayApps.length,
-      workTime: hours > 0 ? `${hours}г ${mins}хв` : `${mins}хв`,
+      nextBreak: breakTime,
+      // Генерируем текст сразу с плюрализацией
+      sessionText: pluralize(todayApps.length, PLURAL.appointment, false),
     };
   }, [schedule]);
 
-  const { nextAppointment, remainingToday } = useMemo(() => {
+  const { nextAppointment, groupedRemaining } = useMemo(() => {
     if (!schedule || schedule.length === 0)
-      return { nextAppointment: null, remainingToday: [] };
+      return { nextAppointment: null, groupedRemaining: {} };
 
     const now = new Date();
 
+    // 1. Фильтруем:
+    // - Либо запись еще не закончилась (предстоящая)
+    // - Либо она отменена ("cancelled"), но она на сегодня или будущее
     const upcoming = [...schedule]
-      .filter((a) => new Date(a.endTime as string) > now)
+      .filter((a) => {
+        const isCancelled = a.status?.toLowerCase() === "cancelled";
+        const isFutureOrToday =
+          new Date(a.endTime as string) > now || isToday(a.startTime as string);
+
+        // Показываем если: (не окончена) ИЛИ (отменена и актуальна по дате)
+        return (
+          new Date(a.endTime as string) > now ||
+          (isCancelled && isFutureOrToday)
+        );
+      })
       .sort(
         (a, b) =>
           new Date(a.startTime as string).getTime() -
           new Date(b.startTime as string).getTime(),
       );
 
-    const next = upcoming[0];
-    const remaining = upcoming.filter(
-      (a) => a.id !== next?.id && isToday(a.startTime as string),
+    // Для главного фокуса (nextAppointment) лучше брать только НЕ отмененную запись
+    const next =
+      upcoming.find((a) => a.status?.toLowerCase() !== "cancelled") ||
+      upcoming[0];
+
+    const remaining = upcoming.filter((a) => a.id !== next?.id);
+
+    const grouped = remaining.reduce(
+      (acc, item) => {
+        const dateKey = (item.startTime as string).split("T")[0];
+        if (!acc[dateKey]) acc[dateKey] = [];
+        acc[dateKey].push(item);
+        return acc;
+      },
+      {} as Record<string, typeof remaining>,
     );
 
-    return { nextAppointment: next, remainingToday: remaining };
+    return { nextAppointment: next, groupedRemaining: grouped };
   }, [schedule]);
 
   const initials = me
@@ -104,11 +147,13 @@ export default function MasterDashboard() {
               <Pressable style={styles.bellBtn}>
                 <Bell size={17} color={Palette.taupe} />
               </Pressable>
-              <AvatarBadge
-                initials={initials}
-                photoUrl={me?.photoUrl}
-                size={38}
-              />
+              <Pressable onPress={() => router.replace("/(master)/profile")}>
+                <AvatarBadge
+                  initials={initials}
+                  photoUrl={me?.photoUrl}
+                  size={38}
+                />
+              </Pressable>
             </View>
           </View>
 
@@ -125,17 +170,22 @@ export default function MasterDashboard() {
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Записи сьогодні</Text>
               <Text style={styles.statValue}>{stats.count}</Text>
-              <Text style={styles.statSub}>сеансів</Text>
+              <Text style={styles.statSub}>{stats.sessionText} планується</Text>
             </View>
+
             <View
               style={[
                 styles.statCard,
-                { backgroundColor: Palette.taupe + "10" },
+                { backgroundColor: Palette.sage + "10" },
               ]}
             >
-              <Text style={styles.statLabel}>Час у роботі</Text>
-              <Text style={styles.statValue}>{stats.workTime}</Text>
-              <Text style={styles.statSub}>зайнятість</Text>
+              <Text style={styles.statLabel}>Найближча перерва</Text>
+              <Text style={styles.statValue}>{stats.nextBreak}</Text>
+              <Text style={styles.statSub}>
+                {stats.nextBreak === "Зараз"
+                  ? "ви вже вільні"
+                  : `початок о ${stats.nextBreak}`}
+              </Text>
             </View>
           </View>
 
@@ -212,24 +262,39 @@ export default function MasterDashboard() {
               )}
             </View>
           </Pressable>
-          {remainingToday.length > 0 && (
-            <>
-              <View style={[styles.sectionLabel, { marginTop: 24 }]}>
-                <Text style={styles.sectionTitle}>Інші записи на сьогодні</Text>
-              </View>
-              <View style={styles.listContainer}>
-                {remainingToday.map((item) => (
-                  <Pressable
-                    key={item.id}
-                    onPress={() => openAppointment(item.id)}
-                  >
-                    <View style={styles.listItemWrapper}>
-                      <AppointmentCard item={item as any} isMasterView={true} />
-                    </View>
-                  </Pressable>
-                ))}
-              </View>
-            </>
+          {Object.keys(groupedRemaining).length > 0 && (
+            <View style={{ marginTop: 24 }}>
+              {Object.entries(groupedRemaining).map(([date, items]) => (
+                <View key={date} style={{ marginBottom: 20 }}>
+                  {/* Подзаголовок даты */}
+                  <View style={styles.dateHeader}>
+                    <Text style={styles.dateHeaderText}>
+                      {isToday(date)
+                        ? "Сьогодні"
+                        : isTomorrow(date)
+                          ? "Завтра"
+                          : formatAppointmentDate(date)}
+                    </Text>
+                    <View style={styles.dateLine} />
+                  </View>
+
+                  <View style={styles.listContainer}>
+                    {items.map((item) => (
+                      <Pressable
+                        key={item.id}
+                        onPress={() => openAppointment(item.id)}
+                        style={styles.listItemWrapper}
+                      >
+                        <AppointmentCard
+                          item={item as any}
+                          isMasterView={true}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              ))}
+            </View>
           )}
         </ScrollView>
       </SafeAreaView>
@@ -368,6 +433,26 @@ const styles = StyleSheet.create({
     fontFamily: "DMSans_700Bold",
     color: Palette.sage,
     letterSpacing: 0.5,
+  },
+  dateHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    marginBottom: 12,
+    gap: 12,
+  },
+  dateHeaderText: {
+    fontSize: 14,
+    fontFamily: "DMSans_700Bold",
+    color: Palette.taupe,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  dateLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Palette.sand,
+    opacity: 0.5,
   },
 
   focusServiceTitle: {

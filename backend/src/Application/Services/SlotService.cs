@@ -12,7 +12,7 @@ public class SlotService(
     IMasterRepository masterRepository,
     IScheduleRepository scheduleRepository,
     IServiceRepository serviceRepository,
-    ITimeOffsRepository timeOffsRepository,
+    ITimeOffRepository timeOffRepository,
     IAppointmentRepository appointmentRepository,
     TimeProvider timeProvider) : ISlotService
 {
@@ -186,7 +186,7 @@ public class SlotService(
             return new();
         }
 
-        var hasTimeOff = await timeOffsRepository.IsMasterOnTimeOffAsync(masterId, date, cancellationToken);
+        var hasTimeOff = await timeOffRepository.IsMasterOnTimeOffAsync(masterId, date, cancellationToken);
         if (hasTimeOff)
         {
             return new();
@@ -243,7 +243,7 @@ public class SlotService(
             return false;
         }
 
-        if (await timeOffsRepository.IsMasterOnTimeOffAsync(masterId, start.Date, cancellationToken))
+        if (await timeOffRepository.IsMasterOnTimeOffAsync(masterId, start.Date, cancellationToken))
         {
             return false;
         }

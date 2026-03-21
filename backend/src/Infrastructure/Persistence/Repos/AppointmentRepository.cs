@@ -104,8 +104,7 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
             .AsNoTracking()
             .Where(a => a.MasterId == masterId &&
                         a.StartTime >= start &&
-                        a.StartTime < end &&
-                        a.Status != AppointmentStatus.Cancelled)
+                        a.StartTime < end)
             .Include(a => a.Service)
             .Include(a => a.Client)
             .Include(a => a.Master)

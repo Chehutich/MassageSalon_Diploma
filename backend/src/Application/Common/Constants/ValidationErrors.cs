@@ -56,4 +56,10 @@ public static class ValidationErrors
         public const string AccessTokenRequired = "Token.AccessToken.Required";
         public const string RefreshTokenRequired = "Token.RefreshToken.Required";
     }
+
+    public static class Time
+    {
+        public const string InvalidTime = "Time.InvalidTime";
+        public const string MaxRange = "Time.MaxRange";
+    }
 }

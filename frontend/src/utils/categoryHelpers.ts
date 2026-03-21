@@ -1,4 +1,3 @@
-// src/utils/categoryHelpers.ts
 import { Leaf, Sparkles, Wind, Zap, Heart, Star } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import type { LucideIcon } from "lucide-react-native";

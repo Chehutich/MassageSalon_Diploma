@@ -22,6 +22,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { LogoutConfirmModal } from "@/src/components/modals/LogoutConfirmModal";
 import { setLoggingOut } from "@/src/api/client";
+import { signalRService } from "@/src/services/SignalRService";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -38,6 +39,8 @@ export default function ProfileScreen() {
   const confirmLogout = async () => {
     try {
       setLoggingOut(true);
+
+      await signalRService.stop();
 
       queryClient.cancelQueries();
       await logoutOnServer();
@@ -56,10 +59,6 @@ export default function ProfileScreen() {
       queryClient.clear();
     }
   };
-
-  const initials = me
-    ? `${me.firstName[0]}${me.lastName[0]}`.toUpperCase()
-    : "??";
 
   return (
     <View style={styles.root}>

@@ -7,12 +7,13 @@ export function PromoBanner() {
     <View style={styles.banner}>
       <View style={styles.circle1} />
       <View style={styles.circle2} />
-      <Text style={styles.tag}>SPRING OFFER</Text>
-      <Text style={styles.title}>
-        {"20% off your first\nHot Stone Massage"}
-      </Text>
+
+      <Text style={styles.tag}>ВЕСНЯНА ПРОПОЗИЦІЯ</Text>
+
+      <Text style={styles.title}>{"-20% на перший сеанс\nстоун-терапії"}</Text>
+
       <Pressable style={styles.btn}>
-        <Text style={styles.btnText}>Book Now</Text>
+        <Text style={styles.btnText}>Забронювати</Text>
         <ChevronRight size={14} strokeWidth={2} color={Palette.espresso} />
       </Pressable>
     </View>
@@ -25,6 +26,11 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.taupe,
     padding: 20,
     overflow: "hidden",
+    shadowColor: Palette.taupe,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 5,
   },
   circle1: {
     position: "absolute",
@@ -45,18 +51,20 @@ const styles = StyleSheet.create({
     right: 20,
   },
   tag: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "DMSans_500Medium",
-    color: Palette.rose + "CC",
-    letterSpacing: 1.5,
-    marginBottom: 6,
+    color: Palette.rose,
+    opacity: 0.8,
+    letterSpacing: 1.2,
+    marginBottom: 8,
+    textTransform: "uppercase",
   },
   title: {
     fontSize: 22,
     fontFamily: "CormorantGaramond_600SemiBold",
     color: Palette.ivory,
-    lineHeight: 28,
-    marginBottom: 14,
+    lineHeight: 26,
+    marginBottom: 16,
   },
   btn: {
     flexDirection: "row",
@@ -64,13 +72,13 @@ const styles = StyleSheet.create({
     gap: 6,
     alignSelf: "flex-start",
     backgroundColor: Palette.rose,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   btnText: {
     fontSize: 13,
-    fontFamily: "DMSans_500Medium",
+    fontFamily: "DMSans_700Bold",
     color: Palette.espresso,
   },
 });

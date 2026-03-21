@@ -6,15 +6,8 @@ import { useSheets } from "@/src/context/SheetContext";
 import { Palette } from "@/src/theme/tokens";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import {
-  ChevronLeft,
-  Lock,
-  Mail,
-  Pencil,
-  Phone,
-  User,
-} from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { ChevronLeft, Lock, Mail, Phone, User } from "lucide-react-native";
+import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,7 +20,6 @@ export default function PersonalDataScreen() {
   const queryClient = useQueryClient();
   const { data: me } = useGetMe();
   const { openEditField } = useSheets();
-  const [initials, setInitials] = useState("??");
   const [isPickerVisible, setPickerVisible] = useState(false);
 
   const [toast, setToast] = useState<ToastConfig>({
@@ -44,14 +36,6 @@ export default function PersonalDataScreen() {
   ) => {
     setToast({ visible: true, type, title, message });
   };
-
-  useEffect(() => {
-    if (me?.firstName && me?.lastName) {
-      setInitials(`${me.firstName[0]}${me.lastName[0]}`.toUpperCase());
-    } else if (me?.firstName) {
-      setInitials(me.firstName[0].toUpperCase());
-    }
-  }, [me]);
 
   const handleImagePicked = async (result: ImagePicker.ImagePickerResult) => {
     if (result.canceled || !result.assets[0]) return;

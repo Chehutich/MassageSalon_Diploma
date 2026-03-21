@@ -2,8 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { BaseCalendar } from "@/src/components/ui/forms/BaseCalendar";
 import { Palette } from "@/src/theme/tokens";
-
-type MasterDayType = "working" | "weekend" | "time_off" | "selected";
+import { toDateString } from "@/src/utils/calendarHelpers";
 
 type MasterScheduleProps = {
   viewYear: number;
@@ -11,7 +10,7 @@ type MasterScheduleProps = {
   loading: boolean;
   onPrevMonth: () => void;
   onNextMonth: () => void;
-  workingDays: number[];
+  workingDates: string[];
   offDates: string[];
   onDatePress?: (date: string) => void;
 };
@@ -19,6 +18,8 @@ type MasterScheduleProps = {
 const CELL_SIZE = 34;
 
 export function MasterScheduleCalendar(props: MasterScheduleProps) {
+  const todayISO = toDateString(new Date());
+
   return (
     <BaseCalendar
       {...props}
@@ -27,12 +28,13 @@ export function MasterScheduleCalendar(props: MasterScheduleProps) {
         if (!day)
           return <View key={`empty-${i}`} style={styles.cellContainer} />;
 
-        const dateObj = new Date(props.viewYear, props.viewMonth, day);
-        const dateISO = dateObj.toISOString().split("T")[0];
-        const dayOfWeek = ((dateObj.getDay() + 6) % 7) + 1;
+        const monthStr = String(props.viewMonth + 1).padStart(2, "0");
+        const dayStr = String(day).padStart(2, "0");
+        const dateISO = `${props.viewYear}-${monthStr}-${dayStr}`;
 
         const isTimeOff = props.offDates.includes(dateISO);
-        const isWorking = props.workingDays.includes(dayOfWeek) && !isTimeOff;
+        const isWorking = props.workingDates.includes(dateISO);
+        const isToday = dateISO === todayISO;
 
         return (
           <Pressable
@@ -45,6 +47,7 @@ export function MasterScheduleCalendar(props: MasterScheduleProps) {
                 styles.cellContent,
                 isWorking && styles.workCell,
                 isTimeOff && styles.offCell,
+                isToday && styles.todayCell,
               ]}
             >
               <Text
@@ -52,12 +55,13 @@ export function MasterScheduleCalendar(props: MasterScheduleProps) {
                   styles.cellText,
                   isWorking && styles.workText,
                   isTimeOff && styles.offText,
+                  isToday && styles.todayText,
                 ]}
               >
                 {day}
               </Text>
 
-              {isWorking && <View style={styles.workDot} />}
+              {isWorking && !isTimeOff && <View style={styles.workDot} />}
             </View>
           </Pressable>
         );
@@ -79,6 +83,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
+    overflow: "hidden",
   },
   cellText: {
     fontSize: 13,
@@ -89,6 +94,7 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.sage + "15",
     borderWidth: 1,
     borderColor: Palette.sage + "30",
+    borderRadius: 10,
   },
   workText: {
     color: Palette.espresso,
@@ -104,6 +110,7 @@ const styles = StyleSheet.create({
   },
   offCell: {
     backgroundColor: Palette.taupe,
+    borderRadius: 10,
     shadowColor: Palette.taupe,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -112,6 +119,14 @@ const styles = StyleSheet.create({
   },
   offText: {
     color: "#fff",
+    fontFamily: "DMSans_700Bold",
+  },
+  todayCell: {
+    borderWidth: 1.5,
+    borderColor: Palette.espresso,
+    borderRadius: 10,
+  },
+  todayText: {
     fontFamily: "DMSans_700Bold",
   },
 });

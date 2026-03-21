@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Catalog\"/>
-    <Folder Include="Features\Master\"/>
   </ItemGroup>
 
 </Project>

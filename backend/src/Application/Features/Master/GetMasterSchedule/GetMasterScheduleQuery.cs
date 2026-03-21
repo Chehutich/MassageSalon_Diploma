@@ -6,6 +6,9 @@ using MediatR;
 
 namespace Application.Features.Master.GetMasterSchedule;
 
+/// <summary>
+/// Get master future appointments schedule
+/// </summary>
 public record GetMasterScheduleQuery(DateTime? From = null, DateTime? To = null)
     : IRequest<Result<List<AppointmentDetailsResponse>>>;
 

@@ -17,4 +17,8 @@ public interface IScheduleRepository
         TimeOnly start,
         TimeOnly end,
         CancellationToken cancellationToken = default);
+
+    Task<List<Schedule>> GetByMasterIdAsync(
+        Guid masterId,
+        CancellationToken cancellationToken = default);
 }

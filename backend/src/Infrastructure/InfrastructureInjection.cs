@@ -32,7 +32,7 @@ public static class InfrastructureInjection
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IScheduleRepository, ScheduleRepository>();
-        services.AddScoped<ITimeOffsRepository, TimeOffsRepository>();
+        services.AddScoped<ITimeOffRepository, TimeOffRepository>();
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IServiceRepository, ServiceRepository>();

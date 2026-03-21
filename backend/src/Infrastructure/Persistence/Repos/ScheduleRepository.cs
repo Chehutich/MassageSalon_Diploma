@@ -43,4 +43,13 @@ public class ScheduleRepository(ApplicationDbContext context) : IScheduleReposit
                     s.EndTime >= end,
                 cancellationToken);
     }
+
+    public async Task<List<Schedule>> GetByMasterIdAsync(
+        Guid masterId,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Schedules
+            .Where(s => s.MasterId == masterId)
+            .ToListAsync(cancellationToken);
+    }
 }

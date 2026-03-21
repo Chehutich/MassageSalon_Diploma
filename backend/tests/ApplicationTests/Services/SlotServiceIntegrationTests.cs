@@ -22,7 +22,7 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
         var masterRepo = new MasterRepository(context);
         var scheduleRepo = new ScheduleRepository(context);
         var serviceRepo = new ServiceRepository(context);
-        var timeOffRepo = new TimeOffsRepository(context);
+        var timeOffRepo = new TimeOffRepository(context);
         var appointmentRepo = new AppointmentRepository(context);
 
         _timeProvider = new FakeTimeProvider();
