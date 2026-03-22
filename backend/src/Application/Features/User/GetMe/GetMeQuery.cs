@@ -23,7 +23,7 @@ public class GetMeHandler(
             return Errors.User.NotFound(userId);
         }
 
-        return new UserMeResponse(user.Id, user.FirstName, user.LastName, user.Email, user.PhotoUrl, user.Phone,
+        return new UserMeResponse(user.Id, user.FirstName, user.LastName, user.Email!, user.PhotoUrl, user.Phone,
             user.Role.ToString());
     }
 }

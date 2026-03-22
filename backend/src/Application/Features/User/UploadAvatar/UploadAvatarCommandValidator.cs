@@ -22,7 +22,7 @@ public class UploadAvatarCommandValidator : AbstractValidator<UploadAvatarComman
 
     private bool HaveAllowedExtension(string fileName)
     {
-        var extension = Path.GetExtension(fileName)?.ToLower();
+        var extension = Path.GetExtension(fileName)?.ToLowerInvariant();
         return extension != null && _allowedExtensions.Contains(extension);
     }
 }

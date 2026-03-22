@@ -46,7 +46,7 @@ public class GetMyAppointmentsQueryHandlerTests
         typeof(Domain.Entities.Appointment).GetProperty("Master")?.SetValue(appointment, master);
 
         _appointmentRepoMock
-            .Setup(x => x.GetAppointmentsByUserId(userId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByUserId(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Domain.Entities.Appointment> { appointment });
 
         // Act
@@ -72,7 +72,7 @@ public class GetMyAppointmentsQueryHandlerTests
         _userContextMock.Setup(x => x.Id).Returns(userId);
 
         _appointmentRepoMock
-            .Setup(x => x.GetAppointmentsByUserId(userId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByUserId(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Domain.Entities.Appointment>());
 
         // Act

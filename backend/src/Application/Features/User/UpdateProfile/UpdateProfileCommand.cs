@@ -35,7 +35,7 @@ public class UpdateProfileCommandHandler(
         if (isEmailChanging || request.NewPassword != null)
         {
             if (string.IsNullOrEmpty(request.CurrentPassword) ||
-                !passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
+                !passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash ?? string.Empty))
             {
                 return Errors.User.InvalidPassword;
             }

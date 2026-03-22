@@ -19,7 +19,7 @@ public class GetMyAppointmentsQueryHandler(
     {
         var userId = userProvider.Id;
 
-        var appointments = await appointmentRepository.GetAppointmentsByUserId(userId, cancellationToken);
+        var appointments = await appointmentRepository.GetByUserId(userId, cancellationToken);
 
         var dtos = appointments.Select(a => new MyAppointmentResponse(
             a.Id,

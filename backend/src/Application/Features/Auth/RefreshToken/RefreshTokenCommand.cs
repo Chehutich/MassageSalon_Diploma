@@ -43,7 +43,7 @@ public class RefreshTokenHandler(
         return new AuthResponse(
             user.Id,
             user.FirstName,
-            user.Email,
+            user.Email!,
             newAccessToken,
             newRefreshToken,
             user.Role.ToString());

@@ -60,4 +60,4 @@ app.AddExceptionHandling();
 
 app.MapHub<NotificationHub>("/notifications-hub");
 
-app.Run("http://localhost:5260");
+app.Run("http://0.0.0.0:5260"); // http://localhost:5260

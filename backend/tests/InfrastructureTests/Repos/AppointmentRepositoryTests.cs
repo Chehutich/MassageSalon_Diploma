@@ -1,219 +1,176 @@
+using Domain.Entities;
 using Domain.Enums;
+using FluentAssertions;
 using Infrastructure.Persistence.Repos;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace InfrastructureTests.Repos;
 
 public class AppointmentRepositoryTests : BaseRepositoryTest
 {
-    private readonly AppointmentRepository _repository;
+    private readonly AppointmentRepository _sut;
 
     public AppointmentRepositoryTests()
     {
-        _repository = new AppointmentRepository(context);
+        _sut = new AppointmentRepository(context);
     }
 
     [Fact]
-    public async Task GetBusyIntervalsAsync_ShouldReturnCombinedAndSortedIntervals()
+    public async Task GetByIdWithDetailsAsync_ShouldReturnCompleteHierarchy()
+    {
+        // Arrange
+        var masterUser = await CreateUserAsync("master@salon.com", "+380991112233", "John", "Master");
+        var master = await CreateMasterAsync(masterUser);
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id);
+
+        var clientUser = await CreateUserAsync("client@gmail.com", "+380994445566", "Alice", "Client");
+        var appointment = await CreateAppointmentAsync(master.Id, service, DateTime.UtcNow.AddDays(1), clientUser.Id);
+
+        // Act
+        var result = await _sut.GetByIdWithDetailsAsync(appointment.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Service.Should().NotBeNull();
+        result.Client.Should().NotBeNull();
+        result.Master.User.Should().NotBeNull();
+        result.Master.User.FirstName.Should().Be("John");
+        result.Client.FirstName.Should().Be("Alice");
+    }
+
+    [Fact]
+    public async Task GetByUserId_ShouldReturnAppointments_OrderedByDateDescending()
+    {
+        // Arrange
+        var master = await CreateMasterAsync();
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id);
+        var client = await CreateUserAsync();
+
+        var date1 = DateTime.UtcNow.AddDays(1);
+        var date2 = DateTime.UtcNow.AddDays(2);
+
+        await CreateAppointmentAsync(master.Id, service, date1, client.Id);
+        await CreateAppointmentAsync(master.Id, service, date2, client.Id);
+
+        // Act
+        var result = await _sut.GetByUserId(client.Id);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result[0].StartTime.Should().BeAfter(result[1].StartTime); // Verification of OrderByDescending
+    }
+
+    [Fact]
+    public async Task GetByMasterAndDateAsync_ShouldOnlyReturnAppointmentsForSpecificDay()
     {
         // Arrange
         var master = await CreateMasterAsync();
         var category = await CreateCategoryAsync();
         var service = await CreateServiceAsync(category.Id);
 
-        var now = DateTime.UtcNow;
-        var startRange = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc).AddDays(1);
-        var endRange = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc).AddDays(5);
+        var targetDate = new DateTime(2026, 05, 20, 10, 0, 0, DateTimeKind.Utc);
+        var differentDate = targetDate.AddDays(1);
 
-        // 1. Valid Appointment within range
-        await CreateAppointmentAsync(master.Id, service, startRange.AddHours(10));
-
-        // 2. Cancelled Appointment (should be ignored)
-        var cancelledAppt = await CreateAppointmentAsync(master.Id, service, startRange.AddHours(14));
-        cancelledAppt.Cancel();
-        await context.SaveChangesAsync();
-
-        // 3. TimeOff within range
-        await CreateTimeOffAsync(master.Id,
-            DateOnly.FromDateTime(startRange.AddDays(2)),
-            DateOnly.FromDateTime(startRange.AddDays(2)));
-
-        // 4. Appointment for DIFFERENT master (should be ignored)
-        var otherMaster = await CreateMasterAsync();
-        await CreateAppointmentAsync(otherMaster.Id, service, startRange.AddHours(11));
+        await CreateAppointmentAsync(master.Id, service, targetDate);
+        await CreateAppointmentAsync(master.Id, service, differentDate);
 
         // Act
-        var result = await _repository.GetBusyIntervalsAsync(master.Id, startRange, endRange);
+        var result = await _sut.GetByMasterAndDateAsync(master.Id, targetDate);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-
-        // Verify Sorting: Earliest first
-        Assert.True(result[0].Start < result[1].Start);
-
-        // Verify types are present (1 appt, 1 timeoff)
-        Assert.Contains(result, i => i.Start == startRange.AddHours(10)); // The appointment
-        Assert.Contains(result, i => i.Start.Date == startRange.AddDays(2).Date); // The TimeOff
+        result.Should().ContainSingle();
+        result[0].StartTime.Date.Should().Be(targetDate.Date);
     }
 
     [Fact]
-    public async Task GetBusyIntervalsAsync_ShouldFilterByBoundaryDates()
+    public async Task GetByMasterAndPeriodAsync_ShouldDetectOverlapsCorrectly()
+    {
+        // Arrange
+        var master = await CreateMasterAsync();
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id, "Massage", 60);
+
+        var apptStart = new DateTime(2026, 06, 10, 14, 0, 0, DateTimeKind.Utc);
+        await CreateAppointmentAsync(master.Id, service, apptStart);
+
+        // Search period: 14:30 - 15:30 (should overlap with the 14:00-15:00 appointment)
+        var searchStart = apptStart.AddMinutes(30);
+        var searchEnd = apptStart.AddMinutes(90);
+
+        // Act
+        var result = await _sut.GetByMasterAndPeriodAsync(master.Id, searchStart, searchEnd);
+
+        // Assert
+        result.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task HasOverlapAsync_ShouldReturnTrue_WhenTimeConflicts()
+    {
+        // Arrange
+        var master = await CreateMasterAsync();
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id, "Haircut", 60);
+
+        var existingStart = new DateTime(2026, 07, 01, 10, 0, 0, DateTimeKind.Utc);
+        await CreateAppointmentAsync(master.Id, service, existingStart);
+
+        // Act
+        // Case: New appointment starts exactly when existing one ends (11:00) -> Should NOT overlap
+        var edgeCaseOverlap = await _sut.HasOverlapAsync(master.Id, existingStart.AddHours(1), existingStart.AddHours(2));
+
+        // Case: New appointment starts during existing one (10:30) -> Should overlap
+        var realOverlap = await _sut.HasOverlapAsync(master.Id, existingStart.AddMinutes(30), existingStart.AddHours(2));
+
+        // Assert
+        edgeCaseOverlap.Should().BeFalse();
+        realOverlap.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task HasOverlapAsync_ShouldExcludeSpecificId_WhenUpdating()
     {
         // Arrange
         var master = await CreateMasterAsync();
         var category = await CreateCategoryAsync();
         var service = await CreateServiceAsync(category.Id);
+        var startTime = DateTime.UtcNow.AddDays(5);
 
-        var now = DateTime.UtcNow;
-        var startRange = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc).AddMonths(1);
-        var endRange = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc).AddMonths(1).AddDays(1);
-
-        // Appointment strictly BEFORE range
-        await CreateAppointmentAsync(master.Id, service, startRange.AddHours(-5));
-
-        // Appointment strictly AFTER range
-        await CreateAppointmentAsync(master.Id, service, endRange.AddHours(5));
-
-        // Appointment overlapping START of range
-        // Starts at 23:00 day before, ends at 01:00
-        await CreateAppointmentAsync(master.Id, service, startRange.AddMinutes(-30));
+        var appointment = await CreateAppointmentAsync(master.Id, service, startTime);
 
         // Act
-        var result = await _repository.GetBusyIntervalsAsync(master.Id, startRange, endRange);
+        // Checking overlap for the exact same time but excluding itself
+        var hasOverlap = await _sut.HasOverlapAsync(
+            master.Id,
+            appointment.StartTime,
+            appointment.EndTime,
+            appointment.Id);
 
         // Assert
-        // Only the overlapping one should be returned
-        Assert.Single(result);
+        hasOverlap.Should().BeFalse();
     }
 
     [Fact]
-    public async Task GetBusyIntervalsAsync_WhenTimeOffExists_ShouldMapToFullDayInterval()
+    public async Task AddAsync_ShouldPersistAppointment()
     {
         // Arrange
         var master = await CreateMasterAsync();
-        // Use future dates (+2 months ahead) to guarantee they are never in the past.
-        var baseDate =
-            new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(2);
-        var startDate = DateOnly.FromDateTime(baseDate.AddDays(19)); // 20th of that month
-        var endDate = DateOnly.FromDateTime(baseDate.AddDays(20)); // 21st of that month
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id);
+        var client = await CreateUserAsync();
 
-        await CreateTimeOffAsync(master.Id, startDate, endDate);
-
-        // Search window covers the whole month
-        var searchStart = baseDate;
-        var searchEnd = baseDate.AddMonths(1);
+        var appointment = new Appointment(client.Id, master.Id, service, DateTime.UtcNow.AddDays(1), "Notes");
 
         // Act
-        var result = await _repository.GetBusyIntervalsAsync(master.Id, searchStart, searchEnd);
-
-        // Assert
-        var interval = Assert.Single(result);
-
-        // TimeOffs are mapped to MinValue (00:00:00) and MaxValue (23:59:59.999)
-        Assert.Equal(TimeOnly.MinValue.Hour, interval.Start.Hour);
-        Assert.Equal(startDate.Day, interval.Start.Day);
-
-        Assert.Equal(endDate.Day, interval.End.Day);
-        Assert.Equal(23, interval.End.Hour);
-    }
-
-    [Fact]
-    public async Task GetBusyIntervalsAsync_DynamicNextMonthScenario_ShouldReturnCorrectDataForTargetMaster()
-    {
-        // --- Arrange ---
-        // Calculate the start and end of the NEXT month dynamically
-        var now = DateTime.UtcNow;
-        var nextMonthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(1);
-        var nextMonthEnd = nextMonthStart.AddMonths(1).AddTicks(-1);
-
-        // Setup: 3 Masters
-        var targetMaster = await CreateMasterAsync();
-        var otherMaster1 = await CreateMasterAsync();
-        var otherMaster2 = await CreateMasterAsync();
-
-        // Setup: Services with different durations
-        var category = await CreateCategoryAsync("Maintenance", "maint");
-        var quickService = await CreateServiceAsync(category.Id, "Quick Fix", 30); // 30 min
-        var longService = await CreateServiceAsync(category.Id, "Full Overhaul", 180); // 3 hours
-
-        // 1. TARGET MASTER: Appointment on the first Monday of the next month
-        var firstMonday = GetNextDayOfWeek(nextMonthStart, DayOfWeek.Monday);
-        await CreateAppointmentAsync(targetMaster.Id, quickService, firstMonday.AddHours(10));
-
-        // 2. TARGET MASTER: Long Appointment on the first Wednesday
-        var firstWednesday = GetNextDayOfWeek(nextMonthStart, DayOfWeek.Wednesday);
-        await CreateAppointmentAsync(targetMaster.Id, longService, firstWednesday.AddHours(14));
-
-        // 3. TARGET MASTER: TimeOff spanning the second weekend (Friday to Sunday)
-        var secondFriday = GetNextDayOfWeek(nextMonthStart, DayOfWeek.Friday).AddDays(7);
-        var secondSunday = secondFriday.AddDays(2);
-        await CreateTimeOffAsync(targetMaster.Id,
-            DateOnly.FromDateTime(secondFriday),
-            DateOnly.FromDateTime(secondSunday));
-
-        // 4. TARGET MASTER: Cancelled Appointment (should NOT appear)
-        var cancelledTime = firstMonday.AddHours(15);
-        var cancelled = await CreateAppointmentAsync(targetMaster.Id, quickService, cancelledTime);
-        cancelled.Cancel();
+        await _sut.AddAsync(appointment);
         await context.SaveChangesAsync();
 
-        // 5. NOISE: Other masters having appointments at the same time
-        await CreateAppointmentAsync(otherMaster1.Id, longService, firstMonday.AddHours(10));
-        await CreateAppointmentAsync(otherMaster2.Id, quickService, firstWednesday.AddHours(14));
-
-        // --- Act ---
-        var result = await _repository.GetBusyIntervalsAsync(targetMaster.Id, nextMonthStart, nextMonthEnd);
-
-        // --- Assert ---
-        // Expected: 2 Appointments + 1 TimeOff = 3 intervals
-        Assert.Equal(3, result.Count);
-
-        // 1. Verify the Quick Service Appointment (30 min)
-        var quickInterval = result.FirstOrDefault(i => i.Start == firstMonday.AddHours(10));
-        Assert.NotNull(quickInterval);
-        Assert.Equal(30, (quickInterval.End - quickInterval.Start).TotalMinutes);
-
-        // 2. Verify the Long Service Appointment (180 min)
-        var longInterval = result.FirstOrDefault(i => i.Start == firstWednesday.AddHours(14));
-        Assert.NotNull(longInterval);
-        Assert.Equal(180, (longInterval.End - longInterval.Start).TotalMinutes);
-
-        // 3. Verify the TimeOff
-        var timeOffInterval = result.FirstOrDefault(i => i.Start.Date == secondFriday.Date);
-        Assert.NotNull(timeOffInterval);
-        Assert.Equal(secondSunday.Day, timeOffInterval.End.Day);
-
-        // 4. Verify Global Sorting (Still important to check!)
-        for (int i = 0; i < result.Count - 1; i++)
-        {
-            Assert.True(result[i].Start <= result[i + 1].Start,
-                $"Interval at index {i} starts after interval at index {i + 1}");
-        }
-    }
-
-    /// <summary>
-    /// Helper to find the specific day of the week within the target month
-    /// </summary>
-    private DateTime GetNextDayOfWeek(DateTime start, DayOfWeek day)
-    {
-        int daysToAdd = ((int)day - (int)start.DayOfWeek + 7) % 7;
-        return start.AddDays(daysToAdd);
-    }
-
-
-    [Fact]
-    public async Task GetBusyIntervalsAsync_WithNoData_ShouldReturnEmptyList()
-    {
-        // Arrange
-        var masterId = Guid.NewGuid();
-        var start = DateTime.UtcNow;
-        var end = start.AddDays(1);
-
-        // Act
-        var result = await _repository.GetBusyIntervalsAsync(masterId, start, end);
-
         // Assert
-        Assert.Empty(result);
+        var dbAppt = await context.Appointments.FindAsync(appointment.Id);
+        dbAppt.Should().NotBeNull();
+        dbAppt!.ClientNotes.Should().Be("Notes");
     }
 }

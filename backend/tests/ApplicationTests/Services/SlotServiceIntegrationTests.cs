@@ -545,4 +545,119 @@ public class SlotServiceIntegrationTests : InfrastructureTests.Repos.BaseReposit
                 master.Id, existingStart, existingEnd, null, CancellationToken.None))
             .Should().BeFalse();
     }
+
+    [Fact]
+    public async Task GetAvailableSlotsAsync_ShouldCombineAppointmentsAndTimeOffs_ToFilterBusyTime()
+    {
+        // Arrange
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id, "Massage", 60);
+        var master = await CreateMasterAsync();
+        await LinkMasterToServiceAsync(master.Id, service.Id);
+
+        // Monday 10:00 - 18:00
+        var testDate = new DateTime(2026, 05, 04, 0, 0, 0, DateTimeKind.Utc);
+        await CreateScheduleAsync(master.Id, (int)testDate.DayOfWeek, new TimeOnly(10, 0), new TimeOnly(18, 0));
+
+        // 1. Appointment: 10:00 - 11:00
+        await CreateAppointmentAsync(master.Id, service, testDate.AddHours(10));
+
+        // 2. TimeOff: Entire day of Tuesday (Blocks Tuesday slots)
+        var tuesday = testDate.AddDays(1);
+        await CreateScheduleAsync(master.Id, (int)tuesday.DayOfWeek, new TimeOnly(10, 0), new TimeOnly(18, 0));
+        await CreateTimeOffAsync(master.Id, DateOnly.FromDateTime(tuesday), DateOnly.FromDateTime(tuesday));
+
+        _timeProvider.SetUtcNow(testDate.AddDays(-1));
+
+        // Act
+        var mondaySlots = await _sut.GetAvailableSlotsAsync(master.Id, service.Id, testDate);
+        var tuesdaySlots = await _sut.GetAvailableSlotsAsync(master.Id, service.Id, tuesday);
+
+        // Assert
+        // Monday checks (Appointment logic)
+        mondaySlots.Should().NotContain(s => s.Start == testDate.AddHours(10), "10:00 is blocked by appointment");
+        mondaySlots.Should().NotContain(s => s.Start == testDate.AddHours(10).AddMinutes(30), "10:30 overlaps with 10-11 appointment");
+        mondaySlots.Should().Contain(s => s.Start == testDate.AddHours(11), "11:00 starts exactly when appointment ends");
+
+        // Tuesday checks (TimeOff logic)
+        tuesdaySlots.Should().BeEmpty("Master is on TimeOff for the whole day");
+    }
+
+    [Fact]
+    public async Task GetAvailableSlotsAsync_ShouldIgnoreCancelledAppointments()
+    {
+        // Arrange
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id, "Service", 60);
+        var master = await CreateMasterAsync();
+        await LinkMasterToServiceAsync(master.Id, service.Id);
+
+        var testDate = new DateTime(2026, 06, 01, 0, 0, 0, DateTimeKind.Utc);
+        await CreateScheduleAsync(master.Id, (int)testDate.DayOfWeek, new TimeOnly(10, 0), new TimeOnly(12, 0));
+
+        // Create appointment and cancel it
+        var appointment = await CreateAppointmentAsync(master.Id, service, testDate.AddHours(10));
+        appointment.Cancel();
+        await context.SaveChangesAsync();
+
+        _timeProvider.SetUtcNow(testDate.AddDays(-1));
+
+        // Act
+        var result = await _sut.GetAvailableSlotsAsync(master.Id, service.Id, testDate);
+
+        // Assert
+        result.Should().Contain(s => s.Start == testDate.AddHours(10), "Cancelled appointments should not block slots");
+    }
+
+    [Fact]
+    public async Task GetAvailableDatesAsync_ShouldReturnEmpty_WhenDayIsFullyBlockedByTimeOff()
+    {
+        // Arrange
+        var testDate = new DateTime(2026, 07, 10, 0, 0, 0, DateTimeKind.Utc);
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id, "Massage", 60);
+        var master = await CreateMasterAsync();
+        await LinkMasterToServiceAsync(master.Id, service.Id);
+
+        await CreateScheduleAsync(master.Id, (int)testDate.DayOfWeek, new TimeOnly(10, 0), new TimeOnly(18, 0));
+        await CreateTimeOffAsync(master.Id, DateOnly.FromDateTime(testDate));
+
+        _timeProvider.SetUtcNow(testDate.AddDays(-1));
+
+        // Act
+        var result = await _sut.GetAvailableDatesAsync(service.Id, master.Id, testDate.Year, testDate.Month);
+
+        // Assert
+        result.Should().NotContain(DateOnly.FromDateTime(testDate), "Day is fully covered by TimeOff");
+    }
+
+    [Fact]
+    public async Task GetAvailableSlotsAsync_ShouldHandleAppointmentsFromDifferentMastersIndependently()
+    {
+        // Arrange
+        var category = await CreateCategoryAsync();
+        var service = await CreateServiceAsync(category.Id, "Shared Service", 60);
+        var testDate = new DateTime(2026, 08, 03, 0, 0, 0, DateTimeKind.Utc);
+
+        var master1 = await CreateMasterAsync();
+        var master2 = await CreateMasterAsync();
+        await LinkMasterToServiceAsync(master1.Id, service.Id);
+        await LinkMasterToServiceAsync(master2.Id, service.Id);
+
+        await CreateScheduleAsync(master1.Id, (int)testDate.DayOfWeek, new TimeOnly(10, 0), new TimeOnly(11, 0));
+        await CreateScheduleAsync(master2.Id, (int)testDate.DayOfWeek, new TimeOnly(10, 0), new TimeOnly(11, 0));
+
+        // Master 1 is busy, Master 2 is free
+        await CreateAppointmentAsync(master1.Id, service, testDate.AddHours(10));
+
+        _timeProvider.SetUtcNow(testDate.AddDays(-1));
+
+        // Act
+        var result = await _sut.GetAvailableSlotsAsync(null, service.Id, testDate);
+
+        // Assert
+        var slot = result.Should().ContainSingle(s => s.Start == testDate.AddHours(10)).Subject;
+        slot.AvailableMasters.Should().ContainSingle(m => m.Id == master2.Id, "Only Master 2 is free at 10:00");
+        slot.AvailableMasters.Should().NotContain(m => m.Id == master1.Id);
+    }
 }

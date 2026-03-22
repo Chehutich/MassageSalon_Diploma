@@ -3,7 +3,7 @@ namespace Domain.Enums;
 public enum Role
 {
     Guest = 0,
-    Client,
-    Master,
-    Admin,
+    Client = 1,
+    Master = 2,
+    Admin = 3,
 }

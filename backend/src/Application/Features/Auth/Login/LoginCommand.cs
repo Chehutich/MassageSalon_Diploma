@@ -15,11 +15,11 @@ public class LoginCommandHandler(
     IJwtTokenGenerator jwtTokenGenerator,
     IUnitOfWork unitOfWork) : IRequestHandler<LoginCommand, Result<AuthResponse, Error>>
 {
-    public async Task<Result<AuthResponse, Error>> Handle(LoginCommand request, CancellationToken ct)
+    public async Task<Result<AuthResponse, Error>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByEmailAsync(request.Email, ct);
+        var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
-        if (user is null || !passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
+        if (user is null || !passwordHasher.VerifyPassword(request.Password, user.PasswordHash ?? string.Empty)) // if this is guest user, passwordHash is null
         {
             return Errors.User.InvalidCredentials;
         }
@@ -29,12 +29,12 @@ public class LoginCommandHandler(
 
         user.SetRefreshToken(refreshToken, expiry);
 
-        await unitOfWork.SaveChangesAsync(ct);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new AuthResponse(
             user.Id,
             user.FirstName,
-            user.Email,
+            user.Email!,
             accessToken,
             refreshToken,
             user.Role.ToString());

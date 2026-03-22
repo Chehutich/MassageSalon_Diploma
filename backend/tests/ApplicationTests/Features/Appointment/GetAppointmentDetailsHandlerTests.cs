@@ -81,10 +81,18 @@ public class GetAppointmentDetailsHandlerTests
 
         _userContextMock.Setup(x => x.Id).Returns(currentUserId);
 
-        var appointment =
-            (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
+        // 1. Create the Master and User hierarchy
+        var user = (Domain.Entities.User)Activator.CreateInstance(typeof(Domain.Entities.User), true)!;
+        typeof(Domain.Entities.User).GetProperty("Id")?.SetValue(user, Guid.NewGuid()); // Random master ID
+
+        var master = (Domain.Entities.Master)Activator.CreateInstance(typeof(Domain.Entities.Master), true)!;
+        typeof(Domain.Entities.Master).GetProperty("User")?.SetValue(master, user);
+
+        // 2. Create the Appointment
+        var appointment = (Domain.Entities.Appointment)Activator.CreateInstance(typeof(Domain.Entities.Appointment), true)!;
         typeof(Domain.Entities.Appointment).GetProperty("Id")?.SetValue(appointment, appointmentId);
         typeof(Domain.Entities.Appointment).GetProperty("ClientId")?.SetValue(appointment, someoneElseId);
+        typeof(Domain.Entities.Appointment).GetProperty("Master")?.SetValue(appointment, master);
 
         _appointmentRepoMock
             .Setup(x => x.GetByIdWithDetailsAsync(appointmentId, It.IsAny<CancellationToken>()))

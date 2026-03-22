@@ -31,16 +31,16 @@ public class ScheduleRepository(ApplicationDbContext context) : IScheduleReposit
     public async Task<bool> IsMasterWorkingAtAsync(
         Guid masterId,
         int dayOfWeek,
-        TimeOnly start,
-        TimeOnly end,
+        TimeOnly startTime,
+        TimeOnly endTime,
         CancellationToken cancellationToken = default)
     {
         return await context.Schedules
             .AnyAsync(s =>
                     s.MasterId == masterId &&
                     s.DayOfWeek == dayOfWeek &&
-                    s.StartTime <= start &&
-                    s.EndTime >= end,
+                    s.StartTime <= startTime &&
+                    s.EndTime >= endTime,
                 cancellationToken);
     }
 

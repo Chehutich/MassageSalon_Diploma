@@ -13,7 +13,7 @@ public class PasswordHasher : IPasswordHasher
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(hash) || !hash.StartsWith("$2"))
+            if (string.IsNullOrWhiteSpace(hash) || !hash.StartsWith("$2", StringComparison.Ordinal))
             {
                 return false;
             }

@@ -8,7 +8,8 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
 {
     public void Configure(EntityTypeBuilder<Service> builder)
     {
-        builder.HasKey(e => e.Id).HasName("services_pkey");
+        builder.HasKey(e => e.Id)
+            .HasName("services_pkey");
 
         builder.ToTable("services");
 
@@ -16,9 +17,14 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");
 
-        builder.Property(e => e.CategoryId).HasColumnName("category_id");
-        builder.Property(e => e.Description).HasColumnName("description");
-        builder.Property(e => e.Duration).HasColumnName("duration");
+        builder.Property(e => e.CategoryId)
+            .HasColumnName("category_id");
+
+        builder.Property(e => e.Description)
+            .HasColumnName("description");
+
+        builder.Property(e => e.Duration)
+            .HasColumnName("duration");
 
         builder.Property(e => e.IsActive)
             .HasDefaultValue(true)
@@ -46,7 +52,8 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .HasDefaultValueSql("'{}'::text[]")
             .HasColumnName("benefits");
 
-        builder.HasOne(d => d.Category).WithMany(p => p.Services)
+        builder.HasOne(d => d.Category)
+            .WithMany(p => p.Services)
             .HasForeignKey(d => d.CategoryId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("services_category_id_fkey");

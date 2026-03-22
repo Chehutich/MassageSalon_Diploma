@@ -9,29 +9,25 @@ public interface IAppointmentRepository
 
     Task<Appointment?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<List<Appointment>> GetAppointmentsByUserId(Guid userId, CancellationToken cancellationToken = default);
+    Task<List<Appointment>> GetByUserId(Guid userId, CancellationToken cancellationToken = default);
 
     Task<List<Appointment>> GetByMasterAndDateAsync(
         Guid masterId,
-        DateTime date,
-        CancellationToken cancellationToken = default);
-
-    Task<List<BusyInterval>> GetBusyIntervalsAsync(
-        Guid masterId,
-        DateTime start,
-        DateTime end,
+        DateTime dateTime,
         CancellationToken cancellationToken = default);
 
     Task<List<Appointment>> GetMasterScheduleAsync(
         Guid masterId,
-        DateTime start,
-        DateTime end,
+        DateTime startDate,
+        DateTime endDate,
         CancellationToken cancellationToken = default);
+
+    Task<List<Appointment>> GetByMasterAndPeriodAsync(Guid masterId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
 
     Task<bool> HasOverlapAsync(
         Guid masterId,
-        DateTime start,
-        DateTime end,
+        DateTime startDate,
+        DateTime endDate,
         Guid? excludeId = null,
         CancellationToken cancellationToken = default);
 

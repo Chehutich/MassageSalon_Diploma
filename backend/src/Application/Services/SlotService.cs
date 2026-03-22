@@ -5,6 +5,7 @@ using Application.Common.Models;
 using Application.Features.Catalog.GetAvailableSlots;
 using Domain.Common;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace Application.Services;
 
@@ -21,7 +22,7 @@ public class SlotService(
     public async Task<List<SlotResponse>> GetAvailableSlotsAsync(
         Guid? masterId,
         Guid serviceId,
-        DateTime date,
+        DateTime dateTime,
         CancellationToken cancellationToken = default)
     {
         var service = await serviceRepository.GetByIdAsync(serviceId, cancellationToken);
@@ -52,7 +53,7 @@ public class SlotService(
                 master.User.LastName,
                 master.User.PhotoUrl);
 
-            var masterSlots = await GetSlotsForMasterAsync(master.Id, service.Duration, date, cancellationToken);
+            var masterSlots = await GetSlotsForMasterAsync(master.Id, service.Duration, dateTime, cancellationToken);
 
             foreach (var slot in masterSlots)
             {
@@ -103,7 +104,7 @@ public class SlotService(
         var masterData = new List<(Guid Id, List<BusyInterval> Busy, List<Schedule> Schedules)>();
         foreach (var m in masters)
         {
-            var busy = await appointmentRepository.GetBusyIntervalsAsync(m.Id, startDate, endDate, cancellationToken);
+            var busy = await GetBusyIntervalsAsync(m.Id, startDate, endDate, cancellationToken);
             var schedules = await scheduleRepository.GetSchedulesForMasterAsync(m.Id, cancellationToken);
             masterData.Add((m.Id, busy, schedules));
         }
@@ -145,7 +146,36 @@ public class SlotService(
         return result;
     }
 
-    private bool CheckIfDayHasFreeSlot(
+    private async Task<List<BusyInterval>> GetBusyIntervalsAsync(
+        Guid masterId,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var appointments = await appointmentRepository.GetByMasterAndPeriodAsync(masterId, startDate, endDate, cancellationToken);
+
+        var appIntervals = appointments
+            .Where(a => a.Status != AppointmentStatus.Cancelled)
+            .Select(a => new BusyInterval(a.StartTime, a.EndTime));
+
+        var timeOffs = await timeOffRepository.GetByMasterAndPeriodAsync(
+            masterId,
+            DateOnly.FromDateTime(startDate),
+            DateOnly.FromDateTime(endDate),
+            cancellationToken);
+
+        var timeOffIntervals = timeOffs.Select(t => new BusyInterval(
+            t.StartDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
+            t.EndDate.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc)
+        ));
+
+        return appIntervals
+            .Concat(timeOffIntervals)
+            .OrderBy(x => x.Start)
+            .ToList();
+    }
+
+    private static bool CheckIfDayHasFreeSlot(
         DateOnly date,
         Schedule schedule,
         List<BusyInterval> busy,
@@ -224,15 +254,15 @@ public class SlotService(
 
     public async Task<bool> IsMasterAvailableAsync(
         Guid masterId,
-        DateTime start,
-        DateTime end,
+        DateTime startDate,
+        DateTime endDate,
         Guid? excludeAppointmentId = null,
         CancellationToken cancellationToken = default)
     {
         // Check our working schedule
-        var dbDayOfWeek = start.DayOfWeek;
-        var startTime = TimeOnly.FromDateTime(start);
-        var endTime = TimeOnly.FromDateTime(end);
+        var dbDayOfWeek = startDate.DayOfWeek;
+        var startTime = TimeOnly.FromDateTime(startDate);
+        var endTime = TimeOnly.FromDateTime(endDate);
 
         var worksThatDay =
             await scheduleRepository.IsMasterWorkingAtAsync(masterId, (int)dbDayOfWeek, startTime, endTime,
@@ -243,14 +273,14 @@ public class SlotService(
             return false;
         }
 
-        if (await timeOffRepository.IsMasterOnTimeOffAsync(masterId, start.Date, cancellationToken))
+        if (await timeOffRepository.IsMasterOnTimeOffAsync(masterId, startDate.Date, cancellationToken))
         {
             return false;
         }
 
         // Check for any appointments that overlap
         var hasOverlap =
-            await appointmentRepository.HasOverlapAsync(masterId, start, end, excludeAppointmentId, cancellationToken);
+            await appointmentRepository.HasOverlapAsync(masterId, startDate, endDate, excludeAppointmentId, cancellationToken);
 
         return !hasOverlap;
     }

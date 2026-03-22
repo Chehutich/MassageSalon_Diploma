@@ -51,17 +51,4 @@ public class Service
 
         Benefits = benefits ?? new List<string>();
     }
-
-    public void AddBenefit(string benefit)
-    {
-        if (!string.IsNullOrWhiteSpace(benefit) && !Benefits.Contains(benefit))
-        {
-            Benefits.Add(benefit);
-        }
-    }
-
-    public void SetBadge(ServiceBadge badge)
-    {
-        Badge = badge;
-    }
 }

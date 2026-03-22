@@ -25,11 +25,9 @@ public static class ValidationErrors
     public static class Appointment
     {
         public const string IdRequired = "Appointment.Id.Required";
-        public const string InvalidTime = "Appointment.StartTime.Invalid";
 
         public const string StartTimeRequired = "Appointment.StartTime.Required";
         public const string StartTimeInvalid = "Appointment.StartTime.Invalid";
-        public const string EndTimeRequired = "Appointment.EndTime.Required";
 
         public const string NewStartTimeRequired = "Appointment.NewStartTime.Required";
         public const string NewStartTimeInvalid = "Appointment.NewStartTime.Invalid";
@@ -52,8 +50,6 @@ public static class ValidationErrors
 
     public static class Token
     {
-        public const string InvalidToken = "Token.InvalidAccessToken";
-        public const string AccessTokenRequired = "Token.AccessToken.Required";
         public const string RefreshTokenRequired = "Token.RefreshToken.Required";
     }
 

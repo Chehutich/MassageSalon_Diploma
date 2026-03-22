@@ -8,7 +8,8 @@ public class TimeOffConfiguration : IEntityTypeConfiguration<TimeOff>
 {
     public void Configure(EntityTypeBuilder<TimeOff> builder)
     {
-        builder.HasKey(e => e.Id).HasName("time_offs_pkey");
+        builder.HasKey(e => e.Id)
+            .HasName("time_offs_pkey");
 
         builder.ToTable("time_offs");
 
@@ -18,12 +19,20 @@ public class TimeOffConfiguration : IEntityTypeConfiguration<TimeOff>
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");
 
-        builder.Property(e => e.EndDate).HasColumnName("end_date");
-        builder.Property(e => e.MasterId).HasColumnName("master_id");
-        builder.Property(e => e.Reason).HasColumnName("reason");
-        builder.Property(e => e.StartDate).HasColumnName("start_date");
+        builder.Property(e => e.EndDate)
+            .HasColumnName("end_date");
 
-        builder.HasOne(d => d.Master).WithMany(p => p.TimeOffs)
+        builder.Property(e => e.MasterId)
+            .HasColumnName("master_id");
+
+        builder.Property(e => e.Reason)
+            .HasColumnName("reason");
+
+        builder.Property(e => e.StartDate)
+            .HasColumnName("start_date");
+
+        builder.HasOne(d => d.Master)
+            .WithMany(p => p.TimeOffs)
             .HasForeignKey(d => d.MasterId)
             .HasConstraintName("time_offs_master_id_fkey");
     }

@@ -9,7 +9,8 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 {
     public void Configure(EntityTypeBuilder<Appointment> builder)
     {
-        builder.HasKey(e => e.Id).HasName("appointments_pkey");
+        builder.HasKey(e => e.Id)
+            .HasName("appointments_pkey");
 
         builder.ToTable("appointments");
 
@@ -27,17 +28,27 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
             .HasPrecision(10, 2)
             .HasColumnName("actual_price");
 
-        builder.Property(e => e.ClientId).HasColumnName("client_id");
-        builder.Property(e => e.ClientNotes).HasColumnName("client_notes");
+        builder.Property(e => e.ClientId)
+            .HasColumnName("client_id");
+
+        builder.Property(e => e.ClientNotes)
+            .HasColumnName("client_notes");
 
         builder.Property(e => e.CreatedAt)
             .HasDefaultValueSql("now()")
             .HasColumnName("created_at");
 
-        builder.Property(e => e.EndTime).HasColumnName("end_time");
-        builder.Property(e => e.MasterId).HasColumnName("master_id");
-        builder.Property(e => e.ServiceId).HasColumnName("service_id");
-        builder.Property(e => e.StartTime).HasColumnName("start_time");
+        builder.Property(e => e.EndTime)
+            .HasColumnName("end_time");
+
+        builder.Property(e => e.MasterId)
+            .HasColumnName("master_id");
+
+        builder.Property(e => e.ServiceId)
+            .HasColumnName("service_id");
+
+        builder.Property(e => e.StartTime)
+            .HasColumnName("start_time");
 
         builder.Property(e => e.Status)
             .HasMaxLength(50)

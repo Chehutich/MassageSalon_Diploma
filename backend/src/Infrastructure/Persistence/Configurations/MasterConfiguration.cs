@@ -8,7 +8,8 @@ public class MasterConfiguration : IEntityTypeConfiguration<Master>
 {
     public void Configure(EntityTypeBuilder<Master> builder)
     {
-        builder.HasKey(e => e.Id).HasName("masters_pkey");
+        builder.HasKey(e => e.Id)
+            .HasName("masters_pkey");
 
         builder.ToTable("masters");
 
@@ -16,7 +17,8 @@ public class MasterConfiguration : IEntityTypeConfiguration<Master>
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");
 
-        builder.Property(e => e.Bio).HasColumnName("bio");
+        builder.Property(e => e.Bio)
+            .HasColumnName("bio");
 
         builder.Property(e => e.IsActive)
             .HasDefaultValue(true)
@@ -26,13 +28,16 @@ public class MasterConfiguration : IEntityTypeConfiguration<Master>
             .HasDefaultValueSql("now()")
             .HasColumnName("updated_at");
 
-        builder.Property(e => e.UserId).HasColumnName("user_id");
+        builder.Property(e => e.UserId)
+            .HasColumnName("user_id");
 
-        builder.HasOne(d => d.User).WithMany(p => p.Masters)
+        builder.HasOne(d => d.User)
+            .WithMany(p => p.Masters)
             .HasForeignKey(d => d.UserId)
             .HasConstraintName("masters_user_id_fkey");
 
-        builder.HasMany(d => d.Services).WithMany(p => p.Masters)
+        builder.HasMany(d => d.Services)
+            .WithMany(p => p.Masters)
             .UsingEntity<Dictionary<string, object>>(
                 "MasterService",
                 r => r.HasOne<Service>().WithMany()

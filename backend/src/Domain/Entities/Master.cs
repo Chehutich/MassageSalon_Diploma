@@ -40,23 +40,4 @@ public class Master
 
         UpdatedAt = DateTime.UtcNow;
     }
-
-    public void AddService(Service service)
-    {
-        if (!Services.Any(s => s.Id == service.Id))
-        {
-            Services.Add(service);
-            UpdatedAt = DateTime.UtcNow;
-        }
-    }
-
-    public void RemoveService(Guid serviceId)
-    {
-        var service = Services.FirstOrDefault(s => s.Id == serviceId);
-        if (service != null)
-        {
-            Services.Remove(service);
-            UpdatedAt = DateTime.UtcNow;
-        }
-    }
 }

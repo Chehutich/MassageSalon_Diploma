@@ -14,8 +14,8 @@ public interface IScheduleRepository
     Task<bool> IsMasterWorkingAtAsync(
         Guid masterId,
         int dayOfWeek,
-        TimeOnly start,
-        TimeOnly end,
+        TimeOnly startTime,
+        TimeOnly endTime,
         CancellationToken cancellationToken = default);
 
     Task<List<Schedule>> GetByMasterIdAsync(

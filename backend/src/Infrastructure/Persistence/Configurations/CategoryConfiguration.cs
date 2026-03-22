@@ -8,13 +8,16 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
     public void Configure(EntityTypeBuilder<Category> builder)
     {
-        builder.HasKey(e => e.Id).HasName("categories_pkey");
+        builder.HasKey(e => e.Id)
+            .HasName("categories_pkey");
 
         builder.ToTable("categories");
 
-        builder.HasIndex(e => e.Title, "categories_title_key").IsUnique();
+        builder.HasIndex(e => e.Title, "categories_title_key")
+            .IsUnique();
 
-        builder.HasIndex(e => e.Slug).IsUnique();
+        builder.HasIndex(e => e.Slug)
+            .IsUnique();
 
         builder.Property(e => e.Id)
             .HasDefaultValueSql("gen_random_uuid()")

@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Features.Catalog.GetAvailableSlots;
+using Domain.Common;
 
 namespace Application.Common.Interfaces;
 
@@ -8,7 +9,7 @@ public interface ISlotService
     Task<List<SlotResponse>> GetAvailableSlotsAsync(
         Guid? masterId,
         Guid serviceId,
-        DateTime date,
+        DateTime dateTime,
         CancellationToken cancellationToken = default);
 
     Task<List<DateOnly>> GetAvailableDatesAsync(
@@ -20,8 +21,8 @@ public interface ISlotService
 
     Task<bool> IsMasterAvailableAsync(
         Guid masterId,
-        DateTime start,
-        DateTime end,
+        DateTime startDate,
+        DateTime endDate,
         Guid? excludeAppointmentId = null,
         CancellationToken cancellationToken = default);
 }

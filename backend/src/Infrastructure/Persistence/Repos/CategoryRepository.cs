@@ -12,14 +12,4 @@ public class CategoryRepository(ApplicationDbContext context) : ICategoryReposit
             .Where(c => c.IsActive)
             .ToListAsync(cancellationToken);
     }
-
-    public Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task AddAsync(Category category, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
 }
