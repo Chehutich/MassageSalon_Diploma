@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This table contains exclusion constraints and requires additional setup for migrations. Visit https://pris.ly/d/exclusion-constraints for more info.
+model appointments {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id    String   @db.Uuid
+  master_id    String   @db.Uuid
+  service_id   String   @db.Uuid
+  start_time   DateTime @db.Timestamptz(6)
+  end_time     DateTime @db.Timestamptz(6)
+  status       String   @default("Confirmed") @db.VarChar(50)
+  actual_price Decimal  @db.Decimal(10, 2)
+  client_notes String?
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @db.Timestamptz(6)
+  users        users    @relation(fields: [client_id], references: [id], onUpdate: NoAction)
+  masters      masters  @relation(fields: [master_id], references: [id], onUpdate: NoAction)
+  services     services @relation(fields: [service_id], references: [id], onUpdate: NoAction)
+
+  @@index([client_id], map: "idx_appointments_client")
+  @@index([master_id, start_time], map: "idx_appointments_master_time")
+  @@index([status], map: "idx_appointments_status")
+}
+
+model categories {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug      String     @unique @db.VarChar(150)
+  title     String     @unique @db.VarChar(150)
+  is_active Boolean    @default(true)
+  services  services[]
+}
+
+model master_services {
+  master_id  String   @db.Uuid
+  service_id String   @db.Uuid
+  masters    masters  @relation(fields: [master_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  services   services @relation(fields: [service_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([master_id, service_id])
+}
+
+model masters {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String            @db.Uuid
+  bio             String?
+  is_active       Boolean           @default(true)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  appointments    appointments[]
+  master_services master_services[]
+  users           users             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  schedules       schedules[]
+  time_offs       time_offs[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model schedules {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  master_id   String   @db.Uuid
+  day_of_week Int      @db.SmallInt
+  start_time  DateTime @db.Time(6)
+  end_time    DateTime @db.Time(6)
+  masters     masters  @relation(fields: [master_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model services {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category_id     String            @db.Uuid
+  slug            String            @unique @db.VarChar(150)
+  title           String            @db.VarChar(200)
+  description     String?
+  duration        Int
+  price           Decimal           @db.Decimal(10, 2)
+  is_active       Boolean           @default(true)
+  badge           String?           @db.VarChar(50)
+  benefits        String[]          @default([])
+  appointments    appointments[]
+  master_services master_services[]
+  categories      categories        @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model time_offs {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  master_id  String   @db.Uuid
+  start_date DateTime @db.Date
+  end_date   DateTime @db.Date
+  reason     String?
+  masters    masters  @relation(fields: [master_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([master_id, start_date, end_date], map: "idx_time_offs_master")
+}
+
+model users {
+  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name           String         @db.VarChar(100)
+  last_name            String         @db.VarChar(100)
+  phone                String?        @unique @db.VarChar(20)
+  email                String?        @unique @db.VarChar(255)
+  photo_url            String?        @db.VarChar(500)
+  password_hash        String?        @db.VarChar(512)
+  role                 String         @default("Guest") @db.VarChar(50)
+  refresh_token        String?        @db.VarChar(512)
+  refresh_token_expiry DateTime?      @db.Timestamptz(6)
+  created_at           DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime       @default(now()) @db.Timestamptz(6)
+  appointments         appointments[]
+  masters              masters[]
+}

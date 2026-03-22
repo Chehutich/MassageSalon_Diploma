@@ -3,7 +3,8 @@ INSERT INTO users (id, first_name, last_name, phone, email, photo_url, password_
 ('00000000-0000-0000-0000-000000000001', 'Головний', 'Адмін', '+380000000000', 'admin@salon.ua', NULL, 'hash', 'Admin'),
 ('11111111-1111-0000-0000-000000000001', 'Ганна', 'Коваленко', '+380671112233', 'hanna@salon.ua', 'https://offside.kz/cache/imagine/1200/uploads/news/2024/10/25/671ba6ce4a381565102388.jpg.webp', '$2a$12$RNV3nK7IzqhTsKtyi/enzu9/97QlrN76k9Bo7keiE3K.4DqnW2.qC', 'Master'),
 ('11111111-1111-0000-0000-000000000002', 'Іван', 'Шевченко', '+380504445566', 'ivan@salon.ua', 'https://photopodium.com/webroot/content/mjr/148572.jpg', 'hash', 'Master'),
-('22222222-2222-0000-0000-000000000001', 'Олена', 'Петренко', '+380639998877', 'olena@client.ua', NULL, 'hash', 'Client');
+('22222222-2222-0000-0000-000000000001', 'Олена', 'Петренко', '+380639998877', 'olena@client.ua', NULL, 'hash', 'Client'),
+('00000000-0000-0000-0000-000000000002', 'Олександр', 'Менеджер', '+380991234567', 'luther@admin.ua', NULL, '$2a$12$MAlKsy0pU2Rrl4ttR7bx9uFePfdjDW6dfAkSRgFDDxuRN21kB6wLq', 'Admin');
 
 -- 2. Майстри (Masters)
 INSERT INTO masters (id, user_id, bio, is_active) VALUES
