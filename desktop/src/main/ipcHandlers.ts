@@ -7,8 +7,8 @@ import { CreateAppointmentPayload } from "../api/types";
 
 export const registerIpcHandlers = () => {
   // Auth
-  ipcMain.handle("db:login", async (_, { email, password }) =>
-    AuthService.login(email, password),
+  ipcMain.handle("db:login", async (_, { email, pass }) =>
+    AuthService.login(email, pass),
   );
 
   // Appointments
@@ -40,6 +40,14 @@ export const registerIpcHandlers = () => {
 
   ipcMain.handle("db:get-services", async () => {
     return await ServicesService.getAll();
+  });
+
+  ipcMain.handle("db:update-service", async (_, { id, data }) => {
+    return await ServicesService.updateService(id, data);
+  });
+
+  ipcMain.handle("db:create-service", async (_, data) => {
+    return await ServicesService.createService(data);
   });
 
   ipcMain.handle("db:search-clients", async (_, query) =>

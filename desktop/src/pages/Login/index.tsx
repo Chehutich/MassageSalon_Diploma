@@ -26,9 +26,9 @@ const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
         values.password || "",
       );
 
-      if (result.success && result.user) {
-        message.success(`Ласкаво просимо, ${result.user.first_name}!`);
-        onLoginSuccess(result.user);
+      if (result.success && result.data) {
+        message.success(`Ласкаво просимо, ${result.data.first_name}!`);
+        onLoginSuccess(result.data);
       } else {
         message.error(result.error || "Помилка входу");
       }
@@ -43,8 +43,8 @@ const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
     if (process.env.NODE_ENV === "development") {
       const autoLogin = async () => {
         const result = await window.dbAPI.login("test@test.com", "12345678w");
-        if (result.success && result.user) {
-          onLoginSuccess(result.user);
+        if (result.success && result.data) {
+          onLoginSuccess(result.data);
         }
       };
       autoLogin();

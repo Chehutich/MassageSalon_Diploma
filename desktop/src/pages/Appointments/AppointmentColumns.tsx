@@ -34,6 +34,8 @@ export const getColumns = (
     dataIndex: "start_time",
     key: "time",
     width: 150,
+    sorter: (a: Appointment, b: Appointment) =>
+      dayjs(a.start_time).unix() - dayjs(b.start_time).unix(),
     render: (time: string) => {
       const dateObj = dayjs(time);
       const isToday = dateObj.isSame(dayjs(), "day");
@@ -53,11 +55,13 @@ export const getColumns = (
   {
     title: "Клієнт",
     key: "client",
+    sorter: (a: Appointment, b: Appointment) =>
+      a.users.first_name.localeCompare(b.users.first_name),
     render: (record: Appointment) => (
       <Link
         onClick={(e) => {
           e.stopPropagation();
-          handleNavigate("клієнта", record.users.id, record.users.first_name);
+          handleNavigate("client", record.users.id, record.users.first_name);
         }}
       >
         {record.users?.first_name} {record.users?.last_name}
@@ -67,12 +71,14 @@ export const getColumns = (
   {
     title: "Послуга",
     key: "service",
+    sorter: (a: Appointment, b: Appointment) =>
+      a.services.title.localeCompare(b.services.title),
     render: (record: Appointment) => (
       <Link
         onClick={(e) => {
           e.stopPropagation();
           handleNavigate(
-            "послуги",
+            "service",
             record.services?.id,
             record.services?.title,
           );
@@ -85,8 +91,17 @@ export const getColumns = (
     ),
   },
   {
+    title: "Вартість",
+    dataIndex: "actual_price",
+    key: "price",
+    sorter: (a: Appointment, b: Appointment) => a.actual_price - b.actual_price,
+    render: (price: number) => <Text strong>{price} ₴</Text>,
+  },
+  {
     title: "Статус",
     key: "status",
+    sorter: (a: Appointment, b: Appointment) =>
+      a.status.localeCompare(b.status),
     render: (record: Appointment) => {
       const items: MenuProps["items"] = [
         {
@@ -141,11 +156,11 @@ export const getColumns = (
   {
     title: "Дії",
     key: "actions",
-    width: 100,
+    width: 120,
     render: (record: Appointment) => (
       <Button
-        size="small"
-        icon={<InfoCircleOutlined />}
+        type="text"
+        icon={<InfoCircleOutlined style={{ color: "#0f766e" }} />}
         onClick={(e) => {
           e.stopPropagation();
           onShowDetails(record);

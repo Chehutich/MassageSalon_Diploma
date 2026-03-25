@@ -26,14 +26,29 @@ export interface Master {
 
 export interface Service {
   id: string;
+  category_id: string;
+  slug: string;
   title: string;
+  description?: string | null;
   duration: number;
-  price: number;
+  price: number | string;
   is_active: boolean;
+  badge?: string | null;
+  benefits?: string[];
+  masterIds?: string[]; // Master ID array for Checkbox.Group
+
+  categories?: Category;
   master_services?: {
     master_id: string;
     service_id: string;
   }[];
+}
+
+export interface Category {
+  id: string;
+  slug: string;
+  title: string;
+  is_active: boolean;
 }
 
 export interface Appointment {
@@ -80,6 +95,13 @@ export interface CreateAppointmentPayload {
   clientNotes?: string | null;
 }
 
+export interface NavParams {
+  id: string;
+  type: "service" | "master" | "client";
+}
+
+export type NavigateFn = (tabKey: string, params?: NavParams) => void;
+
 declare global {
   interface Window {
     dbAPI: {
@@ -104,6 +126,15 @@ declare global {
       createGuestAppointment: (
         payload: CreateAppointmentPayload,
       ) => Promise<ServiceResponse<Appointment>>;
+
+      updateService: (args: {
+        id: string;
+        data: Partial<Service>;
+      }) => Promise<ServiceResponse<void>>;
+
+      createService: (
+        data: Omit<Service, "id"> & { masterIds?: string[] },
+      ) => Promise<ServiceResponse<Service>>;
     };
   }
 }

@@ -1,15 +1,9 @@
-import { User } from "../../api/types";
+import { ServiceResponse, User } from "../../api/types";
 import { prisma } from "../db/prisma";
 import bcrypt from "bcryptjs";
 
-interface LoginResponse {
-  success: boolean;
-  user?: User;
-  error?: string;
-}
-
 export const AuthService = {
-  async login(email: string, pass: string): Promise<LoginResponse> {
+  async login(email: string, pass: string): Promise<ServiceResponse<User>> {
     try {
       const user = await prisma.users.findUnique({ where: { email } });
 
@@ -27,7 +21,7 @@ export const AuthService = {
 
       return {
         success: true,
-        user: {
+        data: {
           id: user.id,
           first_name: user.first_name,
           last_name: user.last_name,
@@ -37,6 +31,7 @@ export const AuthService = {
         },
       };
     } catch (err: any) {
+      console.log(err);
       return { success: false, error: "Помилка бази даних" };
     }
   },

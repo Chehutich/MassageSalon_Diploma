@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Modal,
   Form,
   Input,
   Select,
@@ -16,11 +15,19 @@ import { UserOutlined, CheckCircleFilled } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { SlotPicker } from "./SlotPicker";
 import { useCreateAppointment } from "./hooks/useCreateAppointment";
+import { SharedModal } from "../../../src/components/shared/SharedModal";
+import { Sanitizer } from "../../../src/utils/sanitizer";
 
 interface CreateAppointmentModalProps {
   visible: boolean;
   onClose: () => void;
   onSuccess: () => void;
+}
+
+interface ServiceOption {
+  label: string;
+  value: string;
+  price: number | string;
 }
 
 export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
@@ -46,31 +53,22 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
   const isClientLocked = !!foundClient;
 
   return (
-    <Modal
+    <SharedModal
+      visible={visible}
       title="Новий запис"
-      open={visible}
-      onOk={submitForm}
-      onCancel={onClose}
+      submitText="Створити запис"
+      onClose={onClose}
+      onSave={submitForm}
       width={650}
-      centered
-      destroyOnHidden
-      okText="Створити запис"
-      cancelText="Скасувати"
-      styles={{
-        body: {
-          maxHeight: "75vh",
-          overflowY: "auto",
-          overflowX: "hidden",
-          padding: "12px 8px",
-        },
-      }}
     >
       <Form form={form} layout="vertical" initialValues={{ date: dayjs() }}>
-        {/* Find and confirm client */}
         <Form.Item
           name="phone"
           label="Телефон клієнта"
-          rules={[{ required: true, message: "Введіть телефон" }]}
+          rules={[
+            { required: true, message: "Введіть телефон" },
+            { min: 10, message: "Номер занадто короткий" },
+          ]}
         >
           <Input
             placeholder="+380..."
@@ -82,7 +80,11 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
                 <CheckCircleFilled style={{ color: "#0f766e" }} />
               ) : null
             }
-            onChange={handlePhoneChange}
+            onChange={(e) => {
+              const cleaned = Sanitizer.phone(e.target.value);
+              form.setFieldValue("phone", cleaned);
+              handlePhoneChange(e);
+            }}
             disabled={isClientLocked}
           />
         </Form.Item>
@@ -135,18 +137,36 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
           <Form.Item
             name="firstName"
             label="Ім'я"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Введіть ім'я" },
+              { min: 2, message: "Мінімум 2 символи" },
+            ]}
             style={{ flex: 1 }}
           >
-            <Input disabled={isClientLocked} />
+            <Input
+              placeholder="Iм'я клієнта"
+              disabled={isClientLocked}
+              onChange={(e) =>
+                form.setFieldValue("firstName", Sanitizer.name(e.target.value))
+              }
+            />
           </Form.Item>
           <Form.Item
             name="lastName"
             label="Прізвище"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Введіть прізвище" },
+              { min: 2, message: "Мінімум 2 символи" },
+            ]}
             style={{ flex: 1 }}
           >
-            <Input disabled={isClientLocked} />
+            <Input
+              placeholder="Прізвище клієнта"
+              disabled={isClientLocked}
+              onChange={(e) =>
+                form.setFieldValue("lastName", Sanitizer.name(e.target.value))
+              }
+            />
           </Form.Item>
         </div>
 
@@ -157,25 +177,28 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
           <Form.Item
             name="serviceId"
             label="Послуга"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Оберіть послугу" }]}
             style={{ flex: 1 }}
           >
-            <Select
+            <Select<string, ServiceOption>
               placeholder="Оберіть послугу"
               options={filteredServices.map((s) => ({
                 label: s.title,
                 value: s.id,
                 price: s.price,
               }))}
-              onChange={(_, opt: any) =>
-                form.setFieldsValue({ actualPrice: opt.price })
-              }
+              onChange={(_, option) => {
+                const opt = option as ServiceOption;
+                if (opt) {
+                  form.setFieldsValue({ actualPrice: opt.price });
+                }
+              }}
             />
           </Form.Item>
           <Form.Item
             name="masterId"
             label="Майстер"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Оберіть майстра" }]}
             style={{ flex: 1 }}
           >
             <Select
@@ -189,7 +212,11 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
         </div>
 
         {/* Date and time */}
-        <Form.Item name="date" label="Дата візиту" rules={[{ required: true }]}>
+        <Form.Item
+          name="date"
+          label="Дата візиту"
+          rules={[{ required: true, message: "Оберіть дату" }]}
+        >
           <DatePicker
             style={{ width: "100%" }}
             format="DD.MM.YYYY"
@@ -200,13 +227,17 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
         <Form.Item
           name="slot"
           label="Доступний час"
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: "Оберіть час" }]}
         >
           <SlotPicker slots={slots} loading={loadingSlots} />
         </Form.Item>
 
         {/* Financial details */}
-        <Form.Item name="actualPrice" label="Сума до сплати (грн)">
+        <Form.Item
+          name="actualPrice"
+          label="Сума до сплати (грн)"
+          rules={[{ required: true, type: "number", min: 0 }]}
+        >
           <InputNumber style={{ width: "100%" }} min={0} disabled />
         </Form.Item>
 
@@ -217,9 +248,12 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
             showCount
             placeholder="Особливі побажання..."
             style={{ borderRadius: 8 }}
+            onChange={(e) =>
+              form.setFieldValue("clientNotes", Sanitizer.title(e.target.value))
+            }
           />
         </Form.Item>
       </Form>
-    </Modal>
+    </SharedModal>
   );
 };

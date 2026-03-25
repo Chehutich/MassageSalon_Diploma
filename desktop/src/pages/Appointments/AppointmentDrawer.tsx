@@ -53,7 +53,7 @@ export const AppointmentDrawer: React.FC<Props> = ({
     size={500}
     onClose={onClose}
     open={visible}
-    destroyOnHidden
+    destroyOnClose
   >
     {record && (
       <>
@@ -75,8 +75,8 @@ export const AppointmentDrawer: React.FC<Props> = ({
               strong
               onClick={() =>
                 handleNavigate(
-                  "клієнта",
-                  record.users?.id,
+                  "client",
+                  record.users?.id || "",
                   `${record.users?.first_name} ${record.users?.last_name}`,
                 )
               }
@@ -119,9 +119,9 @@ export const AppointmentDrawer: React.FC<Props> = ({
             <Link
               onClick={() =>
                 handleNavigate(
-                  "послуги",
-                  record.services?.id,
-                  record.services?.title,
+                  "service",
+                  record.services?.id || "",
+                  record.services?.title || "",
                 )
               }
             >
@@ -132,8 +132,8 @@ export const AppointmentDrawer: React.FC<Props> = ({
             <Link
               onClick={() =>
                 handleNavigate(
-                  "майстра",
-                  record.masters?.id,
+                  "master",
+                  record.masters?.id || "",
                   record.masters?.users?.first_name || "",
                 )
               }
