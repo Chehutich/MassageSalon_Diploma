@@ -1,10 +1,6 @@
 import React from "react";
 import { Card, Col, Row, Statistic, Typography } from "antd";
-import {
-  DollarCircleOutlined,
-  ScissorOutlined,
-  TrophyOutlined,
-} from "@ant-design/icons";
+import { DollarCircleOutlined, TrophyOutlined } from "@ant-design/icons";
 import { DRAWER_ACCENT } from "../../../../src/components/shared/drawerStyles";
 
 const { Title } = Typography;

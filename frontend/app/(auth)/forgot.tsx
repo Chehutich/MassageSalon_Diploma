@@ -110,7 +110,6 @@ export default function ForgotScreen() {
               )}
             </View>
 
-            {/* ФУТЕР */}
             {step === 1 && !loading && (
               <View style={styles.footerWrapper}>
                 <AuthFooter

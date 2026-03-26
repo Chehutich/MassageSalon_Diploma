@@ -200,7 +200,7 @@ export function BookingSheet({
   };
 
   const slotDateLabel = selectedDate
-    ? `${DAYS_OF_WEEK[selectedDate.getDay()]}, ${selectedDate.getDate()} ${MONTHS_UA_FULL[selectedDate.getMonth()]}`
+    ? `${DAYS_OF_WEEK[(selectedDate.getDay() + 6) % 7]}, ${selectedDate.getDate()} ${MONTHS_UA_FULL[selectedDate.getMonth()]}`
     : "";
 
   return (

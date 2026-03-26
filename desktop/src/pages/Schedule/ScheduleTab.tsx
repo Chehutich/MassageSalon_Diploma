@@ -27,10 +27,11 @@ export const ScheduleTab: React.FC<Props> = ({
   onTimeChange,
 }) => (
   <div style={{ maxWidth: 600 }}>
-    <Space orientation="vertical" style={{ width: "100%" }} size={12}>
+    <Space direction="vertical" style={{ width: "100%" }} size={12}>
       {DAY_ORDER.map((day) => {
         const s = getScheduleForDay(day);
         const isActive = !!s;
+
         return (
           <Card
             key={day}
@@ -47,7 +48,10 @@ export const ScheduleTab: React.FC<Props> = ({
                   checked={isActive}
                   onChange={(v) => onToggle(day, v)}
                   size="small"
-                  style={{ backgroundColor: isActive ? ACCENT : undefined }}
+                  style={{
+                    backgroundColor: isActive ? ACCENT : undefined,
+                    zIndex: 1,
+                  }}
                 />
               </Col>
               <Col span={5}>
@@ -60,29 +64,28 @@ export const ScheduleTab: React.FC<Props> = ({
                 </Text>
               </Col>
               <Col span={14}>
-                {isActive ? (
+                {s ? (
                   <Space>
                     <TimePicker
-                      value={dayjs(s!.start_time, "HH:mm")}
+                      value={dayjs(s.start_time, "HH:mm")}
                       format="HH:mm"
                       minuteStep={15}
                       size="small"
                       allowClear={false}
                       onChange={(t) => {
-                        if (t)
-                          onTimeChange(day, t.format("HH:mm"), s!.end_time);
+                        if (t) onTimeChange(day, t.format("HH:mm"), s.end_time);
                       }}
                     />
                     <Text type="secondary">—</Text>
                     <TimePicker
-                      value={dayjs(s!.end_time, "HH:mm")}
+                      value={dayjs(s.end_time, "HH:mm")}
                       format="HH:mm"
                       minuteStep={15}
                       size="small"
                       allowClear={false}
                       onChange={(t) => {
                         if (t)
-                          onTimeChange(day, s!.start_time, t.format("HH:mm"));
+                          onTimeChange(day, s.start_time, t.format("HH:mm"));
                       }}
                     />
                   </Space>
@@ -93,9 +96,9 @@ export const ScheduleTab: React.FC<Props> = ({
                 )}
               </Col>
               <Col span={4} style={{ textAlign: "right" }}>
-                {isActive && (
+                {s && (
                   <Tag color="green" style={{ margin: 0 }}>
-                    {s!.start_time} – {s!.end_time}
+                    {s.start_time} – {s.end_time}
                   </Tag>
                 )}
               </Col>

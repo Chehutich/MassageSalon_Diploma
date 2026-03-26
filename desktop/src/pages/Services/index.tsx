@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, Select, Tag } from "antd";
+import { Card, Tag } from "antd";
 import { PlusOutlined, ScissorOutlined } from "@ant-design/icons";
 import { Category, Service } from "../../api/types";
 import { SearchToolbar } from "../../../src/components/shared/SearchToolbar";

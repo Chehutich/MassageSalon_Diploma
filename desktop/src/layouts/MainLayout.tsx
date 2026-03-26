@@ -160,7 +160,6 @@ const MainLayout: React.FC<Props> = ({
               flex: 1,
               minWidth: 0,
               minHeight: 0,
-              scrollbarGutter: "stable",
             }}
           >
             {children}

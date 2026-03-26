@@ -54,8 +54,8 @@ export function MasterScheduleCalendar(props: MasterScheduleProps) {
                 style={[
                   styles.cellText,
                   isWorking && styles.workText,
-                  isTimeOff && styles.offText,
                   isToday && styles.todayText,
+                  isTimeOff && styles.offText,
                 ]}
               >
                 {day}
@@ -83,7 +83,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
-    overflow: "hidden",
   },
   cellText: {
     fontSize: 13,

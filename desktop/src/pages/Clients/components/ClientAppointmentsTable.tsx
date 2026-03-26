@@ -3,7 +3,7 @@ import { Select, Space, Table, Typography } from "antd";
 import dayjs from "dayjs";
 import {
   AppointmentStatus,
-  ClientDetails,
+  ClientAppointment,
   NavigateFn,
   TAB_KEYS,
 } from "../../../api/types";
@@ -12,29 +12,29 @@ import { DRAWER_ACCENT } from "../../../../src/components/shared/drawerStyles";
 
 const { Text, Title } = Typography;
 
-type AppointmentRow = ClientDetails["appointments"][0];
-
-const columns = (onNavigate?: NavigateFn, onClose?: () => void) => [
+const columns = [
   {
     title: "Дата",
     dataIndex: "start_time",
     key: "date",
     render: (v: string) => dayjs(v).format("DD.MM.YYYY HH:mm"),
-    sorter: (a: AppointmentRow, b: AppointmentRow) =>
+    sorter: (a: ClientAppointment, b: ClientAppointment) =>
       dayjs(a.start_time).unix() - dayjs(b.start_time).unix(),
     defaultSortOrder: "descend" as const,
   },
   {
     title: "Послуга",
     key: "service",
-    render: (_: unknown, r: AppointmentRow) => <Text>{r.services.title}</Text>,
-    sorter: (a: AppointmentRow, b: AppointmentRow) =>
+    render: (_: unknown, r: ClientAppointment) => (
+      <Text>{r.services.title}</Text>
+    ),
+    sorter: (a: ClientAppointment, b: ClientAppointment) =>
       a.services.title.localeCompare(b.services.title),
   },
   {
     title: "Майстер",
     key: "master",
-    render: (_: unknown, r: AppointmentRow) => (
+    render: (_: unknown, r: ClientAppointment) => (
       <Text>
         {r.masters.users.first_name} {r.masters.users.last_name}
       </Text>
@@ -49,7 +49,7 @@ const columns = (onNavigate?: NavigateFn, onClose?: () => void) => [
         {v} ₴
       </Text>
     ),
-    sorter: (a: AppointmentRow, b: AppointmentRow) =>
+    sorter: (a: ClientAppointment, b: ClientAppointment) =>
       a.actual_price - b.actual_price,
   },
   {
@@ -61,8 +61,8 @@ const columns = (onNavigate?: NavigateFn, onClose?: () => void) => [
 ];
 
 interface Props {
-  appointments: AppointmentRow[];
-  filteredAppointments: AppointmentRow[];
+  appointments: ClientAppointment[];
+  filteredAppointments: ClientAppointment[];
   statusFilter: AppointmentStatus | null;
   onStatusFilterChange: (v: AppointmentStatus | null) => void;
   onNavigate?: NavigateFn;
@@ -104,7 +104,7 @@ export const ClientAppointmentsTable: React.FC<Props> = ({
     </Space>
     <Table
       dataSource={filteredAppointments}
-      columns={columns(onNavigate, onClose)}
+      columns={columns}
       rowKey="id"
       size="small"
       pagination={{ pageSize: 5, showSizeChanger: false }}

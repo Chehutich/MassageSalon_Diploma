@@ -1,8 +1,9 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import {
   View,
   Text,
   ScrollView,
+  RefreshControl,
   StyleSheet,
   Pressable,
   Linking,
@@ -31,6 +32,13 @@ export default function MasterDashboard() {
   const { data: me } = useGetMe();
   const { data: schedule, refetch } = useGetMySchedule();
   const { openAppointment } = useSheets();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     const connection = signalRService.getConnection();
@@ -70,7 +78,6 @@ export default function MasterDashboard() {
     return {
       count: todayApps.length,
       nextBreak: breakTime,
-      // Генерируем текст сразу с плюрализацией
       sessionText: pluralize(todayApps.length, PLURAL.appointment, false),
     };
   }, [schedule]);
@@ -81,19 +88,17 @@ export default function MasterDashboard() {
 
     const now = new Date();
 
-    // 1. Фильтруем:
-    // - Либо запись еще не закончилась (предстоящая)
-    // - Либо она отменена ("cancelled"), но она на сегодня или будущее
     const upcoming = [...schedule]
       .filter((a) => {
-        const isCancelled = a.status?.toLowerCase() === "cancelled";
+        const status = a.status?.toLowerCase();
+        if (status === "completed") return false;
+        const isCancelled = status === "cancelled";
+        const isNoshow = status === "noshow";
         const isFutureOrToday =
           new Date(a.endTime as string) > now || isToday(a.startTime as string);
-
-        // Показываем если: (не окончена) ИЛИ (отменена и актуальна по дате)
         return (
           new Date(a.endTime as string) > now ||
-          (isCancelled && isFutureOrToday)
+          ((isCancelled || isNoshow) && isFutureOrToday)
         );
       })
       .sort(
@@ -102,10 +107,12 @@ export default function MasterDashboard() {
           new Date(b.startTime as string).getTime(),
       );
 
-    // Для главного фокуса (nextAppointment) лучше брать только НЕ отмененную запись
     const next =
-      upcoming.find((a) => a.status?.toLowerCase() !== "cancelled") ||
-      upcoming[0];
+      upcoming.find(
+        (a) =>
+          a.status?.toLowerCase() !== "cancelled" &&
+          a.status?.toLowerCase() !== "noshow",
+      ) ?? null;
 
     const remaining = upcoming.filter((a) => a.id !== next?.id);
 
@@ -119,12 +126,42 @@ export default function MasterDashboard() {
       {} as Record<string, typeof remaining>,
     );
 
+    Object.keys(grouped).forEach((key) => {
+      grouped[key].sort((a, b) => {
+        const aC = a.status?.toLowerCase() === "cancelled" ? 1 : 0;
+        const bC = b.status?.toLowerCase() === "cancelled" ? 1 : 0;
+        return aC - bC;
+      });
+    });
+
     return { nextAppointment: next, groupedRemaining: grouped };
   }, [schedule]);
 
   const initials = me
     ? `${me.firstName[0]}${me.lastName[0]}`.toUpperCase()
     : "??";
+
+  const getStatusMeta = (status?: string | null) => {
+    switch (status?.toLowerCase()) {
+      case "completed":
+        return { label: "ВИКОНАНО", color: Palette.taupe, dot: Palette.taupe };
+      case "noshow":
+        return { label: "НЕ З'ЯВИВСЯ", color: "#8B7FA8", dot: "#B8A9C9" };
+      case "cancelled":
+        return { label: "СКАСОВАНО", color: Palette.rose, dot: Palette.rose };
+      default:
+        return {
+          label: isToday(nextAppointment?.startTime as string)
+            ? "СЬОГОДНІ"
+            : "ЗАВТРА",
+          color: Palette.sage,
+          dot: Palette.sage,
+        };
+    }
+  };
+  const statusMeta = nextAppointment
+    ? getStatusMeta(nextAppointment.status)
+    : null;
 
   return (
     <View style={styles.root}>
@@ -133,6 +170,14 @@ export default function MasterDashboard() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scroll}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={Palette.taupe}
+              colors={[Palette.taupe]}
+            />
+          }
         >
           {/* Header */}
           <View style={styles.header}>
@@ -208,11 +253,20 @@ export default function MasterDashboard() {
             >
               <View style={styles.timeColumn}>
                 {nextAppointment && (
-                  <View style={[styles.dateTag, { marginBottom: 4 }]}>
-                    <Text style={styles.dateTagText}>
-                      {isToday(nextAppointment.startTime as string)
-                        ? "СЬОГОДНІ"
-                        : "ЗАВТРА"}
+                  <View
+                    style={[
+                      styles.dateTag,
+                      {
+                        marginBottom: 4,
+                        backgroundColor: statusMeta!.color + "15",
+                        borderColor: statusMeta!.color + "30",
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.dateTagText, { color: statusMeta!.color }]}
+                    >
+                      {statusMeta!.label}
                     </Text>
                   </View>
                 )}
@@ -266,7 +320,6 @@ export default function MasterDashboard() {
             <View style={{ marginTop: 24 }}>
               {Object.entries(groupedRemaining).map(([date, items]) => (
                 <View key={date} style={{ marginBottom: 20 }}>
-                  {/* Подзаголовок даты */}
                   <View style={styles.dateHeader}>
                     <Text style={styles.dateHeaderText}>
                       {isToday(date)
@@ -279,18 +332,28 @@ export default function MasterDashboard() {
                   </View>
 
                   <View style={styles.listContainer}>
-                    {items.map((item) => (
-                      <Pressable
-                        key={item.id}
-                        onPress={() => openAppointment(item.id)}
-                        style={styles.listItemWrapper}
-                      >
-                        <AppointmentCard
-                          item={item as any}
-                          isMasterView={true}
-                        />
-                      </Pressable>
-                    ))}
+                    {items.map((item) => {
+                      const isNoshow = item.status?.toLowerCase() === "noshow";
+                      const isCancelled =
+                        item.status?.toLowerCase() === "cancelled";
+                      const isDimmed = isNoshow || isCancelled;
+
+                      return (
+                        <Pressable
+                          key={item.id}
+                          onPress={() => openAppointment(item.id)}
+                          style={[
+                            styles.listItemWrapper,
+                            isDimmed && { opacity: 0.45 },
+                          ]}
+                        >
+                          <AppointmentCard
+                            item={item as any}
+                            isMasterView={true}
+                          />
+                        </Pressable>
+                      );
+                    })}
                   </View>
                 </View>
               ))}

@@ -3,7 +3,7 @@ import {
   PlusOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
-import { Card, message, Segmented, Tag, Space, Select } from "antd";
+import { Card, message, Segmented, Tag, Space } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Appointment,
@@ -83,7 +83,7 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({
             refresh();
           }
         },
-        (type: string, id: string, name: string) => {
+        (type: string, id: string) => {
           if (type === "service")
             onNavigate(TAB_KEYS.services, { id, type: "service" });
           if (type === "master")

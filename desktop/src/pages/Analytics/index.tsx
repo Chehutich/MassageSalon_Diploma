@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Card, Col, DatePicker, Row, Space, Spin, Tag, Typography } from "antd";
+import { Card, Col, DatePicker, Row, Space, Spin, Tag } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { PageHeader } from "../../../src/components/shared/PageHeader";
@@ -19,7 +19,6 @@ import { MasterRevenueChart } from "./components/MasterRevenueChart";
 import { TopServicesChart } from "./components/TopServicesChart";
 
 const { RangePicker } = DatePicker;
-const { Title } = Typography;
 
 export const AnalyticsPage: React.FC = () => {
   const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);

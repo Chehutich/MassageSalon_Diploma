@@ -1,4 +1,4 @@
-export const DAYS_OF_WEEK = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+export const DAYS_OF_WEEK = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 export const MONTHS_UA_SHORT = [
   "Січ",
   "Лют",

@@ -4,19 +4,19 @@ import ukUA from "antd/locale/uk_UA";
 import LoginPage from "./pages/Login";
 import MainLayout from "./layouts/MainLayout";
 import { AppRouter } from "./AppRouter";
-import { TAB_KEYS, type NavParams } from "./api/types";
+import { TAB_KEYS, TabKey, type NavParams } from "./api/types";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<string>(TAB_KEYS.appointments);
+  const [activeTab, setActiveTab] = useState<TabKey>(TAB_KEYS.appointments);
   const [navParams, setNavParams] = useState<NavParams | null>(null);
 
-  const navigateTo = (tabKey: string, params?: NavParams) => {
+  const navigateTo = (tabKey: TabKey, params?: NavParams) => {
     setNavParams(params ?? null);
     setActiveTab(tabKey);
   };
 
-  const handleMenuChange = (key: string) => {
+  const handleMenuChange = (key: TabKey) => {
     setActiveTab(key);
     setNavParams(null);
   };

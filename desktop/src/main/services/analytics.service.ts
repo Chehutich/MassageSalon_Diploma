@@ -1,7 +1,8 @@
+import { IpcMainInvokeEvent } from "electron";
 import { prisma } from "../db/prisma";
 
 export const getAnalytics = async (
-  _: any,
+  _: IpcMainInvokeEvent,
   { from, to }: { from?: string; to?: string },
 ) => {
   try {
@@ -37,7 +38,6 @@ export const getAnalytics = async (
       orderBy: { start_time: "asc" },
     });
 
-    // ✅ Сериализуем все не-примитивные типы
     const serialized = appointments.map((a) => ({
       ...a,
       start_time: a.start_time.toISOString(), // Date → string
@@ -45,7 +45,7 @@ export const getAnalytics = async (
     }));
 
     return { success: true, data: serialized };
-  } catch (e: any) {
-    return { success: false, error: e.message };
+  } catch (e: unknown) {
+    return { success: false, error: (e as Error).message };
   }
 };
