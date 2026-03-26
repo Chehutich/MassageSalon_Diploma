@@ -53,7 +53,8 @@ export const useAppointments = () => {
         (item) =>
           item.users?.first_name?.toLowerCase().includes(lowerSearch) ||
           item.users?.last_name?.toLowerCase().includes(lowerSearch) ||
-          item.users?.phone?.includes(searchText),
+          item.users?.phone?.includes(searchText) ||
+          item.id.toLowerCase().includes(searchText),
       );
     }
 

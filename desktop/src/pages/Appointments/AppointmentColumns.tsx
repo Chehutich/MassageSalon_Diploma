@@ -9,25 +9,33 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { Appointment, AppointmentStatus } from "../../api/types";
+import { Appointment, AppointmentStatus, Service } from "../../api/types";
 
 const { Text, Link } = Typography;
 
+const STATUS_CONFIG: Record<
+  AppointmentStatus,
+  { color: string; text: string }
+> = {
+  Confirmed: { color: "blue", text: "Очікується" },
+  Completed: { color: "green", text: "Виконано" },
+  NoShow: { color: "volcano", text: "Не прийшов" },
+  Cancelled: { color: "red", text: "Скасовано" },
+};
+
 export const getStatusTag = (status: AppointmentStatus | string) => {
-  const config: Record<string, { color: string; text: string }> = {
-    Confirmed: { color: "blue", text: "Очікується" },
-    Completed: { color: "green", text: "Виконано" },
-    NoShow: { color: "volcano", text: "Не прийшов" },
-    Cancelled: { color: "red", text: "Скасовано" },
+  const config = STATUS_CONFIG[status as AppointmentStatus] ?? {
+    color: "default",
+    text: status,
   };
-  const { color, text } = config[status] || { color: "default", text: status };
-  return <Tag color={color}>{text}</Tag>;
+  return <Tag color={config.color}>{config.text}</Tag>;
 };
 
 export const getColumns = (
   updateStatus: (id: string, status: AppointmentStatus) => void,
   handleNavigate: (type: string, id: string, name: string) => void,
   onShowDetails: (record: Appointment) => void,
+  services: Service[],
 ) => [
   {
     title: "Час та Дата",
@@ -39,9 +47,8 @@ export const getColumns = (
     render: (time: string) => {
       const dateObj = dayjs(time);
       const isToday = dateObj.isSame(dayjs(), "day");
-
       return (
-        <Space orientation="vertical" size={0}>
+        <Space direction="vertical" size={0}>
           <Text strong style={{ color: "#0f766e", fontSize: "14px" }}>
             {dateObj.format("HH:mm")}
           </Text>
@@ -61,7 +68,11 @@ export const getColumns = (
       <Link
         onClick={(e) => {
           e.stopPropagation();
-          handleNavigate("client", record.users.id, record.users.first_name);
+          handleNavigate(
+            "client",
+            record.users.id,
+            `${record.users.first_name} ${record.users.last_name}`,
+          );
         }}
       >
         {record.users?.first_name} {record.users?.last_name}
@@ -73,6 +84,10 @@ export const getColumns = (
     key: "service",
     sorter: (a: Appointment, b: Appointment) =>
       a.services.title.localeCompare(b.services.title),
+    filters: services.map((s) => ({ text: s.title, value: s.id })),
+    onFilter: (value: unknown, record: Appointment) =>
+      record.services?.id === value,
+    filterSearch: true,
     render: (record: Appointment) => (
       <Link
         onClick={(e) => {
@@ -102,6 +117,11 @@ export const getColumns = (
     key: "status",
     sorter: (a: Appointment, b: Appointment) =>
       a.status.localeCompare(b.status),
+    filters: (Object.keys(STATUS_CONFIG) as AppointmentStatus[]).map((key) => ({
+      text: STATUS_CONFIG[key].text,
+      value: key,
+    })),
+    onFilter: (value: unknown, record: Appointment) => record.status === value,
     render: (record: Appointment) => {
       const items: MenuProps["items"] = [
         {
@@ -123,7 +143,6 @@ export const getColumns = (
           danger: true,
         },
       ];
-
       return (
         <Dropdown
           menu={{
@@ -142,11 +161,7 @@ export const getColumns = (
           >
             {getStatusTag(record.status)}
             <DownOutlined
-              style={{
-                fontSize: "10px",
-                marginLeft: "4px",
-                color: "#bfbfbf",
-              }}
+              style={{ fontSize: "10px", marginLeft: "4px", color: "#bfbfbf" }}
             />
           </div>
         </Dropdown>

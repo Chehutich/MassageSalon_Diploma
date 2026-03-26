@@ -4,11 +4,14 @@ import {
   PhoneOutlined,
   SolutionOutlined,
 } from "@ant-design/icons";
-import { Master } from "../../api/types";
+import { Master, Service } from "../../api/types";
 
 const { Text } = Typography;
 
-export const getMasterColumns = (onEdit: (record: Master) => void) => [
+export const getMasterColumns = (
+  onEdit: (record: Master) => void,
+  services: Service[],
+) => [
   {
     title: "Майстер",
     key: "master",
@@ -30,12 +33,12 @@ export const getMasterColumns = (onEdit: (record: Master) => void) => [
         >
           <UserOutlined style={{ color: "#0f766e" }} />
         </div>
-        <Space orientation="vertical" size={0}>
+        <Space direction="vertical" size={0}>
           <Text
             strong
             style={{ color: record.is_active ? "inherit" : "#bfbfbf" }}
           >
-            {`${record.users.first_name} ${record.users.last_name}`}
+            {record.users.first_name} {record.users.last_name}
           </Text>
           <Text type="secondary" style={{ fontSize: "12px" }}>
             {record.users.email || "Без email"}
@@ -58,9 +61,13 @@ export const getMasterColumns = (onEdit: (record: Master) => void) => [
   {
     title: "Послуги",
     key: "services_count",
+    filters: services.map((s) => ({ text: s.title, value: s.id })),
+    filterSearch: true,
+    onFilter: (value: unknown, record: Master) =>
+      record.master_services?.some((ms) => ms.service_id === value) ?? false,
     render: (_: unknown, record: Master) => (
       <Tag color="blue" icon={<SolutionOutlined />}>
-        {record.master_services?.length || 0} послуг
+        {record.master_services?.length ?? 0} послуг
       </Tag>
     ),
   },
@@ -68,6 +75,11 @@ export const getMasterColumns = (onEdit: (record: Master) => void) => [
     title: "Статус",
     dataIndex: "is_active",
     key: "status",
+    filters: [
+      { text: "Активний", value: true },
+      { text: "Архів", value: false },
+    ],
+    onFilter: (value: unknown, record: Master) => record.is_active === value,
     render: (active: boolean) => (
       <Tag color={active ? "success" : "default"}>
         {active ? "Активний" : "Архів"}

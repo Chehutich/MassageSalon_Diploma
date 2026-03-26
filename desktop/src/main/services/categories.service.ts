@@ -1,7 +1,6 @@
 import { prisma } from "../db/prisma";
 import { Category, ServiceResponse } from "../../api/types";
 
-// Prisma возвращает categories с _count — расширяем тип
 type CategoryWithCount = Category & {
   _count: { services: number };
 };

@@ -4,7 +4,7 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 import { Card, message, Segmented, Tag, Space, Select } from "antd";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Appointment,
   AppointmentStatus,
@@ -22,9 +22,15 @@ import { SearchToolbar } from "../../../src/components/shared/SearchToolbar";
 
 interface AppointmentsPageProps {
   onNavigate: NavigateFn;
+  initialId?: string | null;
+  onHandled?: () => void;
 }
 
-const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ onNavigate }) => {
+const AppointmentsPage: React.FC<AppointmentsPageProps> = ({
+  onNavigate,
+  initialId,
+  onHandled,
+}) => {
   const {
     data,
     services,
@@ -35,8 +41,6 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ onNavigate }) => {
     refresh,
     searchText,
     setSearchText,
-    serviceFilter,
-    setServiceFilter,
     dateRange,
     setDateRange,
   } = useAppointments();
@@ -49,9 +53,20 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ onNavigate }) => {
 
   const handleReset = () => {
     setSearchText("");
-    setServiceFilter(null);
     setDateRange(null);
   };
+
+  useEffect(() => {
+    if (!initialId || data.length === 0) return;
+    const target = data.find((a) => a.id === initialId);
+    if (target) {
+      setView("All");
+      setSearchText(initialId);
+      setSelectedRecord(target);
+      setDrawerVisible(true);
+    }
+    onHandled?.();
+  }, [initialId, data]);
 
   const columns = useMemo(
     () =>
@@ -63,19 +78,21 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ onNavigate }) => {
             refresh();
           }
         },
-        (type: string, id: string) => {
-          if (type === "service") {
-            onNavigate("3", { id, type: "service" });
-          } else if (type === "master") {
-            onNavigate("2", { id, type: "master" });
-          }
+        (type: string, id: string, name: string) => {
+          if (type === "service")
+            onNavigate(TAB_KEYS.services, { id, type: "service" });
+          if (type === "master")
+            onNavigate(TAB_KEYS.masters, { id, type: "master" });
+          if (type === "client")
+            onNavigate(TAB_KEYS.clients, { id, type: "client" });
         },
         (record: Appointment) => {
           setSelectedRecord(record);
           setDrawerVisible(true);
         },
+        services,
       ),
-    [refresh, onNavigate],
+    [refresh, onNavigate, services],
   );
 
   return (
@@ -123,24 +140,13 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ onNavigate }) => {
           onSearchChange={setSearchText}
           placeholder="Пошук клієнта..."
           onClear={handleReset}
-          showClear={
-            !!(searchText || serviceFilter || dateRange || view !== "Today")
-          }
+          showClear={!!(searchText || dateRange || view !== "Today")}
         >
           <AppointmentFilters
             dateRange={dateRange}
             setDateRange={setDateRange}
             view={view}
             onlyDates={true}
-          />
-
-          <Select
-            placeholder="Усі послуги"
-            style={{ width: 200 }}
-            allowClear
-            value={serviceFilter}
-            onChange={setServiceFilter}
-            options={services.map((s) => ({ label: s.title, value: s.id }))}
           />
         </SearchToolbar>
 
@@ -166,12 +172,9 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ onNavigate }) => {
           visible={drawerVisible}
           onClose={() => setDrawerVisible(false)}
           getStatusTag={getStatusTag}
-          handleNavigate={(type, id) => {
+          onNavigate={(tabKey, params) => {
             setDrawerVisible(false);
-            if (type === "service")
-              onNavigate(TAB_KEYS.services, { id, type: "service" });
-            if (type === "master")
-              onNavigate(TAB_KEYS.masters, { id, type: "master" });
+            if (params) onNavigate(tabKey, params);
           }}
         />
 

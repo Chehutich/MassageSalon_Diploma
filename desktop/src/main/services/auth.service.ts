@@ -1,4 +1,4 @@
-import { ServiceResponse, User } from "../../api/types";
+import { Role, ServiceResponse, User } from "../../api/types";
 import { prisma } from "../db/prisma";
 import bcrypt from "bcryptjs";
 
@@ -15,7 +15,7 @@ export const AuthService = {
       );
       if (!isPasswordValid) return { success: false, error: "Невірний пароль" };
 
-      if (user.role !== "Admin") {
+      if (user.role !== Role.Admin) {
         return { success: false, error: "Відмовлено у доступі: ви не адмін" };
       }
 

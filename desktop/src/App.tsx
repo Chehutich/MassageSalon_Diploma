@@ -6,7 +6,7 @@ import MainLayout from "./layouts/MainLayout";
 import AppointmentsPage from "./pages/Appointments";
 import { ServicesPage } from "./pages/Services";
 import { MastersPage } from "./pages/Masters";
-//import { ClientsPage } from "./pages/Clients";
+import { ClientsPage } from "./pages/Clients";
 import { CategoriesPage } from "./pages/Categories";
 //import { SchedulePage } from "./pages/Schedule";
 
@@ -41,19 +41,26 @@ const App: React.FC = () => {
           onMenuClick={handleMenuChange}
         >
           {activeTab === TAB_KEYS.appointments && (
-            <AppointmentsPage onNavigate={navigateTo} />
+            <AppointmentsPage
+              onNavigate={navigateTo}
+              initialId={
+                navParams?.type === "appointment" ? navParams.id : null
+              }
+              onHandled={() => setNavParams(null)}
+            />
           )}
           {/*{activeTab === "2" && <SchedulePage />}*/}
 
-          {/*{activeTab === "3" && (
+          {activeTab === TAB_KEYS.clients && (
             <ClientsPage
               initialId={navParams?.type === "client" ? navParams.id : null}
               onHandled={() => setNavParams(null)}
+              onNavigate={navigateTo}
             />
           )}
 
           <Divider style={{ margin: "8px 0" }} />
-         */}
+
           {activeTab === TAB_KEYS.masters && (
             <MastersPage
               initialId={navParams?.type === "master" ? navParams.id : null}

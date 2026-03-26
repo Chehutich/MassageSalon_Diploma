@@ -10,7 +10,7 @@ export interface User {
   last_name: string;
   phone?: string;
   email?: string;
-  role: string;
+  role: Role;
 }
 
 export interface Master {
@@ -68,6 +68,43 @@ export interface Appointment {
   masters: Master;
 }
 
+export enum Role {
+  Admin = "Admin",
+  Master = "Master",
+  Client = "Client",
+  Guest = "Guest",
+}
+
+export interface Client {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  email?: string;
+  role: Role;
+  created_at: string;
+  _count?: { appointments: number };
+  last_appointment?: string | null;
+}
+
+export interface ClientDetails extends Client {
+  appointments: {
+    id: string;
+    start_time: string;
+    status: AppointmentStatus;
+    actual_price: number;
+    services: {
+      id: string;
+      title: string;
+      duration: number;
+    };
+    masters: {
+      id: string;
+      users: { first_name: string; last_name: string };
+    };
+  }[];
+}
+
 export type AppointmentStatus =
   | "Confirmed"
   | "Completed"
@@ -112,11 +149,12 @@ export interface UpdateMasterPayload extends CreateMasterPayload {
 
 export interface NavParams {
   id: string;
-  type: "service" | "master" | "client";
+  type: "service" | "master" | "client" | "appointment";
 }
 
 export const TAB_KEYS = {
   appointments: "1",
+  clients: "3",
   masters: "4",
   services: "5",
   categories: "6",
@@ -177,6 +215,10 @@ declare global {
         id: string;
         data: Partial<Category>;
       }) => Promise<ServiceResponse<void>>;
+
+      getClients: () => Promise<ServiceResponse<Client[]>>;
+
+      getClientById: (id: string) => Promise<ServiceResponse<ClientDetails>>;
     };
   }
 }

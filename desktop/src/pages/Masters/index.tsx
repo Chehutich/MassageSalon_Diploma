@@ -24,8 +24,6 @@ export const MastersPage: React.FC<MastersPageProps> = ({
   const [loading, setLoading] = useState(false);
 
   const [searchText, setSearchText] = useState("");
-  const [serviceFilter, setServiceFilter] = useState<string | null>(null);
-
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingMaster, setEditingMaster] = useState<Master | null>(null);
 
@@ -41,8 +39,7 @@ export const MastersPage: React.FC<MastersPageProps> = ({
       if (initialId) {
         const target = mRes.data.find((m) => m.id === initialId);
         if (target) {
-          setSearchText(`${target.users.first_name} ${target.users.last_name}`);
-          setServiceFilter(null);
+          setSearchText(target.id);
         }
         onHandled?.();
       }
@@ -61,7 +58,6 @@ export const MastersPage: React.FC<MastersPageProps> = ({
 
   const handleReset = () => {
     setSearchText("");
-    setServiceFilter(null);
   };
 
   const handleOpenEdit = (record: Master | null) => {
@@ -69,29 +65,25 @@ export const MastersPage: React.FC<MastersPageProps> = ({
     setIsModalVisible(true);
   };
 
-  const columns = useMemo(() => getMasterColumns(handleOpenEdit), []);
+  const columns = useMemo(
+    () => getMasterColumns(handleOpenEdit, services),
+    [services],
+  );
 
   const filteredData = useMemo(() => {
     const query = searchText.toLowerCase().trim();
-
     return masters.filter((m) => {
       const firstName = m.users.first_name.toLowerCase();
       const lastName = m.users.last_name.toLowerCase();
-      const fullName = `${firstName} ${lastName}`;
-      const fullNameReversed = `${lastName} ${firstName}`;
-
-      const matchSearch =
-        fullName.includes(query) ||
-        fullNameReversed.includes(query) ||
-        m.users.phone?.includes(query);
-
-      const matchService = serviceFilter
-        ? m.master_services?.some((ms) => ms.service_id === serviceFilter)
-        : true;
-
-      return matchSearch && matchService;
+      return (
+        `${firstName} ${lastName}`.includes(query) ||
+        `${lastName} ${firstName}`.includes(query) ||
+        m.users.phone?.includes(query) ||
+        m.users.email?.toLowerCase().includes(query) ||
+        m.id.toLowerCase().includes(query)
+      );
     });
-  }, [masters, searchText, serviceFilter]);
+  }, [masters, searchText]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -115,23 +107,8 @@ export const MastersPage: React.FC<MastersPageProps> = ({
           onSearchChange={setSearchText}
           placeholder="Пошук майстра..."
           onClear={handleReset}
-          showClear={!!(searchText || serviceFilter)}
-        >
-          <Select
-            placeholder="Всі послуги"
-            style={{ width: 250 }}
-            allowClear
-            value={serviceFilter}
-            onChange={setServiceFilter}
-            options={services.map((s) => ({
-              label: s.title,
-              value: s.id,
-            }))}
-            showSearch={{
-              optionFilterProp: "label",
-            }}
-          />
-        </SearchToolbar>
+          showClear={!!searchText}
+        ></SearchToolbar>
 
         <DataTable
           dataSource={filteredData}

@@ -6,6 +6,7 @@ import {
   LogoutOutlined,
   ScissorOutlined,
   TagsOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { TAB_KEYS } from "../../src/api/types";
 
@@ -23,6 +24,7 @@ interface Props {
 
 const MENU_ITEMS = [
   { key: TAB_KEYS.appointments, icon: <CalendarOutlined />, label: "Записи" },
+  { key: TAB_KEYS.clients, icon: <UserOutlined />, label: "Клієнти" },
   { key: TAB_KEYS.masters, icon: <TeamOutlined />, label: "Майстри" },
   { key: TAB_KEYS.services, icon: <ScissorOutlined />, label: "Послуги" },
   { key: TAB_KEYS.categories, icon: <TagsOutlined />, label: "Категорії" },

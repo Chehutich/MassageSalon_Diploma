@@ -14,7 +14,7 @@ import {
   FolderOutlined,
   ScissorOutlined,
 } from "@ant-design/icons";
-import { Category, Service, TAB_KEYS } from "../../api/types";
+import { Category, NavigateFn, Service, TAB_KEYS } from "../../api/types";
 import { SharedModal } from "../../components/shared/SharedModal";
 import { Sanitizer } from "../../utils/sanitizer";
 
@@ -23,7 +23,7 @@ interface Props {
   category: Category | null;
   onClose: () => void;
   onSuccess: () => void;
-  onNavigate: (tabKey: string, params?: any) => void;
+  onNavigate: NavigateFn;
 }
 
 export const EditCategoryModal: React.FC<Props> = ({

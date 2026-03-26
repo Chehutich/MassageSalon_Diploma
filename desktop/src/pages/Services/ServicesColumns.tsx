@@ -1,17 +1,20 @@
 import { Space, Typography, Tag, Button } from "antd";
 import { ScissorOutlined, FolderOutlined } from "@ant-design/icons";
-import { Service } from "../../api/types";
+import { Category, Service } from "../../api/types";
 
 const { Text } = Typography;
 
-export const getServiceColumns = (onEdit: (record: Service) => void) => [
+export const getServiceColumns = (
+  onEdit: (record: Service) => void,
+  categories: Category[],
+) => [
   {
     title: "Послуга",
     dataIndex: "title",
     key: "title",
     sorter: (a: Service, b: Service) => a.title.localeCompare(b.title),
     render: (text: string, record: Service) => (
-      <Space orientation="vertical" size={0}>
+      <Space direction="vertical" size={0}>
         <Text
           strong
           style={{ color: record.is_active ? "inherit" : "#bfbfbf" }}
@@ -28,11 +31,11 @@ export const getServiceColumns = (onEdit: (record: Service) => void) => [
     title: "Категорія",
     dataIndex: ["categories", "title"],
     key: "category",
-    sorter: (a: Service, b: Service) => {
-      const catA = a.categories?.title || "";
-      const catB = b.categories?.title || "";
-      return catA.localeCompare(catB);
-    },
+    sorter: (a: Service, b: Service) =>
+      (a.categories?.title ?? "").localeCompare(b.categories?.title ?? ""),
+    filters: categories.map((c) => ({ text: c.title, value: c.id })),
+    filterSearch: true,
+    onFilter: (value: unknown, record: Service) => record.category_id === value,
     render: (category: string, record: Service) => (
       <Tag
         color={record.is_active ? "geekblue" : "default"}
@@ -59,6 +62,11 @@ export const getServiceColumns = (onEdit: (record: Service) => void) => [
     key: "is_active",
     sorter: (a: Service, b: Service) =>
       a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1,
+    filters: [
+      { text: "Активна", value: true },
+      { text: "Архів", value: false },
+    ],
+    onFilter: (value: unknown, record: Service) => record.is_active === value,
     render: (active: boolean) => (
       <Tag
         color={active ? "success" : "default"}

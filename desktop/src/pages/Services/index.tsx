@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Select, Tag } from "antd";
 import { PlusOutlined, ScissorOutlined } from "@ant-design/icons";
-import { Service } from "../../api/types";
+import { Category, Service } from "../../api/types";
 import { SearchToolbar } from "../../../src/components/shared/SearchToolbar";
 import { DataTable } from "../../../src/components/shared/DataTable";
 import { PageHeader } from "../../../src/components/shared/PageHeader";
@@ -18,9 +18,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   onHandled,
 }) => {
   const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
 
@@ -31,47 +31,42 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
   const loadServices = async () => {
     setLoading(true);
-    const res = await window.dbAPI.getServices();
-    if (res.success && res.data) {
-      setServices(res.data);
+    const [sRes, cRes] = await Promise.all([
+      window.dbAPI.getServices(),
+      window.dbAPI.getCategories(),
+    ]);
+
+    if (sRes.success && sRes.data) {
+      setServices(sRes.data);
       if (initialId) {
-        const target = res.data.find((s) => s.id === initialId);
-        if (target) setSearchText(target.title);
+        const target = sRes.data.find((s) => s.id === initialId);
+        if (target) setSearchText(target.id);
         onHandled?.();
       }
     }
+
+    if (cRes.success && cRes.data) setCategories(cRes.data);
     setLoading(false);
   };
 
   useEffect(() => {
     loadServices();
-  }, []);
+  }, [initialId]);
 
-  const columns = useMemo(() => getServiceColumns(handleOpenEdit), []);
-
-  const categoriesOptions = useMemo(() => {
-    const map = new Map();
-    services.forEach((s) => {
-      if (s.categories) map.set(s.categories.id, s.categories.title);
-    });
-    return Array.from(map.entries()).map(([id, title]) => ({
-      label: title,
-      value: id,
-    }));
-  }, [services]);
+  const columns = useMemo(
+    () => getServiceColumns(handleOpenEdit, categories),
+    [categories],
+  );
 
   const filteredData = useMemo(() => {
-    return services.filter((item) => {
-      const matchSearch =
-        item.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.slug.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.id.toLowerCase().includes(searchText.toLowerCase());
-      const matchCategory = selectedCategory
-        ? item.category_id === selectedCategory
-        : true;
-      return matchSearch && matchCategory;
-    });
-  }, [services, searchText, selectedCategory]);
+    const query = searchText.toLowerCase();
+    return services.filter(
+      (s) =>
+        s.title.toLowerCase().includes(query) ||
+        s.slug.toLowerCase().includes(query) ||
+        s.id.toLowerCase().includes(query),
+    );
+  }, [services, searchText]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -96,19 +91,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           placeholder="Пошук послуги..."
           onClear={() => {
             setSearchText("");
-            setSelectedCategory(null);
           }}
-          showClear={!!(searchText || selectedCategory)}
-        >
-          <Select
-            placeholder="Всі категорії"
-            style={{ width: 200 }}
-            options={categoriesOptions}
-            value={selectedCategory}
-            onChange={setSelectedCategory}
-            allowClear
-          />
-        </SearchToolbar>
+          showClear={!!searchText}
+        />
 
         <DataTable
           dataSource={filteredData}

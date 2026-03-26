@@ -2,6 +2,7 @@ import { prisma } from "../db/prisma";
 import {
   CreateMasterPayload,
   Master,
+  Role,
   ServiceResponse,
   UpdateMasterPayload,
   User,
@@ -45,7 +46,7 @@ export const MasterService = {
             last_name: lastName,
             phone: phone ?? null,
             email: email ?? null,
-            role: "Master",
+            role: Role.Master,
           },
         });
 

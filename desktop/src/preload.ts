@@ -3,6 +3,7 @@ import {
   Appointment,
   AvailableSlot,
   Category,
+  Client,
   CreateAppointmentPayload,
   CreateMasterPayload,
   Master,
@@ -85,4 +86,11 @@ contextBridge.exposeInMainWorld("dbAPI", {
     data: Partial<Omit<Category, "id">>;
   }): Promise<ServiceResponse<void>> =>
     ipcRenderer.invoke("db:update-category", args),
+
+  // Clients
+  getClients: (): Promise<ServiceResponse<Client[]>> =>
+    ipcRenderer.invoke("db:get-clients"),
+
+  getClientById: (id: string): Promise<ServiceResponse<ClientDetails>> =>
+    ipcRenderer.invoke("db:get-client-by-id", id),
 });
