@@ -7,7 +7,6 @@ import {
   Card,
   Tag,
   Space,
-  Badge,
 } from "antd";
 import {
   InfoCircleOutlined,
@@ -50,7 +49,7 @@ export const AppointmentDrawer: React.FC<Props> = ({
       </Space>
     }
     placement="right"
-    width={520}
+    size={520}
     onClose={onClose}
     open={visible}
     destroyOnHidden

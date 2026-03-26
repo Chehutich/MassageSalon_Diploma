@@ -10,6 +10,7 @@ import {
   List,
   Card,
   Spin,
+  Alert,
 } from "antd";
 import { UserOutlined, CheckCircleFilled } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -39,6 +40,7 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     form,
     slots,
     loadingSlots,
+    slotsReason,
     filteredMasters,
     filteredServices,
     foundClient,
@@ -233,14 +235,30 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
           label="Доступний час"
           rules={[{ required: true, message: "Оберіть час" }]}
         >
-          <SlotPicker slots={slots} loading={loadingSlots} />
+          {slotsReason === "time_off" ? (
+            <Alert
+              type="warning"
+              showIcon
+              title="Майстер у відпустці цього дня"
+              description="Оберіть іншу дату або іншого майстра"
+            />
+          ) : slotsReason === "day_off" ? (
+            <Alert
+              type="info"
+              showIcon
+              title="Вихідний день у майстра"
+              description="Майстер не працює в цей день тижня"
+            />
+          ) : (
+            <SlotPicker slots={slots} loading={loadingSlots} />
+          )}
         </Form.Item>
 
         {/* Financial details */}
         <Form.Item
           name="actualPrice"
           label="Сума до сплати (грн)"
-          rules={[{ required: true, type: "number", min: 0 }]}
+          rules={[{ required: true, min: 0 }]}
         >
           <InputNumber style={{ width: "100%" }} min={0} disabled />
         </Form.Item>

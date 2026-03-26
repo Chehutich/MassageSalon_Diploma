@@ -10,6 +10,9 @@ export const useCreateAppointment = (
   const [form] = Form.useForm();
   const [slots, setSlots] = useState<AvailableSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotsReason, setSlotsReason] = useState<"time_off" | "day_off" | null>(
+    null,
+  );
   const [allMasters, setAllMasters] = useState<Master[]>([]);
   const [allServices, setAllServices] = useState<Service[]>([]);
 
@@ -99,6 +102,7 @@ export const useCreateAppointment = (
   useEffect(() => {
     if (selectedMaster && selectedService && selectedDate) {
       setLoadingSlots(true);
+      setSlotsReason(null);
       form.setFieldValue("slot", undefined);
       window.dbAPI
         .getAvailableSlots({
@@ -107,11 +111,15 @@ export const useCreateAppointment = (
           date: selectedDate.toISOString(),
         })
         .then((res) => {
-          setSlots(res.data || []);
+          if (res.success && res.data) {
+            setSlots(res.data.slots ?? []); // ✅
+            setSlotsReason(res.data.reason ?? null); // ✅
+          }
           setLoadingSlots(false);
         });
     } else {
       setSlots([]);
+      setSlotsReason(null);
     }
   }, [selectedMaster, selectedService, selectedDate, form]);
 
@@ -145,6 +153,7 @@ export const useCreateAppointment = (
     form,
     slots,
     loadingSlots,
+    slotsReason,
     filteredMasters,
     filteredServices,
     foundClient,

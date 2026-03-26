@@ -1,4 +1,4 @@
-import { Space, Typography, Button, Tag } from "antd";
+import { Space, Typography, Button, Tag, Avatar } from "antd";
 import {
   UserOutlined,
   PhoneOutlined,
@@ -7,6 +7,28 @@ import {
 import { Master, Service } from "../../api/types";
 
 const { Text } = Typography;
+
+const MasterAvatar: React.FC<{ master: Master }> = ({ master }) => {
+  const url = master.users.photo_url;
+  return url ? (
+    <Avatar
+      src={url}
+      size={36}
+      style={{ border: "1px solid #0f766e33", flexShrink: 0 }}
+    />
+  ) : (
+    <Avatar
+      size={36}
+      icon={<UserOutlined />}
+      style={{
+        backgroundColor: "#f0fafa",
+        border: "1px solid #0f766e33",
+        color: "#0f766e",
+        flexShrink: 0,
+      }}
+    />
+  );
+};
 
 export const getMasterColumns = (
   onEdit: (record: Master) => void,
@@ -19,28 +41,15 @@ export const getMasterColumns = (
       a.users.first_name.localeCompare(b.users.first_name),
     render: (_: unknown, record: Master) => (
       <Space>
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            backgroundColor: "#f0fafa",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "1px solid #0f766e33",
-          }}
-        >
-          <UserOutlined style={{ color: "#0f766e" }} />
-        </div>
-        <Space direction="vertical" size={0}>
+        <MasterAvatar master={record} />
+        <Space orientation="vertical" size={0}>
           <Text
             strong
             style={{ color: record.is_active ? "inherit" : "#bfbfbf" }}
           >
             {record.users.first_name} {record.users.last_name}
           </Text>
-          <Text type="secondary" style={{ fontSize: "12px" }}>
+          <Text type="secondary" style={{ fontSize: 12 }}>
             {record.users.email || "Без email"}
           </Text>
         </Space>

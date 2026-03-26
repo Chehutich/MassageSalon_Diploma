@@ -1,25 +1,17 @@
-import React, { useEffect, useState } from "react";
-import {
-  Form,
-  Input,
-  Checkbox,
-  Divider,
-  message,
-  Space,
-  Typography,
-  Switch,
-} from "antd";
+import React from "react";
+import { Form, Input, Divider, Space } from "antd";
 import {
   UserOutlined,
   MailOutlined,
   PhoneOutlined,
   BookOutlined,
 } from "@ant-design/icons";
-import { Master, Service } from "../../api/types";
+import { Master } from "../../api/types";
 import { SharedModal } from "../../components/shared/SharedModal";
 import { Sanitizer } from "../../utils/sanitizer";
-
-const { Text } = Typography;
+import { useEditMaster } from "./hooks/useEditMaster";
+import { MasterServicesList } from "./components/MasterServicesList";
+import { StatusSwitch } from "../../../src/components/shared/StatusSwitch";
 
 interface Props {
   visible: boolean;
@@ -34,72 +26,14 @@ export const EditMasterModal: React.FC<Props> = ({
   onClose,
   onSuccess,
 }) => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [services, setServices] = useState<Service[]>([]);
+  const { form, services, loading, handleOk } = useEditMaster(
+    visible,
+    master,
+    onSuccess,
+    onClose,
+  );
 
   const isActive = Form.useWatch("is_active", form);
-
-  useEffect(() => {
-    if (visible) {
-      loadInitialData();
-      if (master) {
-        const currentServiceIds =
-          master.master_services?.map((ms) => ms.service_id) || [];
-        form.setFieldsValue({
-          firstName: master.users.first_name,
-          lastName: master.users.last_name,
-          is_active: master.is_active,
-          phone: master.users.phone,
-          email: master.users.email,
-          bio: master.bio,
-          serviceIds: currentServiceIds,
-        });
-      } else {
-        form.resetFields();
-        form.setFieldsValue({ is_active: true });
-      }
-    }
-  }, [visible, master]);
-
-  const loadInitialData = async () => {
-    const res = await window.dbAPI.getServices();
-    if (res.success) setServices(res.data || []);
-  };
-
-  const handleOk = async () => {
-    try {
-      const values = await form.validateFields();
-      setLoading(true);
-      const payload = {
-        ...values,
-        firstName: Sanitizer.name(values.firstName),
-        lastName: Sanitizer.name(values.lastName),
-        phone: Sanitizer.phone(values.phone),
-        bio: values.bio?.trim(),
-        is_active: values.is_active,
-      };
-
-      let res;
-      if (master) {
-        res = await window.dbAPI.updateMaster({ id: master.id, data: payload });
-      } else {
-        res = await window.dbAPI.createMaster(payload);
-      }
-
-      if (res.success) {
-        message.success(master ? "Профіль оновлено" : "Майстра додано");
-        onSuccess();
-        onClose();
-      } else {
-        message.error(res.error);
-      }
-    } catch (error) {
-      console.error("Validation failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <SharedModal
@@ -113,37 +47,16 @@ export const EditMasterModal: React.FC<Props> = ({
     >
       <Form form={form} layout="vertical">
         {master && (
-          <Space
-            style={{
-              width: "100%",
-              justifyContent: "space-between",
-              marginBottom: 16,
-            }}
-          >
-            <div
-              style={{
-                padding: "8px 12px",
-                background: "#f5f5f5",
-                borderRadius: 8,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Form.Item name="is_active" valuePropName="checked" noStyle>
-                <Switch
-                  checkedChildren="Активний"
-                  unCheckedChildren="Деактивований"
-                  style={{ backgroundColor: isActive ? "#0f766e" : "#ff4d4f" }}
-                />
-              </Form.Item>
-              <span style={{ marginLeft: 12, fontWeight: 500 }}>
-                {isActive ? "Майстер працює" : "Майстер звільнений"}
-              </span>
-            </div>
-          </Space>
+          <StatusSwitch
+            isActive={isActive}
+            checkedText="Активний"
+            uncheckedText="Деактивований"
+            activeLabel="Майстер працює"
+            inactiveLabel="Майстер звільнений"
+          />
         )}
 
-        <Divider orientation="horizontal" plain style={{ marginTop: 0 }}>
+        <Divider plain style={{ marginTop: 0 }}>
           <UserOutlined /> Особисті дані
         </Divider>
 
@@ -216,7 +129,7 @@ export const EditMasterModal: React.FC<Props> = ({
           />
         </Form.Item>
 
-        <Divider orientation="horizontal" plain>
+        <Divider plain>
           <BookOutlined /> Професійний профіль
         </Divider>
 
@@ -234,34 +147,7 @@ export const EditMasterModal: React.FC<Props> = ({
           />
         </Form.Item>
 
-        <Form.Item
-          name="serviceIds"
-          label="Послуги, які надає майстер"
-          rules={[{ required: true, message: "Виберіть хоча б одну послугу" }]}
-        >
-          <Checkbox.Group style={{ width: "100%" }}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "8px",
-                maxHeight: "200px",
-                overflowY: "auto",
-                padding: "8px",
-                border: "1px solid #f0f0f0",
-                borderRadius: "8px",
-              }}
-            >
-              {services.map((s) => (
-                <Checkbox key={s.id} value={s.id} disabled={!s.is_active}>
-                  <Text style={{ color: s.is_active ? "inherit" : "#bfbfbf" }}>
-                    {s.title} {!s.is_active && "(неактивна)"}
-                  </Text>
-                </Checkbox>
-              ))}
-            </div>
-          </Checkbox.Group>
-        </Form.Item>
+        <MasterServicesList services={services} />
       </Form>
     </SharedModal>
   );

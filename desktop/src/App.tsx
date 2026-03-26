@@ -8,7 +8,7 @@ import { ServicesPage } from "./pages/Services";
 import { MastersPage } from "./pages/Masters";
 import { ClientsPage } from "./pages/Clients";
 import { CategoriesPage } from "./pages/Categories";
-//import { SchedulePage } from "./pages/Schedule";
+import { SchedulePage } from "./pages/Schedule";
 
 import { TAB_KEYS, type NavParams } from "./api/types";
 
@@ -49,7 +49,7 @@ const App: React.FC = () => {
               onHandled={() => setNavParams(null)}
             />
           )}
-          {/*{activeTab === "2" && <SchedulePage />}*/}
+          {activeTab === TAB_KEYS.schedule && <SchedulePage />}
 
           {activeTab === TAB_KEYS.clients && (
             <ClientsPage

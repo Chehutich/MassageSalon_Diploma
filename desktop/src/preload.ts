@@ -4,6 +4,7 @@ import {
   AvailableSlot,
   Category,
   Client,
+  ClientDetails,
   CreateAppointmentPayload,
   CreateMasterPayload,
   Master,
@@ -93,4 +94,24 @@ contextBridge.exposeInMainWorld("dbAPI", {
 
   getClientById: (id: string): Promise<ServiceResponse<ClientDetails>> =>
     ipcRenderer.invoke("db:get-client-by-id", id),
+
+  // Schedule
+  getSchedule: (masterId: string) =>
+    ipcRenderer.invoke("db:get-schedule", masterId),
+
+  upsertSchedule: (args: {
+    masterId: string;
+    dayOfWeek: number;
+    startTime: string | null;
+    endTime: string | null;
+  }) => ipcRenderer.invoke("db:upsert-schedule", args),
+
+  addTimeOff: (args: {
+    masterId: string;
+    startDate: string;
+    endDate: string;
+    reason?: string;
+  }) => ipcRenderer.invoke("db:add-time-off", args),
+
+  deleteTimeOff: (id: string) => ipcRenderer.invoke("db:delete-time-off", id),
 });

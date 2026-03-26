@@ -11,6 +11,7 @@ export interface User {
   phone?: string;
   email?: string;
   role: Role;
+  photo_url?: string;
 }
 
 export interface Master {
@@ -122,6 +123,11 @@ export interface AvailableSlot {
   label: string;
 }
 
+export interface AvailableSlotsResponse {
+  slots: AvailableSlot[];
+  reason?: "time_off" | "day_off" | null;
+}
+
 export interface CreateAppointmentPayload {
   firstName: string;
   lastName: string;
@@ -147,6 +153,22 @@ export interface UpdateMasterPayload extends CreateMasterPayload {
   is_active: boolean;
 }
 
+export interface Schedule {
+  id: string;
+  master_id: string;
+  day_of_week: number; // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  start_time: string; // "HH:mm"
+  end_time: string;
+}
+
+export interface TimeOff {
+  id: string;
+  master_id: string;
+  start_date: string; // "YYYY-MM-DD"
+  end_date: string;
+  reason?: string | null;
+}
+
 export interface NavParams {
   id: string;
   type: "service" | "master" | "client" | "appointment";
@@ -158,6 +180,7 @@ export const TAB_KEYS = {
   masters: "4",
   services: "5",
   categories: "6",
+  schedule: "7",
 } as const;
 
 export type NavigateFn = (tabKey: string, params?: NavParams) => void;
@@ -188,7 +211,7 @@ declare global {
         masterId: string;
         serviceId: string;
         date: string;
-      }) => Promise<ServiceResponse<AvailableSlot[]>>;
+      }) => Promise<ServiceResponse<AvailableSlotsResponse>>;
 
       searchClients: (phone: string) => Promise<ServiceResponse<User[]>>;
 
@@ -219,6 +242,28 @@ declare global {
       getClients: () => Promise<ServiceResponse<Client[]>>;
 
       getClientById: (id: string) => Promise<ServiceResponse<ClientDetails>>;
+
+      getSchedule: (
+        masterId: string,
+      ) => Promise<
+        ServiceResponse<{ schedules: Schedule[]; timeOffs: TimeOff[] }>
+      >;
+
+      upsertSchedule: (args: {
+        masterId: string;
+        dayOfWeek: number;
+        startTime: string | null;
+        endTime: string | null;
+      }) => Promise<ServiceResponse<void>>;
+
+      addTimeOff: (args: {
+        masterId: string;
+        startDate: string;
+        endDate: string;
+        reason?: string;
+      }) => Promise<ServiceResponse<TimeOff>>;
+
+      deleteTimeOff: (id: string) => Promise<ServiceResponse<void>>;
     };
   }
 }

@@ -48,7 +48,7 @@ export const getColumns = (
       const dateObj = dayjs(time);
       const isToday = dateObj.isSame(dayjs(), "day");
       return (
-        <Space direction="vertical" size={0}>
+        <Space orientation="vertical" size={0}>
           <Text strong style={{ color: "#0f766e", fontSize: "14px" }}>
             {dateObj.format("HH:mm")}
           </Text>

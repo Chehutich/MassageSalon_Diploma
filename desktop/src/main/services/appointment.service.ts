@@ -5,6 +5,7 @@ import {
   CreateAppointmentPayload,
   ServiceResponse,
   AvailableSlot,
+  AvailableSlotsResponse,
 } from "../../api/types";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -50,7 +51,7 @@ export const AppointmentService = {
     masterId: string,
     serviceId: string,
     date: string,
-  ): Promise<ServiceResponse<AvailableSlot[]>> {
+  ): Promise<ServiceResponse<AvailableSlotsResponse>> {
     try {
       const targetDateUtc = dayjs(date).utc(true).startOf("day");
       const dayOfWeek = targetDateUtc.day();
@@ -79,8 +80,16 @@ export const AppointmentService = {
         }),
       ]);
 
-      if (!schedule || !service || timeOffs.length > 0) {
-        return { success: true, data: [] };
+      if (timeOffs.length > 0) {
+        return { success: true, data: { slots: [], reason: "time_off" } };
+      }
+
+      if (!schedule) {
+        return { success: true, data: { slots: [], reason: "day_off" } };
+      }
+
+      if (!service) {
+        return { success: false, error: "Послугу не знайдено" };
       }
 
       const slots: AvailableSlot[] = [];

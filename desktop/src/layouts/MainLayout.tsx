@@ -28,6 +28,7 @@ const MENU_ITEMS = [
   { key: TAB_KEYS.masters, icon: <TeamOutlined />, label: "Майстри" },
   { key: TAB_KEYS.services, icon: <ScissorOutlined />, label: "Послуги" },
   { key: TAB_KEYS.categories, icon: <TagsOutlined />, label: "Категорії" },
+  { key: TAB_KEYS.schedule, icon: <CalendarOutlined />, label: "Розклад" },
 ];
 
 const MainLayout: React.FC<Props> = ({

@@ -6,6 +6,7 @@ import { ServicesService } from "./services/services.service";
 import { CreateAppointmentPayload } from "../api/types";
 import { CategoryService } from "./services/categories.service";
 import { ClientService } from "./services/сlient.service";
+import { ScheduleService } from "./services/schedule.service";
 
 export const registerIpcHandlers = () => {
   // Auth
@@ -86,5 +87,29 @@ export const registerIpcHandlers = () => {
 
   ipcMain.handle("db:get-client-by-id", (_, id: string) =>
     ClientService.getById(id),
+  );
+
+  // Schedule
+  ipcMain.handle("db:get-schedule", (_, masterId) =>
+    ScheduleService.getByMaster(masterId),
+  );
+  ipcMain.handle("db:upsert-schedule", (_, args) =>
+    ScheduleService.upsertSchedule(
+      args.masterId,
+      args.dayOfWeek,
+      args.startTime,
+      args.endTime,
+    ),
+  );
+  ipcMain.handle("db:add-time-off", (_, args) =>
+    ScheduleService.addTimeOff(
+      args.masterId,
+      args.startDate,
+      args.endDate,
+      args.reason,
+    ),
+  );
+  ipcMain.handle("db:delete-time-off", (_, id) =>
+    ScheduleService.deleteTimeOff(id),
   );
 };
