@@ -11,7 +11,7 @@ export const AuthService = {
 
       const isPasswordValid = await bcrypt.compare(
         pass,
-        user.password_hash || "",
+        user.password_hash ?? "",
       );
       if (!isPasswordValid) return { success: false, error: "Невірний пароль" };
 
@@ -30,8 +30,8 @@ export const AuthService = {
           phone: user.phone ?? undefined,
         },
       };
-    } catch (err: any) {
-      console.log(err);
+    } catch (err: unknown) {
+      console.error("AuthService.login error:", err);
       return { success: false, error: "Помилка бази даних" };
     }
   },

@@ -57,21 +57,14 @@ export const EditServiceModal: React.FC<EditServiceModalProps> = ({
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      const [mastRes, servRes] = await Promise.all([
+      const [mastRes, catRes] = await Promise.all([
         window.dbAPI.getMasters(),
-        window.dbAPI.getServices(),
+        window.dbAPI.getCategories(),
       ]);
 
       setAllMasters(mastRes.data || []);
 
-      const uniqueCats = Array.from(
-        new Map(
-          servRes.data
-            ?.filter((s) => s.categories)
-            .map((s) => [s.categories!.id, s.categories!]),
-        ).values(),
-      );
-      setCategories(uniqueCats as Category[]);
+      setCategories((catRes.data || []).filter((c: Category) => c.is_active));
     } finally {
       setLoading(false);
     }
@@ -180,8 +173,19 @@ export const EditServiceModal: React.FC<EditServiceModalProps> = ({
           >
             <Select
               placeholder="Оберіть категорію"
-              options={categories.map((c) => ({ label: c.title, value: c.id }))}
               suffixIcon={<FolderOutlined />}
+              options={[
+                ...categories.map((c) => ({ label: c.title, value: c.id })),
+                ...(service?.categories && !service.categories.is_active
+                  ? [
+                      {
+                        label: `${service.categories.title} (архів)`,
+                        value: service.categories.id,
+                        disabled: true,
+                      },
+                    ]
+                  : []),
+              ]}
             />
           </Form.Item>
         </div>

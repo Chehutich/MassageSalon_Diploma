@@ -4,6 +4,7 @@ import { AuthService } from "./services/auth.service";
 import { MasterService } from "./services/master.service";
 import { ServicesService } from "./services/services.service";
 import { CreateAppointmentPayload } from "../api/types";
+import { CategoryService } from "./services/categories.service";
 
 export const registerIpcHandlers = () => {
   // Auth
@@ -63,4 +64,17 @@ export const registerIpcHandlers = () => {
   ipcMain.handle("db:search-clients", async (_, query) =>
     MasterService.searchClients(query),
   );
+
+  // Categories
+  ipcMain.handle("db:get-categories", async () => {
+    return await CategoryService.getAll();
+  });
+
+  ipcMain.handle("db:create-category", async (_, data) => {
+    return await CategoryService.createCategory(data);
+  });
+
+  ipcMain.handle("db:update-category", async (_, { id, data }) => {
+    return await CategoryService.updateCategory(id, data);
+  });
 };

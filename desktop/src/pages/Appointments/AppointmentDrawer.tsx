@@ -133,11 +133,7 @@ export const AppointmentDrawer: React.FC<Props> = ({
               onClick={() => {
                 const fullName = `${record.masters?.users?.first_name} ${record.masters?.users?.last_name}`;
 
-                handleNavigate(
-                  "master",
-                  record.masters?.id || "",
-                  fullName, // Передаємо fullName замість тільки first_name
-                );
+                handleNavigate("master", record.masters?.id || "", fullName);
               }}
             >
               {record.masters?.users?.first_name}{" "}

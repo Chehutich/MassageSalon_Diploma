@@ -50,6 +50,7 @@ export interface Category {
   slug: string;
   title: string;
   is_active: boolean;
+  _count?: { services: number };
 }
 
 export interface Appointment {
@@ -114,6 +115,13 @@ export interface NavParams {
   type: "service" | "master" | "client";
 }
 
+export const TAB_KEYS = {
+  appointments: "1",
+  masters: "4",
+  services: "5",
+  categories: "6",
+} as const;
+
 export type NavigateFn = (tabKey: string, params?: NavParams) => void;
 
 declare global {
@@ -158,6 +166,17 @@ declare global {
       createService: (
         data: Omit<Service, "id"> & { masterIds?: string[] },
       ) => Promise<ServiceResponse<Service>>;
+
+      getCategories: () => Promise<ServiceResponse<Category[]>>;
+      createCategory: (data: {
+        title: string;
+        slug: string;
+        is_active: boolean;
+      }) => Promise<ServiceResponse<Category>>;
+      updateCategory: (args: {
+        id: string;
+        data: Partial<Category>;
+      }) => Promise<ServiceResponse<void>>;
     };
   }
 }

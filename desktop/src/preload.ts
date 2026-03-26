@@ -1,14 +1,16 @@
 import { contextBridge, ipcRenderer } from "electron";
 import {
-  CreateAppointmentPayload,
-  Service,
-  Master,
-  UpdateStatusArgs,
-  CreateMasterPayload,
+  Appointment,
   AvailableSlot,
-  User,
+  Category,
+  CreateAppointmentPayload,
+  CreateMasterPayload,
+  Master,
+  Service,
   ServiceResponse,
   UpdateMasterPayload,
+  UpdateStatusArgs,
+  User,
 } from "./api/types";
 
 contextBridge.exposeInMainWorld("dbAPI", {
@@ -17,7 +19,7 @@ contextBridge.exposeInMainWorld("dbAPI", {
     ipcRenderer.invoke("db:login", { email, pass }),
 
   // Appointments
-  getAppointments: (): Promise<ServiceResponse<AvailableSlot[]>> =>
+  getAppointments: (): Promise<ServiceResponse<Appointment[]>> =>
     ipcRenderer.invoke("db:get-appointments"),
 
   updateStatus: (args: UpdateStatusArgs): Promise<ServiceResponse<void>> =>
@@ -25,7 +27,7 @@ contextBridge.exposeInMainWorld("dbAPI", {
 
   createGuestAppointment: (
     payload: CreateAppointmentPayload,
-  ): Promise<ServiceResponse<AvailableSlot>> =>
+  ): Promise<ServiceResponse<Appointment>> =>
     ipcRenderer.invoke("db:create-appointment", payload),
 
   getAvailableSlots: (payload: {
@@ -53,6 +55,7 @@ contextBridge.exposeInMainWorld("dbAPI", {
   // Masters
   getMasters: (): Promise<ServiceResponse<Master[]>> =>
     ipcRenderer.invoke("db:get-masters"),
+
   createMaster: (data: CreateMasterPayload): Promise<ServiceResponse<Master>> =>
     ipcRenderer.invoke("db:create-master", data),
 
@@ -65,4 +68,21 @@ contextBridge.exposeInMainWorld("dbAPI", {
   // Clients / Users
   searchClients: (query: string): Promise<ServiceResponse<User[]>> =>
     ipcRenderer.invoke("db:search-clients", query),
+
+  // Categories
+  getCategories: (): Promise<ServiceResponse<Category[]>> =>
+    ipcRenderer.invoke("db:get-categories"),
+
+  createCategory: (data: {
+    title: string;
+    slug: string;
+    is_active: boolean;
+  }): Promise<ServiceResponse<Category>> =>
+    ipcRenderer.invoke("db:create-category", data),
+
+  updateCategory: (args: {
+    id: string;
+    data: Partial<Omit<Category, "id">>;
+  }): Promise<ServiceResponse<void>> =>
+    ipcRenderer.invoke("db:update-category", args),
 });

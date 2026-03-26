@@ -1,17 +1,20 @@
 import React, { useState } from "react";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, Divider } from "antd";
 import ukUA from "antd/locale/uk_UA";
 import LoginPage from "./pages/Login";
 import MainLayout from "./layouts/MainLayout";
 import AppointmentsPage from "./pages/Appointments";
 import { ServicesPage } from "./pages/Services";
 import { MastersPage } from "./pages/Masters";
-import type { NavParams } from "./api/types";
+//import { ClientsPage } from "./pages/Clients";
+import { CategoriesPage } from "./pages/Categories";
+//import { SchedulePage } from "./pages/Schedule";
+
+import { TAB_KEYS, type NavParams } from "./api/types";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
   const [activeTab, setActiveTab] = useState("1");
-
   const [navParams, setNavParams] = useState<NavParams | null>(null);
 
   const navigateTo = (tabKey: string, params?: NavParams) => {
@@ -19,9 +22,9 @@ const App: React.FC = () => {
     setActiveTab(tabKey);
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    setActiveTab("1");
+  const handleMenuChange = (key: string) => {
+    setActiveTab(key);
+    setNavParams(null);
   };
 
   return (
@@ -33,27 +36,40 @@ const App: React.FC = () => {
       ) : (
         <MainLayout
           adminName={user.name}
-          onLogout={handleLogout}
           activeKey={activeTab}
-          onMenuClick={(key) => {
-            setActiveTab(key);
-            setNavParams(null);
-          }}
+          onLogout={() => setUser(null)}
+          onMenuClick={handleMenuChange}
         >
-          {activeTab === "1" && <AppointmentsPage onNavigate={navigateTo} />}
+          {activeTab === TAB_KEYS.appointments && (
+            <AppointmentsPage onNavigate={navigateTo} />
+          )}
+          {/*{activeTab === "2" && <SchedulePage />}*/}
 
-          {activeTab === "2" && (
+          {/*{activeTab === "3" && (
+            <ClientsPage
+              initialId={navParams?.type === "client" ? navParams.id : null}
+              onHandled={() => setNavParams(null)}
+            />
+          )}
+
+          <Divider style={{ margin: "8px 0" }} />
+         */}
+          {activeTab === TAB_KEYS.masters && (
             <MastersPage
               initialId={navParams?.type === "master" ? navParams.id : null}
               onHandled={() => setNavParams(null)}
             />
           )}
 
-          {activeTab === "3" && (
+          {activeTab === TAB_KEYS.services && (
             <ServicesPage
               initialId={navParams?.type === "service" ? navParams.id : null}
               onHandled={() => setNavParams(null)}
             />
+          )}
+
+          {activeTab === TAB_KEYS.categories && (
+            <CategoriesPage onNavigate={navigateTo} />
           )}
         </MainLayout>
       )}

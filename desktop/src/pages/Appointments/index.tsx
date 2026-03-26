@@ -5,7 +5,12 @@ import {
 } from "@ant-design/icons";
 import { Card, message, Segmented, Tag, Space, Select } from "antd";
 import React, { useMemo, useState } from "react";
-import { Appointment, AppointmentStatus, NavigateFn } from "../../api/types";
+import {
+  Appointment,
+  AppointmentStatus,
+  NavigateFn,
+  TAB_KEYS,
+} from "../../api/types";
 import { getColumns, getStatusTag } from "./AppointmentColumns";
 import { AppointmentDrawer } from "./AppointmentDrawer";
 import { AppointmentFilters } from "./AppointmentFilters";
@@ -163,8 +168,10 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ onNavigate }) => {
           getStatusTag={getStatusTag}
           handleNavigate={(type, id) => {
             setDrawerVisible(false);
-            if (type === "service") onNavigate("3", { id, type: "service" });
-            if (type === "master") onNavigate("2", { id, type: "master" });
+            if (type === "service")
+              onNavigate(TAB_KEYS.services, { id, type: "service" });
+            if (type === "master")
+              onNavigate(TAB_KEYS.masters, { id, type: "master" });
           }}
         />
 

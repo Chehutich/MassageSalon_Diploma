@@ -5,7 +5,9 @@ import {
   TeamOutlined,
   LogoutOutlined,
   ScissorOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
+import { TAB_KEYS } from "../../src/api/types";
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
@@ -20,9 +22,10 @@ interface Props {
 }
 
 const MENU_ITEMS = [
-  { key: "1", icon: <CalendarOutlined />, label: "Записи" },
-  { key: "2", icon: <TeamOutlined />, label: "Майстри" },
-  { key: "3", icon: <ScissorOutlined />, label: "Послуги" },
+  { key: TAB_KEYS.appointments, icon: <CalendarOutlined />, label: "Записи" },
+  { key: TAB_KEYS.masters, icon: <TeamOutlined />, label: "Майстри" },
+  { key: TAB_KEYS.services, icon: <ScissorOutlined />, label: "Послуги" },
+  { key: TAB_KEYS.categories, icon: <TagsOutlined />, label: "Категорії" },
 ];
 
 const MainLayout: React.FC<Props> = ({

@@ -4,6 +4,7 @@ import {
   AppointmentStatus,
   CreateAppointmentPayload,
   ServiceResponse,
+  AvailableSlot,
 } from "../../api/types";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -26,29 +27,31 @@ export const AppointmentService = {
         orderBy: { start_time: "desc" },
       });
 
-      return {
-        success: true,
-        data: JSON.parse(JSON.stringify(data)),
-      };
-    } catch (err: any) {
+      return { success: true, data: JSON.parse(JSON.stringify(data)) };
+    } catch (err: unknown) {
       console.error("Prisma Fetch Error:", err);
-      return { success: false, error: err.message };
+      return { success: false, error: (err as Error).message };
     }
   },
-  async updateStatus(id: string, status: AppointmentStatus) {
+
+  async updateStatus(
+    id: string,
+    status: AppointmentStatus,
+  ): Promise<ServiceResponse<void>> {
     try {
-      await prisma.appointments.update({
-        where: { id },
-        data: { status },
-      });
+      await prisma.appointments.update({ where: { id }, data: { status } });
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message };
+    } catch (err: unknown) {
+      return { success: false, error: (err as Error).message };
     }
   },
-  async getAvailableSlots(masterId: string, serviceId: string, date: string) {
+
+  async getAvailableSlots(
+    masterId: string,
+    serviceId: string,
+    date: string,
+  ): Promise<ServiceResponse<AvailableSlot[]>> {
     try {
-      // Make sure the date is in UTC and start of the day
       const targetDateUtc = dayjs(date).utc(true).startOf("day");
       const dayOfWeek = targetDateUtc.day();
 
@@ -76,10 +79,11 @@ export const AppointmentService = {
         }),
       ]);
 
-      if (!schedule || !service || timeOffs.length > 0)
+      if (!schedule || !service || timeOffs.length > 0) {
         return { success: true, data: [] };
+      }
 
-      const slots = [];
+      const slots: AvailableSlot[] = [];
       const duration = service.duration;
 
       const sDate = new Date(schedule.start_time);
@@ -95,10 +99,8 @@ export const AppointmentService = {
         .set("minute", eDate.getUTCMinutes())
         .set("second", 0);
 
-      // Minimum allowed time (now + 1 hour) in UTC
       const minAllowed = dayjs().utc().add(1, "hour");
 
-      // Generate slots (TimeStep = 30 min as in C# backend server)
       while (
         currentStart.add(duration, "minute").isBefore(dayLimit) ||
         currentStart.add(duration, "minute").isSame(dayLimit)
@@ -123,11 +125,12 @@ export const AppointmentService = {
       }
 
       return { success: true, data: slots };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Critical Slots Error:", err);
-      return { success: false, error: err.message };
+      return { success: false, error: (err as Error).message };
     }
   },
+
   async createAppointment(
     payload: CreateAppointmentPayload,
   ): Promise<ServiceResponse<Appointment>> {
@@ -147,27 +150,26 @@ export const AppointmentService = {
       const service = await prisma.services.findUnique({
         where: { id: serviceId },
       });
-      const duration = service?.duration || 60;
+      const duration = service?.duration ?? 60;
 
       const start = dayjs(startTime).utc();
       const end = start.add(duration, "minute");
 
       const result = await prisma.$transaction(async (tx) => {
-        let clientId = existingClientId;
+        const clientId =
+          existingClientId ??
+          (
+            await tx.users.create({
+              data: {
+                first_name: firstName,
+                last_name: lastName,
+                phone,
+                role: "Guest",
+              },
+            })
+          ).id;
 
-        if (!clientId) {
-          const newUser = await tx.users.create({
-            data: {
-              first_name: firstName,
-              last_name: lastName,
-              phone: phone,
-              role: "Guest",
-            },
-          });
-          clientId = newUser.id;
-        }
-
-        return await tx.appointments.create({
+        return tx.appointments.create({
           data: {
             client_id: clientId,
             master_id: masterId,
@@ -181,12 +183,9 @@ export const AppointmentService = {
         });
       });
 
-      return {
-        success: true,
-        data: JSON.parse(JSON.stringify(result)),
-      };
-    } catch (err: any) {
-      const errorMsg = String(err?.message ?? err);
+      return { success: true, data: JSON.parse(JSON.stringify(result)) };
+    } catch (err: unknown) {
+      const errorMsg = (err as Error).message ?? String(err);
       console.error("Create Appointment Error:", errorMsg);
 
       if (errorMsg.includes("no_overlapping_appointments")) {
