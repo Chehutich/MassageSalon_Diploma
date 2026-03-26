@@ -223,7 +223,6 @@ export const EditServiceModal: React.FC<EditServiceModalProps> = ({
             rules={[
               { required: true, message: "Вкажіть ціну" },
               {
-                type: "number",
                 min: 0,
                 message: "Ціна не може бути від'ємною",
               },

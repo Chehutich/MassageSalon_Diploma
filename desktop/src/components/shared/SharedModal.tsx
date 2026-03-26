@@ -36,7 +36,7 @@ export const SharedModal: React.FC<SharedModalProps> = ({
       onCancel={onClose}
       width={width}
       centered
-      destroyOnClose
+      destroyOnHidden
       confirmLoading={loading}
       styles={{
         body: {

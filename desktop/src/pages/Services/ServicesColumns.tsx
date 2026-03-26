@@ -11,7 +11,7 @@ export const getServiceColumns = (onEdit: (record: Service) => void) => [
     key: "title",
     sorter: (a: Service, b: Service) => a.title.localeCompare(b.title),
     render: (text: string, record: Service) => (
-      <Space direction="vertical" size={0}>
+      <Space orientation="vertical" size={0}>
         <Text
           strong
           style={{ color: record.is_active ? "inherit" : "#bfbfbf" }}

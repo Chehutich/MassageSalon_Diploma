@@ -36,7 +36,17 @@ export const registerIpcHandlers = () => {
   );
 
   // Masters & Services
-  ipcMain.handle("db:get-masters", async () => MasterService.getAll());
+  ipcMain.handle("db:get-masters", async () => {
+    return await MasterService.getAll();
+  });
+
+  ipcMain.handle("db:create-master", async (_, payload) => {
+    return await MasterService.createMaster(payload);
+  });
+
+  ipcMain.handle("db:update-master", async (_, { id, data }) => {
+    return await MasterService.updateMaster(id, data);
+  });
 
   ipcMain.handle("db:get-services", async () => {
     return await ServicesService.getAll();

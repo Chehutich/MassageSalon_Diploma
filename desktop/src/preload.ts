@@ -1,25 +1,68 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { CreateAppointmentPayload, Service } from "./api/types";
+import {
+  CreateAppointmentPayload,
+  Service,
+  Master,
+  UpdateStatusArgs,
+  CreateMasterPayload,
+  AvailableSlot,
+  User,
+  ServiceResponse,
+  UpdateMasterPayload,
+} from "./api/types";
 
 contextBridge.exposeInMainWorld("dbAPI", {
-  login: (email: string, pass: string) =>
+  // Auth
+  login: (email: string, pass: string): Promise<ServiceResponse<User>> =>
     ipcRenderer.invoke("db:login", { email, pass }),
-  getAppointments: () => ipcRenderer.invoke("db:get-appointments"),
-  updateStatus: (data: { id: string; status: string }) =>
-    ipcRenderer.invoke("db:update-appointment-status", data),
-  getServices: () => ipcRenderer.invoke("db:get-services"),
-  createGuestAppointment: (payload: CreateAppointmentPayload) =>
+
+  // Appointments
+  getAppointments: (): Promise<ServiceResponse<AvailableSlot[]>> =>
+    ipcRenderer.invoke("db:get-appointments"),
+
+  updateStatus: (args: UpdateStatusArgs): Promise<ServiceResponse<void>> =>
+    ipcRenderer.invoke("db:update-appointment-status", args),
+
+  createGuestAppointment: (
+    payload: CreateAppointmentPayload,
+  ): Promise<ServiceResponse<AvailableSlot>> =>
     ipcRenderer.invoke("db:create-appointment", payload),
+
   getAvailableSlots: (payload: {
     masterId: string;
     serviceId: string;
     date: string;
-  }) => ipcRenderer.invoke("db:get-available-slots", payload),
-  getMasters: () => ipcRenderer.invoke("db:get-masters"),
-  searchClients: (query: string) =>
-    ipcRenderer.invoke("db:search-clients", query),
-  updateService: (args: { id: string; data: any }) =>
-    ipcRenderer.invoke("db:update-service", args),
-  createService: (data: Omit<Service, "id"> & { masterIds?: string[] }) =>
+  }): Promise<ServiceResponse<AvailableSlot[]>> =>
+    ipcRenderer.invoke("db:get-available-slots", payload),
+
+  // Services
+  getServices: (): Promise<ServiceResponse<Service[]>> =>
+    ipcRenderer.invoke("db:get-services"),
+
+  createService: (
+    data: Omit<Service, "id"> & { masterIds?: string[] },
+  ): Promise<ServiceResponse<Service>> =>
     ipcRenderer.invoke("db:create-service", data),
+
+  updateService: (args: {
+    id: string;
+    data: Partial<Service> & { masterIds?: string[] };
+  }): Promise<ServiceResponse<void>> =>
+    ipcRenderer.invoke("db:update-service", args),
+
+  // Masters
+  getMasters: (): Promise<ServiceResponse<Master[]>> =>
+    ipcRenderer.invoke("db:get-masters"),
+  createMaster: (data: CreateMasterPayload): Promise<ServiceResponse<Master>> =>
+    ipcRenderer.invoke("db:create-master", data),
+
+  updateMaster: (args: {
+    id: string;
+    data: UpdateMasterPayload;
+  }): Promise<ServiceResponse<void>> =>
+    ipcRenderer.invoke("db:update-master", args),
+
+  // Clients / Users
+  searchClients: (query: string): Promise<ServiceResponse<User[]>> =>
+    ipcRenderer.invoke("db:search-clients", query),
 });

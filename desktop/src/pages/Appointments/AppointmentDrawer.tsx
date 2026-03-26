@@ -53,7 +53,7 @@ export const AppointmentDrawer: React.FC<Props> = ({
     size={500}
     onClose={onClose}
     open={visible}
-    destroyOnClose
+    destroyOnHidden
   >
     {record && (
       <>
@@ -130,13 +130,15 @@ export const AppointmentDrawer: React.FC<Props> = ({
           </Descriptions.Item>
           <Descriptions.Item label="Майстер">
             <Link
-              onClick={() =>
+              onClick={() => {
+                const fullName = `${record.masters?.users?.first_name} ${record.masters?.users?.last_name}`;
+
                 handleNavigate(
                   "master",
                   record.masters?.id || "",
-                  record.masters?.users?.first_name || "",
-                )
-              }
+                  fullName, // Передаємо fullName замість тільки first_name
+                );
+              }}
             >
               {record.masters?.users?.first_name}{" "}
               {record.masters?.users?.last_name}

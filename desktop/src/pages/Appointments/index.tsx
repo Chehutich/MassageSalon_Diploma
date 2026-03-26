@@ -162,7 +162,9 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ onNavigate }) => {
           onClose={() => setDrawerVisible(false)}
           getStatusTag={getStatusTag}
           handleNavigate={(type, id) => {
+            setDrawerVisible(false);
             if (type === "service") onNavigate("3", { id, type: "service" });
+            if (type === "master") onNavigate("2", { id, type: "master" });
           }}
         />
 

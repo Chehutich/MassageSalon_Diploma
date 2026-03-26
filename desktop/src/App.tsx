@@ -42,12 +42,12 @@ const App: React.FC = () => {
         >
           {activeTab === "1" && <AppointmentsPage onNavigate={navigateTo} />}
 
-          {/*{activeTab === "2" && (
+          {activeTab === "2" && (
             <MastersPage
               initialId={navParams?.type === "master" ? navParams.id : null}
               onHandled={() => setNavParams(null)}
             />
-          )}*/}
+          )}
 
           {activeTab === "3" && (
             <ServicesPage

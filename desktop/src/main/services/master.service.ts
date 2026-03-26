@@ -1,5 +1,11 @@
 import { prisma } from "../db/prisma";
-import { Master, ServiceResponse, User } from "../../api/types";
+import {
+  CreateMasterPayload,
+  Master,
+  ServiceResponse,
+  UpdateMasterPayload,
+  User,
+} from "../../api/types";
 
 export const MasterService = {
   async getAll(): Promise<ServiceResponse<Master[]>> {
@@ -9,6 +15,7 @@ export const MasterService = {
           users: true,
           master_services: true,
         },
+        orderBy: [{ is_active: "desc" }, { users: { first_name: "asc" } }],
       });
 
       return {
@@ -17,6 +24,106 @@ export const MasterService = {
       };
     } catch (err: any) {
       console.error("MasterService GetAll Error:", err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  async createMaster(
+    payload: CreateMasterPayload,
+  ): Promise<ServiceResponse<Master>> {
+    try {
+      const { firstName, lastName, phone, email, bio, serviceIds } = payload;
+
+      const result = await prisma.$transaction(async (tx) => {
+        const user = await tx.users.create({
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone || null,
+            email: email || null,
+            role: "Master",
+          },
+        });
+
+        const master = await tx.masters.create({
+          data: {
+            user_id: user.id,
+            bio: bio,
+            master_services: {
+              create: (serviceIds || []).map((sId: string) => ({
+                service_id: sId,
+              })),
+            },
+          },
+          include: {
+            users: true,
+            master_services: true,
+          },
+        });
+
+        return master;
+      });
+
+      return {
+        success: true,
+        data: JSON.parse(JSON.stringify(result)) as Master,
+      };
+    } catch (err: any) {
+      console.error("MasterService Create Error:", err);
+      if (err.code === "P2002") {
+        return {
+          success: false,
+          error: "Користувач з таким телефоном або email вже існує",
+        };
+      }
+      return { success: false, error: err.message };
+    }
+  },
+
+  async updateMaster(
+    id: string,
+    payload: UpdateMasterPayload,
+  ): Promise<ServiceResponse<void>> {
+    try {
+      const { firstName, lastName, phone, email, bio, is_active, serviceIds } =
+        payload;
+
+      await prisma.$transaction(async (tx) => {
+        const currentMaster = await tx.masters.findUnique({
+          where: { id },
+          select: { user_id: true },
+        });
+
+        if (!currentMaster) throw new Error("Майстра не знайдено");
+
+        await tx.users.update({
+          where: { id: currentMaster.user_id },
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone || null,
+            email: email || null,
+          },
+        });
+
+        await tx.masters.update({
+          where: { id },
+          data: {
+            bio: bio,
+            is_active: is_active,
+            master_services: {
+              deleteMany: {},
+              create: (serviceIds || []).map((sId: string) => ({
+                service_id: sId,
+              })),
+            },
+          },
+        });
+      });
+
+      return { success: true };
+    } catch (err: any) {
+      console.error("MasterService Update Error:", err);
       return { success: false, error: err.message };
     }
   },

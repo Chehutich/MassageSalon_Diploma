@@ -182,11 +182,13 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
           >
             <Select<string, ServiceOption>
               placeholder="Оберіть послугу"
-              options={filteredServices.map((s) => ({
-                label: s.title,
-                value: s.id,
-                price: s.price,
-              }))}
+              options={filteredServices
+                .filter((s) => s.is_active)
+                .map((s) => ({
+                  label: s.title,
+                  value: s.id,
+                  price: s.price,
+                }))}
               onChange={(_, option) => {
                 const opt = option as ServiceOption;
                 if (opt) {
@@ -203,10 +205,12 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
           >
             <Select
               placeholder="Оберіть майстра"
-              options={filteredMasters.map((m) => ({
-                label: `${m.users.first_name} ${m.users.last_name}`,
-                value: m.id,
-              }))}
+              options={filteredMasters
+                .filter((m) => m.is_active)
+                .map((m) => ({
+                  label: `${m.users.first_name} ${m.users.last_name}`,
+                  value: m.id,
+                }))}
             />
           </Form.Item>
         </div>

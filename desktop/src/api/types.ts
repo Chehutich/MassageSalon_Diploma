@@ -18,6 +18,7 @@ export interface Master {
   user_id: string;
   bio?: string;
   users: User;
+  is_active: boolean;
   master_services?: {
     master_id: string;
     service_id: string;
@@ -95,6 +96,19 @@ export interface CreateAppointmentPayload {
   clientNotes?: string | null;
 }
 
+export interface CreateMasterPayload {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  email?: string;
+  bio?: string;
+  serviceIds?: string[];
+}
+
+export interface UpdateMasterPayload extends CreateMasterPayload {
+  is_active: boolean;
+}
+
 export interface NavParams {
   id: string;
   type: "service" | "master" | "client";
@@ -114,6 +128,15 @@ declare global {
       getServices: () => Promise<ServiceResponse<Service[]>>;
 
       getMasters: () => Promise<ServiceResponse<Master[]>>;
+
+      createMaster: (
+        data: CreateMasterPayload,
+      ) => Promise<ServiceResponse<Master>>;
+
+      updateMaster: (args: {
+        id: string;
+        data: UpdateMasterPayload;
+      }) => Promise<ServiceResponse<void>>;
 
       getAvailableSlots: (args: {
         masterId: string;

@@ -1,4 +1,3 @@
-import React from "react";
 import { Table, TableProps } from "antd";
 
 interface DataTableProps<T> extends TableProps<T> {
