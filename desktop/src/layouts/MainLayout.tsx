@@ -7,8 +7,10 @@ import {
   ScissorOutlined,
   TagsOutlined,
   UserOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { TAB_KEYS } from "../../src/api/types";
+import { LeafLogo } from "../../src/components/shared/LeafLogo";
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
@@ -24,11 +26,12 @@ interface Props {
 
 const MENU_ITEMS = [
   { key: TAB_KEYS.appointments, icon: <CalendarOutlined />, label: "Записи" },
-  { key: TAB_KEYS.clients, icon: <UserOutlined />, label: "Клієнти" },
-  { key: TAB_KEYS.masters, icon: <TeamOutlined />, label: "Майстри" },
+  { key: TAB_KEYS.clients, icon: <TeamOutlined />, label: "Клієнти" },
+  { key: TAB_KEYS.masters, icon: <UserOutlined />, label: "Майстри" },
   { key: TAB_KEYS.services, icon: <ScissorOutlined />, label: "Послуги" },
   { key: TAB_KEYS.categories, icon: <TagsOutlined />, label: "Категорії" },
   { key: TAB_KEYS.schedule, icon: <CalendarOutlined />, label: "Розклад" },
+  { key: TAB_KEYS.analytics, icon: <BarChartOutlined />, label: "Аналітика" },
 ];
 
 const MainLayout: React.FC<Props> = ({
@@ -77,7 +80,7 @@ const MainLayout: React.FC<Props> = ({
                 justifyContent: "center",
               }}
             >
-              <ScissorOutlined style={{ fontSize: 22, color: "#fff" }} />
+              <LeafLogo></LeafLogo>
             </div>
             {!collapsed && (
               <div

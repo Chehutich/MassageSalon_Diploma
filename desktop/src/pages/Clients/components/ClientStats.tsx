@@ -60,7 +60,6 @@ export const ClientStats: React.FC<Props> = ({
           <Statistic
             title="Улюблена послуга"
             value={favoriteService}
-            prefix={<ScissorOutlined />}
             valueStyle={{ fontSize: 13, color: DRAWER_ACCENT }}
           />
         </Card>

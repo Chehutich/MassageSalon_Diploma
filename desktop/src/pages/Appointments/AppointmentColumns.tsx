@@ -123,6 +123,7 @@ export const getColumns = (
     })),
     onFilter: (value: unknown, record: Appointment) => record.status === value,
     render: (record: Appointment) => {
+      // const isFuture = dayjs(record.start_time).isAfter(dayjs()); TODO: uncomment in production
       const items: MenuProps["items"] = [
         {
           key: "Confirmed",
@@ -135,12 +136,14 @@ export const getColumns = (
           label: "Не прийшов",
           icon: <UserDeleteOutlined />,
           danger: true,
+          // disabled: isFuture, TODO: uncomment in production
         },
         {
           key: "Cancelled",
           label: "Скасовано",
           icon: <CloseOutlined />,
           danger: true,
+          // disabled: isFuture, TODO: uncomment in production
         },
       ];
       return (

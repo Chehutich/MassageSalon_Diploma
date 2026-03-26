@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Badge, Card, Tag, Typography } from "antd";
-import { FolderOutlined, PlusOutlined } from "@ant-design/icons";
+import { FolderOutlined, PlusOutlined, TagsOutlined } from "@ant-design/icons";
 import { Category, NavigateFn, Service } from "../../api/types";
 import { PageHeader } from "../../../src/components/shared/PageHeader";
 import { DataTable } from "../../../src/components/shared/DataTable";
@@ -126,7 +126,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
       >
         <PageHeader
           title="Категорії"
-          icon={<FolderOutlined />}
+          icon={<TagsOutlined />}
           actionButton={{
             label: "Додати категорію",
             icon: <PlusOutlined />,

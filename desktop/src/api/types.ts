@@ -169,6 +169,27 @@ export interface TimeOff {
   reason?: string | null;
 }
 
+export interface AnalyticsAppointment {
+  id: string;
+  start_time: string;
+  status: AppointmentStatus;
+  actual_price: string;
+  masters: {
+    id: string;
+    users: { first_name: string; last_name: string };
+  };
+  services: {
+    title: string;
+    duration: number;
+    categories: { title: string };
+  };
+}
+
+export interface AnalyticsParams {
+  from?: string;
+  to?: string;
+}
+
 export interface NavParams {
   id: string;
   type: "service" | "master" | "client" | "appointment";
@@ -176,11 +197,12 @@ export interface NavParams {
 
 export const TAB_KEYS = {
   appointments: "1",
+  schedule: "2",
   clients: "3",
   masters: "4",
   services: "5",
   categories: "6",
-  schedule: "7",
+  analytics: "7",
 } as const;
 
 export type NavigateFn = (tabKey: string, params?: NavParams) => void;
@@ -264,6 +286,11 @@ declare global {
       }) => Promise<ServiceResponse<TimeOff>>;
 
       deleteTimeOff: (id: string) => Promise<ServiceResponse<void>>;
+
+      getAnalytics: (params: {
+        from?: string;
+        to?: string;
+      }) => Promise<ServiceResponse<AnalyticsAppointment[]>>;
     };
   }
 }

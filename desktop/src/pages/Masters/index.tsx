@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Tag, Select } from "antd";
-import { UserOutlined, PlusOutlined } from "@ant-design/icons";
+import { UserOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
 import { Master, Service } from "../../api/types";
 
 // Shared components

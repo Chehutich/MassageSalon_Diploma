@@ -1,5 +1,5 @@
 import { Space, Typography, Tag, Button } from "antd";
-import { ScissorOutlined, FolderOutlined } from "@ant-design/icons";
+import { EditOutlined, FolderOutlined } from "@ant-design/icons";
 import { Category, Service } from "../../api/types";
 
 const { Text } = Typography;
@@ -84,7 +84,7 @@ export const getServiceColumns = (
       <Button
         type="text"
         icon={
-          <ScissorOutlined
+          <EditOutlined
             style={{ color: record.is_active ? "#0f766e" : "#bfbfbf" }}
           />
         }

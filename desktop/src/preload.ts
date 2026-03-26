@@ -114,4 +114,6 @@ contextBridge.exposeInMainWorld("dbAPI", {
   }) => ipcRenderer.invoke("db:add-time-off", args),
 
   deleteTimeOff: (id: string) => ipcRenderer.invoke("db:delete-time-off", id),
+
+  getAnalytics: (params) => ipcRenderer.invoke("db:getAnalytics", params),
 });

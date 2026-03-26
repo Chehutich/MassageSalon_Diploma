@@ -1,24 +1,18 @@
 import React, { useState } from "react";
-import { ConfigProvider, Divider } from "antd";
+import { ConfigProvider } from "antd";
 import ukUA from "antd/locale/uk_UA";
 import LoginPage from "./pages/Login";
 import MainLayout from "./layouts/MainLayout";
-import AppointmentsPage from "./pages/Appointments";
-import { ServicesPage } from "./pages/Services";
-import { MastersPage } from "./pages/Masters";
-import { ClientsPage } from "./pages/Clients";
-import { CategoriesPage } from "./pages/Categories";
-import { SchedulePage } from "./pages/Schedule";
-
+import { AppRouter } from "./AppRouter";
 import { TAB_KEYS, type NavParams } from "./api/types";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
-  const [activeTab, setActiveTab] = useState("1");
+  const [activeTab, setActiveTab] = useState<string>(TAB_KEYS.appointments);
   const [navParams, setNavParams] = useState<NavParams | null>(null);
 
   const navigateTo = (tabKey: string, params?: NavParams) => {
-    setNavParams(params || null);
+    setNavParams(params ?? null);
     setActiveTab(tabKey);
   };
 
@@ -40,44 +34,12 @@ const App: React.FC = () => {
           onLogout={() => setUser(null)}
           onMenuClick={handleMenuChange}
         >
-          {activeTab === TAB_KEYS.appointments && (
-            <AppointmentsPage
-              onNavigate={navigateTo}
-              initialId={
-                navParams?.type === "appointment" ? navParams.id : null
-              }
-              onHandled={() => setNavParams(null)}
-            />
-          )}
-          {activeTab === TAB_KEYS.schedule && <SchedulePage />}
-
-          {activeTab === TAB_KEYS.clients && (
-            <ClientsPage
-              initialId={navParams?.type === "client" ? navParams.id : null}
-              onHandled={() => setNavParams(null)}
-              onNavigate={navigateTo}
-            />
-          )}
-
-          <Divider style={{ margin: "8px 0" }} />
-
-          {activeTab === TAB_KEYS.masters && (
-            <MastersPage
-              initialId={navParams?.type === "master" ? navParams.id : null}
-              onHandled={() => setNavParams(null)}
-            />
-          )}
-
-          {activeTab === TAB_KEYS.services && (
-            <ServicesPage
-              initialId={navParams?.type === "service" ? navParams.id : null}
-              onHandled={() => setNavParams(null)}
-            />
-          )}
-
-          {activeTab === TAB_KEYS.categories && (
-            <CategoriesPage onNavigate={navigateTo} />
-          )}
+          <AppRouter
+            activeTab={activeTab}
+            navParams={navParams}
+            onNavigate={navigateTo}
+            onHandled={() => setNavParams(null)}
+          />
         </MainLayout>
       )}
     </ConfigProvider>

@@ -41,7 +41,7 @@ const columns = (onNavigate?: NavigateFn, onClose?: () => void) => [
     ),
   },
   {
-    title: "Сума",
+    title: "Вартість",
     dataIndex: "actual_price",
     key: "price",
     render: (v: number) => (

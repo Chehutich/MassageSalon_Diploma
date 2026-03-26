@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Tag } from "antd";
-import { TeamOutlined } from "@ant-design/icons";
+import { TeamOutlined, UserOutlined } from "@ant-design/icons";
 import { Client, NavigateFn } from "../../api/types";
 import { PageHeader } from "../../../src/components/shared/PageHeader";
 import { DataTable } from "../../../src/components/shared/DataTable";

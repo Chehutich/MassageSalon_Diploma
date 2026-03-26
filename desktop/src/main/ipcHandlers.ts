@@ -7,6 +7,7 @@ import { CreateAppointmentPayload } from "../api/types";
 import { CategoryService } from "./services/categories.service";
 import { ClientService } from "./services/сlient.service";
 import { ScheduleService } from "./services/schedule.service";
+import { getAnalytics } from "./services/analytics.service";
 
 export const registerIpcHandlers = () => {
   // Auth
@@ -112,4 +113,7 @@ export const registerIpcHandlers = () => {
   ipcMain.handle("db:delete-time-off", (_, id) =>
     ScheduleService.deleteTimeOff(id),
   );
+
+  // Analytics
+  ipcMain.handle("db:getAnalytics", getAnalytics);
 };

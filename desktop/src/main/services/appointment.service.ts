@@ -133,7 +133,7 @@ export const AppointmentService = {
         currentStart = currentStart.add(30, "minute");
       }
 
-      return { success: true, data: slots };
+      return { success: true, data: { slots, reason: null } };
     } catch (err: unknown) {
       console.error("Critical Slots Error:", err);
       return { success: false, error: (err as Error).message };

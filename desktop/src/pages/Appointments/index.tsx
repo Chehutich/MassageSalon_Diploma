@@ -57,16 +57,21 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({
   };
 
   useEffect(() => {
+    if (!initialId) return;
+
+    setView("All");
+    setSearchText(initialId);
+    onHandled?.();
+  }, [initialId]);
+
+  useEffect(() => {
     if (!initialId || data.length === 0) return;
     const target = data.find((a) => a.id === initialId);
     if (target) {
-      setView("All");
-      setSearchText(initialId);
       setSelectedRecord(target);
       setDrawerVisible(true);
     }
-    onHandled?.();
-  }, [initialId, data]);
+  }, [data, initialId]);
 
   const columns = useMemo(
     () =>
