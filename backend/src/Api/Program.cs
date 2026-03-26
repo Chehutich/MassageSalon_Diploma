@@ -37,10 +37,13 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+var uploadsPath = app.Configuration["FileStorage:Path"]
+    ?? Path.Combine(app.Environment.ContentRootPath, "AppData", "uploads");
+Directory.CreateDirectory(uploadsPath);
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "AppData", "uploads")),
+    FileProvider = new PhysicalFileProvider(uploadsPath),
     RequestPath = "/uploads"
 });
 
@@ -60,4 +63,4 @@ app.AddExceptionHandling();
 
 app.MapHub<NotificationHub>("/notifications-hub");
 
-app.Run("http://0.0.0.0:5260"); // http://localhost:5260
+app.Run();

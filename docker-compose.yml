@@ -1,4 +1,26 @@
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: massagesalon-backend
+    restart: always
+    ports:
+      - "${BACKEND_PORT}:5260"
+    environment:
+      ASPNETCORE_URLS: "http://+:${BACKEND_PORT}"
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ConnectionStrings__DefaultConnection: "Host=postgres-db;Port=${PG_PORT};Database=${PG_DB};Username=${PG_USER};Password=${PG_PASSWORD}"
+      Jwt__Key: "${JWT_KEY}"
+      Jwt__Issuer: "${JWT_ISSUER}"
+      Jwt__Audience: "${JWT_AUDIENCE}"
+      App__Url: "${APP_URL}"
+      FileStorage__Path: "${FileStorage_Path}"
+    volumes:
+      - uploads_data:${FileStorage_Path}
+    depends_on:
+      - postgres-db
+
   postgres-db:
     image: postgres:16-alpine
     container_name: massagesalon-db
@@ -15,3 +37,4 @@ services:
 
 volumes:
   pgdata:
+  uploads_data:

@@ -17,7 +17,7 @@ public class FileStorageService : IFileStorageService
                        ?? Path.Combine(env.ContentRootPath!, "AppData", UploadsFolderName);
         Directory.CreateDirectory(_uploadsPath);
 
-        _publicBaseUrl = config["AppUrl"]
+        _publicBaseUrl = config["App:Url"]
                          ?? "http://0.0.0.0:5260";
     }
 
