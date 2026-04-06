@@ -43,7 +43,7 @@ app-example
 /android
 
 # generated build artifacts
-src/api/generated/
+#src/api/generated/
 
 # openapi spec
 v1.json
