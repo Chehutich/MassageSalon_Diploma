@@ -1,74 +1,81 @@
 @echo off
 setlocal enabledelayedexpansion
 
-echo 🚀 Starting Massage Salon project setup for Windows...
+:: Check if running in fixed terminal mode
+if not defined TERMINAL_FIX (
+    set "TERMINAL_FIX=1"
+    echo [INFO] Launching persistent shell...
+    start cmd /k "%~f0" %*
+    exit /b
+)
 
-:: 1. Detect IP and Setup .env files
-echo 📝 Setting up environment variables...
-set "TEMPLATE=.env-template"
+echo [STEP] Starting Massage Salon project setup for Windows...
+echo [INFO] This window will stay open after finishing!
+echo.
 
-:: Detect local IPv4
+:: 1. Detect local IPv4
+echo [STEP] Detecting network...
 set "LOCAL_IP=127.0.0.1"
-for /f "usebackq tokens=2 delims=:" %%f in (`ipconfig ^| findstr /c:"IPv4 Address"`) do (
-    set "IP_RAW=%%f"
-    set "IP_TRIMMED=!IP_RAW: =!"
-    :: Save the first non-loopback IP found
-    if "!LOCAL_IP!"=="127.0.0.1" set "LOCAL_IP=!IP_TRIMMED!"
+for /f "usebackq" %%f in (powershell -NoProfile -Command "(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notlike '*Loopback*' -and $_.IPAddress -notlike '169.254.*' } | Select-Object -First 1).IPAddress") do (
+    set "LOCAL_IP=%%f"
 )
-
-echo 📍 Local IP detected: !LOCAL_IP!
+echo [INFO] Local IP detected: !LOCAL_IP!
 echo.
 
-if exist "%TEMPLATE%" (
-    echo Root: Creating .env with IP !LOCAL_IP!...
-    powershell -Command "(gc %TEMPLATE%) -replace '192.168.1.111', '!LOCAL_IP!' | Out-File -encoding utf8 .env"
-
-    if exist "frontend" (
-        echo Frontend: Creating .env with IP !LOCAL_IP!...
-        powershell -Command "(gc %TEMPLATE%) -replace '192.168.1.111', '!LOCAL_IP!' -replace 'APP_URL', 'EXPO_PUBLIC_API_URL' | Out-File -encoding utf8 frontend/.env"
-    )
-
-    if exist "desktop" (
-        if not exist "desktop\.env" (
-            echo Desktop: Creating .env with DATABASE_URL...
-            echo DATABASE_URL="postgresql://admin:supersecret@localhost:5432/massagesalondb?schema=public" > desktop\.env
-        )
-    )
-) else (
-    echo ⚠️ Root .env-template not found. Skipping environment setup.
+:: 2. Setup environment files
+set "TEMPLATE=.env-template"
+if not exist "%TEMPLATE%" (
+    echo [WARN] Root .env-template not found. Skipping environment setup.
+    goto :dependencies
 )
 
-:: 2. Install host dependencies
-if exist "frontend" (
-    echo.
-    echo 📦 Installing frontend dependencies...
-    pushd "frontend"
-    call npm install
-    echo 🛠️ Generating API client (Orval)...
-    call npx orval
-    popd
-)
+echo [FILE] Root: Creating .env with IP !LOCAL_IP!
+powershell -Command "$c = Get-Content '%TEMPLATE%'; $c -replace '192.168.1.111', '!LOCAL_IP!' | Out-File -encoding utf8 .env"
 
-if exist "desktop" (
-    echo.
-    echo 📦 Installing desktop dependencies...
-    pushd "desktop"
-    call npm install
-    echo 🗄️ Generating Prisma client...
-    call npx prisma generate
-    popd
-)
+if not exist "frontend" goto :check_desktop
+echo [FILE] Frontend: Creating .env with IP !LOCAL_IP!
+powershell -Command "$c = Get-Content '%TEMPLATE%'; $c -replace '192.168.1.111', '!LOCAL_IP!' -replace 'APP_URL', 'EXPO_PUBLIC_API_URL' | Out-File -encoding utf8 frontend\.env"
 
-:: 3. Docker Compose
+:check_desktop
+if not exist "desktop" goto :dependencies
+if exist "desktop\.env" goto :dependencies
+echo [FILE] Desktop: Creating .env
+echo DATABASE_URL="postgresql://admin:supersecret@localhost:5432/massagesalondb?schema=public" > desktop\.env
+
+:dependencies
+:: 3. Install frontend dependencies
+if not exist "frontend" goto :check_desktop_deps
 echo.
-echo 🐳 Starting Docker infrastructure (Database ^& Backend)...
+echo [STEP] Installing frontend dependencies...
+pushd "frontend"
+call npm install
+echo [STEP] Generating API client (Orval)...
+call npx orval
+popd
+
+:check_desktop_deps
+:: 4. Install desktop dependencies
+if not exist "desktop" goto :docker_setup
+echo.
+echo [STEP] Installing desktop dependencies...
+pushd "desktop"
+call npm install
+echo [STEP] Generating Prisma client...
+call npx prisma generate
+popd
+
+:docker_setup
+:: 5. Docker Infrastructure
+echo.
+echo [STEP] Starting Docker infrastructure (Database and Backend)...
 call docker-compose up -d --build
 
 echo.
-echo ✨ Setup complete!
-echo 💡 To start the project:
+echo [OK] Setup complete!
+echo [TIPS] To start the project:
 echo    - Mobile: cd frontend ^&^& npm start
 echo    - Desktop: cd desktop ^&^& npm run start
-echo    - Backend/DB: Already running in Docker (IP: !LOCAL_IP!)
+echo    - Backend/DB: Already running (IP: !LOCAL_IP!)
 echo.
-pause
+echo NOTE: This window will stay open. You can close it manually.
+echo.
