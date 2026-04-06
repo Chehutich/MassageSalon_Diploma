@@ -42,11 +42,5 @@ app-example
 /ios
 /android
 
-# generated build artifacts
-#src/api/generated/
-
-# openapi spec
-v1.json
-
 *.vscode
 src/api/generated

@@ -1,6 +1,6 @@
 export default {
   serenity: {
-    input: "./v1.json",
+    input: "./api-spec.json",
     output: {
       mode: "tags-split",
       target: "./src/api/generated",

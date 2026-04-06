@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 *.swp
 
 AppData/
+
+**/bin/
+**/obj/
