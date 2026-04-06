@@ -207,9 +207,15 @@ export default function PersonalDataScreen() {
                 >
                   <View style={styles.fieldLeft}>
                     <View style={styles.iconBox}>{field.icon}</View>
-                    <View>
+                    <View style={{ flex: 1 }}>
                       <Text style={styles.fieldLabel}>{field.label}</Text>
-                      <Text style={styles.fieldValue}>{field.value}</Text>
+                      <Text
+                        style={styles.fieldValue}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {field.value}
+                      </Text>
                     </View>
                   </View>
                   <View style={styles.editBtn}>
@@ -331,7 +337,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
   },
-  fieldLeft: { flexDirection: "row", alignItems: "center", gap: 14 },
+  fieldLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    flex: 1,
+    marginRight: 10,
+  },
   iconBox: {
     width: 40,
     height: 40,

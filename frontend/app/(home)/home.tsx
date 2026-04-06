@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Search, Bell } from "lucide-react-native";
+import { Search, Bell, Sparkles } from "lucide-react-native";
 import { Palette } from "@/src/theme/tokens";
 import { AmbientBackground } from "@/src/components/ui/layout/AmbientBackground";
 import { AvatarBadge } from "@/src/components/home/AvatarBadge";
@@ -182,27 +182,45 @@ export default function HomeScreen() {
               contentContainerStyle={styles.chips}
               keyboardShouldPersistTaps="handled"
             >
-              {chips.map((chip) => (
-                <Pressable
-                  key={chip}
-                  onPress={() => setActiveChip(chip)}
-                  style={[
-                    styles.chip,
-                    activeChip === chip && styles.chipActive,
-                  ]}
-                >
-                  <Text
+              {chips.map((chip) => {
+                const isAll = chip === "All";
+                const label = isAll ? "Всі" : categoryHelpers.categoryLabel(chip);
+                const Icon = isAll ? Sparkles : categoryHelpers.categoryIcon(chip);
+                const color = isAll ? Palette.taupe : categoryHelpers.categoryColor(chip);
+                const isActive = activeChip === chip;
+
+                return (
+                  <Pressable
+                    key={chip}
+                    onPress={() => setActiveChip(chip)}
                     style={[
-                      styles.chipText,
-                      activeChip === chip && styles.chipTextActive,
+                      styles.categoryCard,
+                      isActive && { backgroundColor: color, borderColor: color },
                     ]}
                   >
-                    {chip === "All"
-                      ? "Всі"
-                      : categoryHelpers.categoryLabel(chip)}
-                  </Text>
-                </Pressable>
-              ))}
+                    <View
+                      style={[
+                        styles.categoryIconBox,
+                        { backgroundColor: isActive ? "#fff" : color + "1A" },
+                      ]}
+                    >
+                      <Icon
+                        size={16}
+                        strokeWidth={2}
+                        color={isActive ? color : color}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.categoryCardText,
+                        isActive && styles.categoryCardTextActive,
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </ScrollView>
           )}
 
@@ -361,30 +379,44 @@ const styles = StyleSheet.create({
   },
   section: { paddingHorizontal: 24, marginBottom: 22 },
   chips: { paddingLeft: 24, paddingRight: 24, gap: 8, marginBottom: 22 },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: 99,
-    backgroundColor: Palette.sand,
-    borderWidth: 1,
-    borderColor: Palette.sandDark,
-  },
-  chipActive: { backgroundColor: Palette.taupe, borderColor: Palette.taupe },
-  chipText: {
-    fontSize: 12.5,
-    fontFamily: "DMSans_400Regular",
-    color: Palette.taupe,
-  },
-  chipTextActive: {
-    fontFamily: "DMSans_500Medium",
-    color: Palette.ivory,
-  },
   sectionLabel: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 24,
     marginBottom: 14,
+  },
+  categoryCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingLeft: 6,
+    paddingRight: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    borderWidth: 1.2,
+    borderColor: Palette.sand,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  categoryIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  categoryCardText: {
+    fontSize: 13,
+    fontFamily: "DMSans_500Medium",
+    color: Palette.espresso,
+  },
+  categoryCardTextActive: {
+    color: "#fff",
   },
   sectionTitle: {
     fontSize: 16,

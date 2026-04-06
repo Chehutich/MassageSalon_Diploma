@@ -1,4 +1,9 @@
-import { View, Text, Pressable, StyleSheet, Linking } from "react-native";
+import { Palette } from "@/src/theme/tokens";
+import {
+  checkCanCancel,
+  formatAppointmentDate,
+  formatAppointmentTimeRange,
+} from "@/src/utils/dateHelpers";
 import {
   Banknote,
   Calendar,
@@ -6,13 +11,8 @@ import {
   MessageSquare,
   Phone,
 } from "lucide-react-native";
-import { Palette } from "@/src/theme/tokens";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { STATUS_CONFIG } from "./appointmentHelpers";
-import {
-  checkCanCancel,
-  formatAppointmentDate,
-  formatAppointmentTimeRange,
-} from "@/src/utils/dateHelpers";
 
 type Props = {
   item: any;
@@ -27,7 +27,11 @@ export function AppointmentCard({
   onCancelPress,
   isMasterView,
 }: Props) {
-  const isCancelled = item.status?.toLowerCase() === "cancelled";
+  const statusKey = item.status?.toLowerCase() ?? "";
+  const isCancelled = statusKey === "cancelled";
+  const isNoshow = statusKey === "noshow";
+  const isCompleted = statusKey === "completed";
+  const isInactive = isCancelled || isNoshow || isCompleted;
 
   const status =
     STATUS_CONFIG[item.status?.toLowerCase() ?? ""] ?? STATUS_CONFIG.confirmed;
@@ -41,7 +45,13 @@ export function AppointmentCard({
   const canCancel = checkCanCancel(item.startTime as string);
 
   return (
-    <View style={[styles.card, isCancelled && styles.cardCancelled]}>
+    <View
+      style={[
+        styles.card,
+        isInactive && styles.cardInactive,
+        isCancelled && styles.cardCancelled,
+      ]}
+    >
       {/* ── Top row ── */}
       <View style={styles.topRow}>
         <View
@@ -57,12 +67,12 @@ export function AppointmentCard({
           <View
             style={[
               styles.accentDot,
-              { backgroundColor: isCancelled ? Palette.taupe : status.color },
+              { backgroundColor: isInactive ? Palette.taupe : status.color },
             ]}
           />
         </View>
         <Text
-          style={[styles.serviceName, isCancelled && styles.textCancelled]}
+          style={[styles.serviceName, isInactive && styles.textMuted]}
           numberOfLines={1}
         >
           {item.serviceName}
@@ -70,13 +80,13 @@ export function AppointmentCard({
         <View
           style={[
             styles.statusBadge,
-            { backgroundColor: isCancelled ? Palette.sand : status.bg },
+            { backgroundColor: isInactive ? Palette.sand : status.bg },
           ]}
         >
           <Text
             style={[
               styles.statusText,
-              { color: isCancelled ? Palette.taupe : status.color },
+              { color: isInactive ? Palette.taupe : status.color },
             ]}
           >
             {status.label}
@@ -90,14 +100,14 @@ export function AppointmentCard({
       <View style={styles.metaBlock}>
         <View style={styles.mainInfoRow}>
           <Text
-            style={[styles.mainInfoText, isCancelled && styles.textCancelled]}
+            style={[styles.mainInfoText, isInactive && styles.textMuted]}
           >
             {isMasterView
               ? `${item.clientFirstName} ${item.clientLastName}`
               : `${item.masterFirstName} ${item.masterLastName}`}
           </Text>
 
-          {isMasterView && item.clientPhone && !isCancelled && (
+          {isMasterView && item.clientPhone && !isInactive && (
             <Pressable
               onPress={() => Linking.openURL(`tel:${item.clientPhone}`)}
               style={styles.miniCallBtn}
@@ -111,7 +121,7 @@ export function AppointmentCard({
           <View style={styles.metaItem}>
             <Clock size={12} color={Palette.taupe} style={{ opacity: 0.7 }} />
             <Text
-              style={[styles.metaText, isCancelled && styles.textCancelled]}
+              style={[styles.metaText, isInactive && styles.textMuted]}
             >
               {timeStr}
             </Text>
@@ -126,7 +136,7 @@ export function AppointmentCard({
                   style={{ opacity: 0.7 }}
                 />
                 <Text
-                  style={[styles.metaText, isCancelled && styles.textCancelled]}
+                  style={[styles.metaText, isInactive && styles.textMuted]}
                 >
                   {item.price ?? item.actualPrice} ₴
                 </Text>
@@ -138,7 +148,7 @@ export function AppointmentCard({
                   style={{ opacity: 0.7 }}
                 />
                 <Text
-                  style={[styles.metaText, isCancelled && styles.textCancelled]}
+                  style={[styles.metaText, isInactive && styles.textMuted]}
                 >
                   {dateStr}
                 </Text>
@@ -148,9 +158,7 @@ export function AppointmentCard({
         </View>
 
         {isMasterView && item.clientNotes && (
-          <View
-            style={[styles.notesContainer, isCancelled && { opacity: 0.5 }]}
-          >
+          <View style={[styles.notesContainer, isInactive && { opacity: 0.5 }]}>
             <MessageSquare
               size={12}
               color={Palette.taupe}
@@ -294,13 +302,19 @@ const styles = StyleSheet.create({
     fontFamily: "DMSans_500Medium",
     color: Palette.espresso,
   },
-  cardCancelled: {
-    opacity: 0.6,
-    backgroundColor: Palette.ivory,
+  cardInactive: {
+    opacity: 0.65,
+    backgroundColor: "#FBFBFC", // Softer than plain ivory
     borderColor: Palette.sand,
+  },
+  cardCancelled: {
+    backgroundColor: Palette.ivory,
+  },
+  textMuted: {
+    color: Palette.taupe,
+    opacity: 0.8,
   },
   textCancelled: {
     textDecorationLine: "line-through",
-    color: Palette.taupe,
   },
 });

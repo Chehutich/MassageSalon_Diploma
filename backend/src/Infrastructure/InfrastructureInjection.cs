@@ -8,6 +8,7 @@ using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Infrastructure;
 
@@ -25,6 +26,13 @@ public static class InfrastructureInjection
         {
             options.UseNpgsql(connectionString);
         });
+
+        services.AddHealthChecks()
+                    .AddNpgSql(
+                        connectionString,
+                        name: "PostgreSQL",
+                        failureStatus: HealthStatus.Unhealthy,
+                        tags: ["db", "sql", "ready"]);
 
         services.AddSignalR();
 

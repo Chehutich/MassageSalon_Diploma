@@ -39,18 +39,6 @@ const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
     }
   };
 
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      const autoLogin = async () => {
-        const result = await window.dbAPI.login("test@test.com", "12345678w");
-        if (result.success && result.data) {
-          onLoginSuccess(result.data);
-        }
-      };
-      autoLogin();
-    }
-  }, [onLoginSuccess]);
-
   return (
     <div
       style={{

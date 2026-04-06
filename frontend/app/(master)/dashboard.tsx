@@ -1,32 +1,32 @@
-import React, { useMemo, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  RefreshControl,
-  StyleSheet,
-  Pressable,
-  Linking,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Bell, Phone } from "lucide-react-native";
-import { Palette } from "@/src/theme/tokens";
-import { AmbientBackground } from "@/src/components/ui/layout/AmbientBackground";
+import { useGetMySchedule } from "@/src/api/generated/master-personal-cabinet/master-personal-cabinet";
+import { useGetMe } from "@/src/api/generated/user/user";
+import { AppointmentCard } from "@/src/components/appointments/AppointmentCard";
 import { AvatarBadge } from "@/src/components/home/AvatarBadge";
 import { LeafLogo } from "@/src/components/ui/brand/LeafLogo";
-import { useGetMe } from "@/src/api/generated/user/user";
-import { useGetMySchedule } from "@/src/api/generated/master-personal-cabinet/master-personal-cabinet";
-import { signalRService } from "@/src/services/SignalRService";
-import {
-  isToday,
-  formatTime,
-  isTomorrow,
-  formatAppointmentDate,
-} from "@/src/utils/dateHelpers";
-import { AppointmentCard } from "@/src/components/appointments/AppointmentCard";
+import { AmbientBackground } from "@/src/components/ui/layout/AmbientBackground";
 import { useSheets } from "@/src/context/SheetContext";
+import { signalRService } from "@/src/services/SignalRService";
+import { Palette } from "@/src/theme/tokens";
+import {
+  formatAppointmentDate,
+  formatTime,
+  isToday,
+  isTomorrow,
+} from "@/src/utils/dateHelpers";
 import { PLURAL, pluralize } from "@/src/utils/pluralize";
 import { router } from "expo-router";
+import { Bell, Phone } from "lucide-react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Linking,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MasterDashboard() {
   const { data: me } = useGetMe();
@@ -57,9 +57,13 @@ export default function MasterDashboard() {
   }, [refetch]);
 
   const stats = useMemo(() => {
-    const now = new Date();
     const todayApps =
-      schedule?.filter((a) => isToday(a.startTime as string)) || [];
+      schedule?.filter(
+        (a) =>
+          isToday(a.startTime as string) &&
+          a.status?.toLowerCase() !== "cancelled" &&
+          a.status?.toLowerCase() !== "noshow",
+      ) || [];
 
     const sortedToday = [...todayApps].sort(
       (a, b) =>
@@ -67,17 +71,8 @@ export default function MasterDashboard() {
         new Date(b.startTime as string).getTime(),
     );
 
-    const currentOrNext = sortedToday.find(
-      (a) => new Date(a.endTime as string) > now,
-    );
-
-    const breakTime = currentOrNext
-      ? formatTime(currentOrNext.endTime as string)
-      : "Зараз";
-
     return {
       count: todayApps.length,
-      nextBreak: breakTime,
       sessionText: pluralize(todayApps.length, PLURAL.appointment, false),
     };
   }, [schedule]);
@@ -91,15 +86,20 @@ export default function MasterDashboard() {
     const upcoming = [...schedule]
       .filter((a) => {
         const status = a.status?.toLowerCase();
-        if (status === "completed") return false;
         const isCancelled = status === "cancelled";
         const isNoshow = status === "noshow";
-        const isFutureOrToday =
+        const isCompleted = status === "completed";
+
+        const isTodayOrFuture =
           new Date(a.endTime as string) > now || isToday(a.startTime as string);
-        return (
-          new Date(a.endTime as string) > now ||
-          ((isCancelled || isNoshow) && isFutureOrToday)
-        );
+
+        // Include all today's appointments (even completed/past) in the dashboard load
+        // But still filter out cancelled/noshow if they are in the past
+        if (isCancelled || isNoshow) {
+          return new Date(a.endTime as string) > now;
+        }
+
+        return isTodayOrFuture;
       })
       .sort(
         (a, b) =>
@@ -111,7 +111,9 @@ export default function MasterDashboard() {
       upcoming.find(
         (a) =>
           a.status?.toLowerCase() !== "cancelled" &&
-          a.status?.toLowerCase() !== "noshow",
+          a.status?.toLowerCase() !== "noshow" &&
+          a.status?.toLowerCase() !== "completed" &&
+          new Date(a.endTime as string) > now,
       ) ?? null;
 
     const remaining = upcoming.filter((a) => a.id !== next?.id);
@@ -162,6 +164,21 @@ export default function MasterDashboard() {
   const statusMeta = nextAppointment
     ? getStatusMeta(nextAppointment.status)
     : null;
+
+  const nextStatusKey = nextAppointment?.status?.toLowerCase() ?? "";
+  const isNextInactive =
+    nextStatusKey === "cancelled" ||
+    nextStatusKey === "noshow" ||
+    nextStatusKey === "completed";
+
+  const isNextAppointmentCurrent = useMemo(() => {
+    if (!nextAppointment) return false;
+    const now = new Date();
+    return (
+      new Date(nextAppointment.startTime as string) <= now &&
+      new Date(nextAppointment.endTime as string) >= now
+    );
+  }, [nextAppointment]);
 
   return (
     <View style={styles.root}>
@@ -217,21 +234,6 @@ export default function MasterDashboard() {
               <Text style={styles.statValue}>{stats.count}</Text>
               <Text style={styles.statSub}>{stats.sessionText} планується</Text>
             </View>
-
-            <View
-              style={[
-                styles.statCard,
-                { backgroundColor: Palette.sage + "10" },
-              ]}
-            >
-              <Text style={styles.statLabel}>Найближча перерва</Text>
-              <Text style={styles.statValue}>{stats.nextBreak}</Text>
-              <Text style={styles.statSub}>
-                {stats.nextBreak === "Зараз"
-                  ? "ви вже вільні"
-                  : `початок о ${stats.nextBreak}`}
-              </Text>
-            </View>
           </View>
 
           {/* Next Appointment Section */}
@@ -249,6 +251,7 @@ export default function MasterDashboard() {
               style={[
                 styles.appointmentPreview,
                 nextAppointment && styles.focusCard,
+                isNextInactive && styles.previewInactive,
               ]}
             >
               <View style={styles.timeColumn}>
@@ -279,7 +282,7 @@ export default function MasterDashboard() {
                   style={[
                     styles.statusDot,
                     {
-                      backgroundColor: nextAppointment
+                      backgroundColor: isNextAppointmentCurrent
                         ? Palette.sage
                         : Palette.sand,
                     },
@@ -290,11 +293,14 @@ export default function MasterDashboard() {
               <View style={{ flex: 1, marginLeft: 16 }}>
                 {nextAppointment ? (
                   <>
-                    <Text style={styles.focusServiceTitle} numberOfLines={2}>
+                    <Text
+                      style={[styles.focusServiceTitle, isNextInactive && styles.textMuted]}
+                      numberOfLines={2}
+                    >
                       {nextAppointment.serviceName}
                     </Text>
 
-                    <Text style={styles.clientSubName}>
+                    <Text style={[styles.clientSubName, isNextInactive && styles.textMuted]}>
                       Клієнт: {nextAppointment.clientFirstName}{" "}
                       {nextAppointment.clientLastName}
                     </Text>
@@ -336,7 +342,9 @@ export default function MasterDashboard() {
                       const isNoshow = item.status?.toLowerCase() === "noshow";
                       const isCancelled =
                         item.status?.toLowerCase() === "cancelled";
-                      const isDimmed = isNoshow || isCancelled;
+                      const isCompleted =
+                        item.status?.toLowerCase() === "completed";
+                      const isDimmed = isNoshow || isCancelled || isCompleted;
 
                       return (
                         <Pressable
@@ -535,6 +543,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "DMSans_500Medium",
     color: Palette.espresso,
+  },
+  previewInactive: {
+    opacity: 0.7,
+    backgroundColor: "#FBFBFC",
+    borderLeftColor: Palette.taupe,
+  },
+  textMuted: {
+    opacity: 0.6,
   },
   listContainer: { paddingHorizontal: 24 },
   listItemWrapper: { marginBottom: 12 },

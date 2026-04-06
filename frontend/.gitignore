@@ -49,3 +49,4 @@ app-example
 v1.json
 
 *.vscode
+src/api/generated
