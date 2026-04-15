@@ -33,4 +33,12 @@ export const Sanitizer = {
       .trim();
     return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
   },
+
+  bio: (text: string): string => {
+    if (!text) return "";
+    // Allow letters, digits, spaces, and basic punctuation
+    // We don't trim trailing spaces here to allow typing
+    const cleaned = text.replace(/[^\p{L}\d\s.,!?;:()"'%-]/gu, "");
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  },
 };

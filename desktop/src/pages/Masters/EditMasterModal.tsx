@@ -142,7 +142,7 @@ export const EditMasterModal: React.FC<Props> = ({
             rows={3}
             placeholder="Досвід роботи, спеціалізація..."
             onChange={(e) =>
-              form.setFieldValue("bio", Sanitizer.title(e.target.value))
+              form.setFieldValue("bio", Sanitizer.bio(e.target.value))
             }
           />
         </Form.Item>
